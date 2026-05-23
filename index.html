@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SiRapat — KIP Pidie Jaya</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
+<script src="https://unpkg.com/docxtemplater@3.44.0/build/docxtemplater.js"></script>
+<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+<style>
+:root {
+  --maroon: #7a1020; --maroon-dark: #5a0b18; --maroon-deep: #3d0710;
+  --maroon-light: #9b1a2e; --gold: #c9932a; --gold-light: #e8b84b;
+  --cream: #fdf8f0; --cream-dark: #f5ede0; --text-dark: #1a0a0d;
+  --text-mid: #5a3040; --text-muted: #8a6070; --white: #ffffff;
+  --shadow: 0 4px 24px rgba(90,10,24,0.13); --shadow-lg: 0 12px 48px rgba(90,10,24,0.18);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--text-dark); min-height: 100vh; }
+
+nav { background: var(--maroon-deep); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 64px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 16px rgba(0,0,0,0.3); }
+.nav-brand { display: flex; align-items: center; gap: 12px; }
+.nav-logo { width: 36px; height: 36px; background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: var(--maroon-deep); }
+.nav-title { display: flex; flex-direction: column; }
+.nav-title span:first-child { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; color: var(--white); }
+.nav-title span:last-child { font-size: 10px; color: var(--gold-light); letter-spacing: 0.08em; text-transform: uppercase; }
+.nav-menu { display: flex; gap: 4px; flex-wrap: wrap; }
+.nav-btn { background: none; border: none; color: rgba(255,255,255,0.65); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; padding: 8px 14px; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
+.nav-btn:hover { background: rgba(255,255,255,0.08); color: var(--white); }
+.nav-btn.active { background: var(--gold); color: var(--maroon-deep); font-weight: 600; }
+
+.page { display: none; }
+.page.active { display: block; }
+
+.hero { background: linear-gradient(160deg, var(--maroon-deep) 0%, var(--maroon) 55%, var(--maroon-light) 100%); padding: 3rem 2rem 2.5rem; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 300px; height: 300px; border-radius: 50%; border: 1px solid rgba(201,147,42,0.12); }
+.hero-inner { max-width: 900px; margin: 0 auto; position: relative; z-index: 1; }
+.hero-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(201,147,42,0.15); border: 1px solid rgba(201,147,42,0.3); border-radius: 20px; padding: 5px 14px; font-size: 11px; color: var(--gold-light); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1rem; }
+.hero-badge::before { content: '●'; font-size: 8px; }
+.hero h1 { font-family: 'Playfair Display', serif; font-size: 2.6rem; font-weight: 700; color: var(--white); line-height: 1.2; margin-bottom: 0.4rem; }
+.hero h1 em { font-style: italic; color: var(--gold-light); }
+.hero p { font-size: 14px; color: rgba(255,255,255,0.65); max-width: 520px; line-height: 1.7; }
+
+.form-section { max-width: 900px; margin: 0 auto; padding: 2rem; }
+.form-card { background: var(--white); border-radius: 16px; box-shadow: var(--shadow-lg); overflow: hidden; }
+.form-card-header { background: var(--cream-dark); border-bottom: 1px solid rgba(122,16,32,0.1); padding: 1.25rem 1.75rem; display: flex; align-items: center; gap: 10px; }
+.form-card-header h2 { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; color: var(--maroon); }
+.step-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--maroon); color: var(--white); font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.form-body { padding: 1.75rem; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 12px; font-weight: 600; color: var(--text-mid); letter-spacing: 0.04em; text-transform: uppercase; }
+.field input, .field select, .field textarea { font-family: 'Inter', sans-serif; font-size: 14px; padding: 10px 14px; border: 1.5px solid #e8ddd5; border-radius: 8px; background: #fdfaf7; color: var(--text-dark); transition: border-color 0.15s; outline: none; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--maroon); box-shadow: 0 0 0 3px rgba(122,16,32,0.08); background: var(--white); }
+.field textarea { resize: vertical; min-height: 72px; }
+
+/* ── TEMPLATE PATH BOX ── */
+.tpl-box {
+  background: linear-gradient(135deg, rgba(61,7,16,0.03) 0%, rgba(201,147,42,0.05) 100%);
+  border: 1.5px solid rgba(201,147,42,0.2);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.tpl-box-title {
+  font-size: 12px; font-weight: 700; color: var(--maroon);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;
+}
+.tpl-box-title span { background: var(--maroon); color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; }
+
+/* mode tabs */
+.tpl-mode-tabs { display: flex; gap: 6px; margin-bottom: 1rem; }
+.tpl-mode-tab { padding: 7px 16px; border-radius: 8px; border: 1.5px solid #e8ddd5; background: var(--white); font-size: 12px; font-weight: 500; color: var(--text-muted); cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
+.tpl-mode-tab:hover { border-color: var(--maroon); color: var(--maroon); }
+.tpl-mode-tab.active { background: var(--maroon); border-color: var(--maroon); color: var(--white); font-weight: 600; }
+
+.tpl-mode-panel { display: none; }
+.tpl-mode-panel.active { display: block; }
+
+/* auto mode */
+.auto-info {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 16px; background: rgba(76,175,80,0.07);
+  border: 1.5px solid rgba(76,175,80,0.2); border-radius: 10px; margin-bottom: 12px;
+}
+.auto-info-icon { font-size: 20px; flex-shrink: 0; }
+.auto-info-text { font-size: 13px; color: var(--text-mid); line-height: 1.6; }
+.auto-info-text strong { color: var(--maroon); }
+.auto-info-text code { background: rgba(122,16,32,0.08); padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 12px; color: var(--maroon); }
+
+.tpl-status-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f0e8e0; }
+.tpl-status-row:last-child { border-bottom: none; }
+.tpl-status-label { font-size: 12px; font-weight: 600; color: var(--text-mid); min-width: 120px; }
+.tpl-status-path { font-size: 12px; font-family: monospace; color: var(--text-muted); flex: 1; }
+.tpl-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.tpl-badge.ok { background: rgba(76,175,80,0.12); color: #2e7d32; }
+.tpl-badge.idle { background: rgba(180,180,180,0.12); color: #888; }
+.tpl-badge.loading { background: rgba(201,147,42,0.15); color: #8a6010; animation: pulse 1s infinite; }
+.tpl-badge.err { background: rgba(229,57,53,0.1); color: #c62828; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+/* manual mode */
+.tpl-url-row { display: grid; grid-template-columns: 110px 1fr auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+.tpl-url-row input { font-family: 'Inter', sans-serif; font-size: 12px; padding: 8px 12px; border: 1.5px solid #e8ddd5; border-radius: 7px; background: var(--white); outline: none; transition: border-color 0.15s; }
+.tpl-url-row input:focus { border-color: var(--gold); }
+.tpl-test-btn { padding: 8px 14px; border-radius: 7px; border: 1.5px solid #e8ddd5; background: var(--white); font-size: 12px; font-weight: 500; color: var(--text-mid); cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; white-space: nowrap; }
+.tpl-test-btn:hover { border-color: var(--maroon); color: var(--maroon); }
+
+.tpl-hint { font-size: 11px; color: var(--text-muted); line-height: 1.7; margin-top: 10px; padding: 10px 14px; background: rgba(122,16,32,0.03); border-radius: 8px; }
+.tpl-hint code { background: rgba(122,16,32,0.08); padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 11px; color: var(--maroon); }
+
+/* placeholder chips */
+.ph-section { margin-top: 1rem; }
+.ph-section-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+.placeholder-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
+.ph-chip { font-size: 11px; font-family: monospace; background: rgba(122,16,32,0.06); color: var(--maroon); padding: 3px 9px; border-radius: 4px; border: 1px solid rgba(122,16,32,0.12); }
+.ph-loop { background: rgba(201,147,42,0.1); color: #7a5010; border-color: rgba(201,147,42,0.25); }
+
+.agenda-tabs { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+.agenda-chip { padding: 6px 14px; border-radius: 20px; border: 1.5px solid #e8ddd5; background: #fdfaf7; font-size: 12px; font-weight: 500; color: var(--text-mid); cursor: pointer; transition: all 0.15s; }
+.agenda-chip:hover { border-color: var(--maroon); color: var(--maroon); }
+.agenda-chip.active { background: var(--maroon); border-color: var(--maroon); color: var(--white); }
+
+.peserta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.peserta-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1.5px solid #e8ddd5; border-radius: 8px; background: #fdfaf7; cursor: pointer; transition: all 0.15s; user-select: none; }
+.peserta-item:hover { border-color: var(--maroon-light); }
+.peserta-item.checked { border-color: var(--maroon); background: rgba(122,16,32,0.04); }
+.peserta-check { width: 18px; height: 18px; border-radius: 4px; border: 2px solid #ccc; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.peserta-item.checked .peserta-check { background: var(--maroon); border-color: var(--maroon); }
+.peserta-item.checked .peserta-check::after { content: '✓'; color: white; font-size: 11px; font-weight: 700; }
+.peserta-info { flex: 1; min-width: 0; }
+.peserta-nama { font-size: 13px; font-weight: 500; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.peserta-jabatan { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.section-divider { display: flex; align-items: center; gap: 12px; margin: 1.5rem 0 1.25rem; }
+.section-divider span { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+.section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: #e8ddd5; }
+
+/* progress steps */
+.progress-bar { display: flex; align-items: center; gap: 0; padding: 0 1.75rem 1rem; display: none; }
+.prog-step { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); padding: 6px 12px; border-radius: 20px; transition: all 0.3s; }
+.prog-step.active { background: rgba(201,147,42,0.15); color: #8a6010; font-weight: 600; }
+.prog-step.done { background: rgba(76,175,80,0.1); color: #2e7d32; font-weight: 600; }
+.prog-step.err { background: rgba(229,57,53,0.1); color: #c62828; }
+.prog-arrow { color: #ccc; font-size: 12px; flex-shrink: 0; }
+
+.generate-area { padding: 1.5rem 1.75rem; background: var(--cream-dark); border-top: 1px solid rgba(122,16,32,0.1); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.doc-preview { display: flex; gap: 8px; flex-wrap: wrap; }
+.doc-badge { display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+.doc-badge.undangan { background: rgba(122,16,32,0.08); color: var(--maroon); }
+.doc-badge.absen { background: rgba(201,147,42,0.12); color: #8a6010; }
+.doc-badge.risalah { background: rgba(26,10,13,0.06); color: var(--text-mid); }
+.doc-badge::before { content: '📄'; font-size: 14px; }
+
+.btn-generate { display: flex; align-items: center; gap: 10px; background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-light) 100%); color: var(--white); border: none; border-radius: 10px; padding: 13px 28px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 16px rgba(122,16,32,0.35); }
+.btn-generate:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(122,16,32,0.45); }
+.btn-generate:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+.btn-generate .gold-star { color: var(--gold-light); font-size: 16px; }
+.spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--maroon-deep); color: var(--white); padding: 14px 20px; border-radius: 10px; font-size: 14px; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow-lg); transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 999; max-width: 360px; }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { border-left: 4px solid #4caf50; }
+.toast.error { border-left: 4px solid #e53935; }
+.toast.info { border-left: 4px solid var(--gold); }
+
+.page-header { background: linear-gradient(160deg, var(--maroon-deep) 0%, var(--maroon) 100%); padding: 2.5rem 2rem 2rem; }
+.page-header-inner { max-width: 900px; margin: 0 auto; }
+.page-header h1 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--white); margin-bottom: 4px; }
+.page-header p { font-size: 13px; color: rgba(255,255,255,0.6); }
+.content-section { max-width: 900px; margin: 0 auto; padding: 2rem; }
+
+.search-bar { display: flex; gap: 10px; margin-bottom: 1.5rem; }
+.search-bar input { flex: 1; font-family: 'Inter', sans-serif; font-size: 14px; padding: 11px 16px; border: 1.5px solid #e8ddd5; border-radius: 10px; background: var(--white); outline: none; }
+.search-bar input:focus { border-color: var(--maroon); }
+.search-bar select { font-family: 'Inter', sans-serif; font-size: 13px; padding: 11px 14px; border: 1.5px solid #e8ddd5; border-radius: 10px; background: var(--white); outline: none; color: var(--text-dark); cursor: pointer; }
+
+.arsip-list { display: flex; flex-direction: column; gap: 10px; }
+.arsip-item { background: var(--white); border-radius: 12px; padding: 1.1rem 1.4rem; display: flex; align-items: center; gap: 1rem; box-shadow: 0 2px 8px rgba(90,10,24,0.07); border: 1px solid rgba(122,16,32,0.06); transition: all 0.15s; cursor: pointer; }
+.arsip-item:hover { border-color: rgba(122,16,32,0.2); box-shadow: 0 4px 16px rgba(90,10,24,0.12); transform: translateY(-1px); }
+.arsip-date-box { width: 52px; height: 52px; border-radius: 10px; background: var(--maroon); display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
+.arsip-date-box .day { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--white); line-height: 1; }
+.arsip-date-box .month { font-size: 10px; color: var(--gold-light); letter-spacing: 0.06em; text-transform: uppercase; }
+.arsip-info { flex: 1; min-width: 0; }
+.arsip-title { font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 3px; }
+.arsip-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 12px; flex-wrap: wrap; }
+.arsip-actions { display: flex; gap: 6px; }
+.btn-sm { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; border: 1.5px solid #e8ddd5; background: var(--white); color: var(--text-mid); transition: all 0.15s; }
+.btn-sm:hover { border-color: var(--maroon); color: var(--maroon); }
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+.empty-state .icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+.empty-state h3 { font-size: 16px; font-weight: 500; margin-bottom: 6px; }
+
+.peserta-manage-list { display: flex; flex-direction: column; gap: 8px; }
+.peserta-row { background: var(--white); border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 4px rgba(90,10,24,0.06); border: 1px solid rgba(122,16,32,0.06); }
+.peserta-num { width: 28px; height: 28px; border-radius: 50%; background: var(--cream-dark); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--maroon); flex-shrink: 0; }
+.peserta-row input { flex: 1; font-family: 'Inter', sans-serif; font-size: 13px; padding: 7px 10px; border: 1.5px solid #e8ddd5; border-radius: 6px; background: #fdfaf7; outline: none; }
+.peserta-row input:focus { border-color: var(--maroon); }
+.btn-icon { width: 32px; height: 32px; border-radius: 6px; border: 1.5px solid #e8ddd5; background: var(--white); cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+.btn-icon:hover { border-color: #e53935; background: #fff5f5; }
+.btn-add { width: 100%; padding: 11px; border-radius: 8px; border: 1.5px dashed #e8ddd5; background: transparent; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text-muted); cursor: pointer; margin-top: 8px; transition: all 0.15s; }
+.btn-add:hover { border-color: var(--maroon); color: var(--maroon); }
+.save-bar { position: sticky; bottom: 0; background: var(--white); border-top: 1px solid #e8ddd5; padding: 1rem 2rem; display: flex; justify-content: flex-end; gap: 10px; }
+.btn-primary { background: var(--maroon); color: var(--white); border: none; border-radius: 8px; padding: 10px 24px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.btn-primary:hover { background: var(--maroon-dark); }
+
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+.stat-card { background: var(--white); border-radius: 12px; padding: 1.2rem; box-shadow: 0 2px 8px rgba(90,10,24,0.07); border: 1px solid rgba(122,16,32,0.06); }
+.stat-label { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+.stat-value { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--maroon); line-height: 1; margin-bottom: 4px; }
+.stat-sub { font-size: 12px; color: var(--text-muted); }
+.chart-card { background: var(--white); border-radius: 12px; padding: 1.4rem; box-shadow: 0 2px 8px rgba(90,10,24,0.07); border: 1px solid rgba(122,16,32,0.06); margin-bottom: 12px; }
+.chart-title { font-size: 13px; font-weight: 600; color: var(--text-dark); margin-bottom: 1rem; }
+.bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 100px; }
+.bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.bar { width: 100%; background: linear-gradient(180deg, var(--maroon-light) 0%, var(--maroon) 100%); border-radius: 4px 4px 0 0; min-height: 4px; }
+.bar-label { font-size: 10px; color: var(--text-muted); }
+
+.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.cal-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 600; color: var(--maroon); }
+.cal-nav { display: flex; gap: 6px; }
+.cal-nav button { width: 32px; height: 32px; border-radius: 6px; border: 1.5px solid #e8ddd5; background: var(--white); cursor: pointer; font-size: 14px; color: var(--text-mid); transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
+.cal-nav button:hover { border-color: var(--maroon); color: var(--maroon); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.cal-day-name { text-align: center; font-size: 11px; font-weight: 600; color: var(--text-muted); padding: 8px 0; }
+.cal-day { aspect-ratio: 1; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; transition: all 0.15s; color: var(--text-dark); gap: 3px; }
+.cal-day:hover { background: rgba(122,16,32,0.08); }
+.cal-day.today { background: var(--maroon); color: var(--white); font-weight: 600; }
+.cal-day.has-event::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+.cal-day.other-month { color: #ccc; pointer-events: none; }
+
+.setting-group { margin-bottom: 2rem; }
+.setting-group h3 { font-size: 13px; font-weight: 600; color: var(--text-mid); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 1rem; padding-bottom: 8px; border-bottom: 1px solid #e8ddd5; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal { background: var(--white); border-radius: 16px; width: 100%; max-width: 520px; box-shadow: var(--shadow-lg); transform: translateY(20px); transition: transform 0.2s; }
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header { background: var(--maroon); padding: 1.2rem 1.5rem; border-radius: 16px 16px 0 0; display: flex; align-items: center; justify-content: space-between; }
+.modal-header h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--white); }
+.modal-close { background: none; border: none; color: rgba(255,255,255,0.7); font-size: 20px; cursor: pointer; }
+.modal-body { padding: 1.5rem; }
+.modal-body p { font-size: 14px; color: var(--text-mid); margin-bottom: 8px; }
+
+@media (max-width: 640px) {
+  .form-row, .form-row-2, .peserta-grid { grid-template-columns: 1fr; }
+  .tpl-url-row { grid-template-columns: 1fr; }
+  nav { padding: 0 1rem; }
+  .form-section, .content-section { padding: 1rem; }
+  .hero { padding: 2rem 1rem 1.5rem; }
+  .hero h1 { font-size: 1.8rem; }
+  .progress-bar { flex-wrap: wrap; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <div class="nav-logo">KIP</div>
+    <div class="nav-title">
+      <span>SiRapat</span>
+      <span>KIP Pidie Jaya</span>
+    </div>
+  </div>
+  <div class="nav-menu">
+    <button class="nav-btn active" onclick="showPage('generate',this)">✦ Generate</button>
+    <button class="nav-btn" onclick="showPage('arsip',this)">Arsip Rapat</button>
+    <button class="nav-btn" onclick="showPage('peserta',this)">Peserta</button>
+    <button class="nav-btn" onclick="showPage('dashboard',this)">Dashboard</button>
+    <button class="nav-btn" onclick="showPage('kalender',this)">Kalender</button>
+    <button class="nav-btn" onclick="showPage('pengaturan',this)">⚙ Pengaturan</button>
+  </div>
+</nav>
+
+<!-- PAGE: GENERATE -->
+<div id="page-generate" class="page active">
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-badge">Sistem Rapat Digital</div>
+      <h1>Generate Dokumen<br><em>Rapat KIP</em></h1>
+      <p>Template Word diambil dari repo GitHub yang sama, data diinject, 3 dokumen resmi siap diunduh sebagai ZIP.</p>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-card">
+
+      <!-- TEMPLATE SOURCE -->
+      <div class="form-card-header">
+        <div class="step-dot" style="background:var(--gold);color:var(--maroon-deep)">☁</div>
+        <h2>Sumber Template Word</h2>
+      </div>
+      <div class="form-body" style="padding-bottom:0.5rem">
+        <div class="tpl-box">
+          <div class="tpl-box-title">
+            Pilih mode pengambilan template
+            <span>WAJIB DIISI</span>
+          </div>
+
+          <!-- MODE TABS -->
+          <div class="tpl-mode-tabs">
+            <button class="tpl-mode-tab active" onclick="setTplMode('auto',this)">📁 Otomatis (Repo Sama)</button>
+            <button class="tpl-mode-tab" onclick="setTplMode('manual',this)">🔗 URL Manual</button>
+          </div>
+
+          <!-- AUTO MODE -->
+          <div class="tpl-mode-panel active" id="tpl-panel-auto">
+            <div class="auto-info">
+              <div class="auto-info-icon">✅</div>
+              <div class="auto-info-text">
+                Mode ini otomatis fetch template dari <strong>folder <code>templates/</code> di repo yang sama</strong>.<br>
+                Pastikan struktur repo kamu seperti ini:<br><br>
+                <code>📁 repo-kamu/</code><br>
+                <code>&nbsp;&nbsp;├── index.html</code> ← file SiRapat ini<br>
+                <code>&nbsp;&nbsp;└── templates/</code><br>
+                <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── UND_template.docx</code><br>
+                <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── ABSEN_template.docx</code><br>
+                <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── RISALAH_template.docx</code>
+              </div>
+            </div>
+            <div class="tpl-status-row">
+              <span class="tpl-status-label">📄 Undangan</span>
+              <span class="tpl-status-path">./templates/UND_template.docx</span>
+              <span class="tpl-badge idle" id="st-auto-und" onclick="testAutoUrl('und')">Klik untuk test</span>
+            </div>
+            <div class="tpl-status-row">
+              <span class="tpl-status-label">📋 Absen Hadir</span>
+              <span class="tpl-status-path">./templates/ABSEN_template.docx</span>
+              <span class="tpl-badge idle" id="st-auto-abs" onclick="testAutoUrl('abs')">Klik untuk test</span>
+            </div>
+            <div class="tpl-status-row">
+              <span class="tpl-status-label">📝 Risalah</span>
+              <span class="tpl-status-path">./templates/RISALAH_template.docx</span>
+              <span class="tpl-badge idle" id="st-auto-ris" onclick="testAutoUrl('ris')">Klik untuk test</span>
+            </div>
+            <div style="margin-top:10px">
+              <button class="tpl-test-btn" style="width:100%;padding:10px;border-radius:8px" onclick="testSemuaAuto()">🔍 Test Semua Template Sekarang</button>
+            </div>
+          </div>
+
+          <!-- MANUAL MODE -->
+          <div class="tpl-mode-panel" id="tpl-panel-manual">
+            <div class="tpl-url-row">
+              <span style="font-size:12px;font-weight:600;color:var(--text-mid)">📄 Undangan</span>
+              <input type="text" id="url-und" placeholder="https://namakamu.github.io/repo/templates/UND_template.docx">
+              <div style="display:flex;gap:6px;align-items:center">
+                <span class="tpl-badge idle" id="badge-und">—</span>
+                <button class="tpl-test-btn" onclick="testManualUrl('und')">Test</button>
+              </div>
+            </div>
+            <div class="tpl-url-row">
+              <span style="font-size:12px;font-weight:600;color:var(--text-mid)">📋 Absen</span>
+              <input type="text" id="url-abs" placeholder="https://namakamu.github.io/repo/templates/ABSEN_template.docx">
+              <div style="display:flex;gap:6px;align-items:center">
+                <span class="tpl-badge idle" id="badge-abs">—</span>
+                <button class="tpl-test-btn" onclick="testManualUrl('abs')">Test</button>
+              </div>
+            </div>
+            <div class="tpl-url-row">
+              <span style="font-size:12px;font-weight:600;color:var(--text-mid)">📝 Risalah</span>
+              <input type="text" id="url-ris" placeholder="https://namakamu.github.io/repo/templates/RISALAH_template.docx">
+              <div style="display:flex;gap:6px;align-items:center">
+                <span class="tpl-badge idle" id="badge-ris">—</span>
+                <button class="tpl-test-btn" onclick="testManualUrl('ris')">Test</button>
+              </div>
+            </div>
+            <div class="tpl-hint">
+              ⚠ Gunakan URL <strong>github.io</strong> (bukan raw.githubusercontent.com).<br>
+              Format: <code>https://namakamu.github.io/nama-repo/templates/UND_template.docx</code><br>
+              Repo harus <strong>Public</strong> dan GitHub Pages sudah diaktifkan.
+            </div>
+          </div>
+
+          <!-- PLACEHOLDER REFERENCE -->
+          <div class="ph-section">
+            <div class="ph-section-label">Placeholder untuk template Word kamu:</div>
+            <div class="placeholder-chips">
+              <span class="ph-chip">{{nomorSurat}}</span>
+              <span class="ph-chip">{{hari}}</span>
+              <span class="ph-chip">{{tanggal}}</span>
+              <span class="ph-chip">{{tanggalHari}}</span>
+              <span class="ph-chip">{{jam}}</span>
+              <span class="ph-chip">{{tempat}}</span>
+              <span class="ph-chip">{{agenda}}</span>
+              <span class="ph-chip">{{ketua}}</span>
+              <span class="ph-chip">{{sekretaris}}</span>
+              <span class="ph-chip">{{kota}}</span>
+              <span class="ph-chip">{{kotaTanggal}}</span>
+              <span class="ph-chip">{{tahun}}</span>
+              <span class="ph-chip">{{jumlahPeserta}}</span>
+            </div>
+            <div class="ph-section-label" style="margin-top:8px">Loop tabel peserta (di baris tabel Word):</div>
+            <div class="placeholder-chips">
+              <span class="ph-chip ph-loop">{#peserta}</span>
+              <span class="ph-chip">{{no}}</span>
+              <span class="ph-chip">{{nama}}</span>
+              <span class="ph-chip">{{jabatan}}</span>
+              <span class="ph-chip ph-loop">{/peserta}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div class="form-card-header" style="border-top:1px solid rgba(122,16,32,0.08)">
+        <div class="step-dot">1</div>
+        <h2>Waktu & Tempat Rapat</h2>
+      </div>
+      <div class="form-body">
+        <div class="form-row">
+          <div class="field">
+            <label>Tanggal Rapat</label>
+            <input type="date" id="inp-tanggal">
+          </div>
+          <div class="field">
+            <label>Pukul Mulai</label>
+            <input type="time" id="inp-jam" value="09:00">
+          </div>
+          <div class="field">
+            <label>Tempat</label>
+            <input type="text" id="inp-tempat" value="Aula Kantor KIP Kabupaten Pidie Jaya">
+          </div>
+        </div>
+
+        <div class="section-divider"><span>Agenda Rapat</span></div>
+        <div class="agenda-tabs">
+          <div class="agenda-chip active" onclick="pilihAgenda(this,'Rapat Pleno Rutin, Evaluasi Pelaksanaan Kegiatan Mingguan dan Hal-hal lain yang dianggap perlu.')">Pleno Rutin</div>
+          <div class="agenda-chip" onclick="pilihAgenda(this,'Evaluasi Pelaksanaan Kegiatan Bulanan dan Hal-hal lain yang dianggap perlu.')">Evaluasi Bulanan</div>
+          <div class="agenda-chip" onclick="pilihAgenda(this,'Rapat Koordinasi Internal KIP Kabupaten Pidie Jaya.')">Koordinasi Internal</div>
+          <div class="agenda-chip" onclick="pilihAgenda(this,'')">✏ Ketik Sendiri</div>
+        </div>
+        <div class="field">
+          <textarea id="inp-agenda" rows="2">Rapat Pleno Rutin, Evaluasi Pelaksanaan Kegiatan Mingguan dan Hal-hal lain yang dianggap perlu.</textarea>
+        </div>
+
+        <div class="section-divider"><span>Peserta yang Diundang</span></div>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Centang peserta yang hadir.</p>
+        <div class="peserta-grid" id="peserta-gen-grid"></div>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="progress-bar" id="progress-bar">
+        <span class="prog-step" id="ps-fetch">⬇ Fetch</span>
+        <span class="prog-arrow">›</span>
+        <span class="prog-step" id="ps-inject">⚙ Inject</span>
+        <span class="prog-arrow">›</span>
+        <span class="prog-step" id="ps-zip">📦 ZIP</span>
+        <span class="prog-arrow">›</span>
+        <span class="prog-step" id="ps-done">✓ Selesai</span>
+      </div>
+
+      <div class="generate-area">
+        <div class="doc-preview">
+          <span class="doc-badge undangan">Surat Undangan</span>
+          <span class="doc-badge absen">Daftar Hadir</span>
+          <span class="doc-badge risalah">Risalah/Notulen</span>
+        </div>
+        <button class="btn-generate" onclick="generateDokumen()" id="btn-gen">
+          <div class="spinner" id="spinner"></div>
+          <span class="gold-star">✦</span>
+          <span id="btn-gen-text">Generate 3 Dokumen</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: ARSIP -->
+<div id="page-arsip" class="page">
+  <div class="page-header"><div class="page-header-inner">
+    <h1>Arsip Rapat</h1>
+    <p>Seluruh rapat yang pernah di-generate</p>
+  </div></div>
+  <div class="content-section">
+    <div class="search-bar">
+      <input type="text" placeholder="Cari agenda, peserta..." id="search-inp" oninput="renderArsip()">
+      <select id="filter-bulan" onchange="renderArsip()">
+        <option value="">Semua Bulan</option>
+        <option>Januari</option><option>Februari</option><option>Maret</option><option>April</option>
+        <option>Mei</option><option>Juni</option><option>Juli</option><option>Agustus</option>
+        <option>September</option><option>Oktober</option><option>November</option><option>Desember</option>
+      </select>
+      <select id="filter-tahun" onchange="renderArsip()">
+        <option value="">Semua Tahun</option>
+        <option>2026</option><option>2025</option>
+      </select>
+    </div>
+    <div class="arsip-list" id="arsip-list"></div>
+  </div>
+</div>
+
+<!-- PAGE: PESERTA -->
+<div id="page-peserta" class="page">
+  <div class="page-header"><div class="page-header-inner">
+    <h1>Manajemen Peserta</h1>
+    <p>Daftar peserta default untuk setiap generate dokumen</p>
+  </div></div>
+  <div class="content-section">
+    <div class="peserta-manage-list" id="peserta-manage-list"></div>
+    <button class="btn-add" onclick="tambahPeserta()">+ Tambah Peserta</button>
+  </div>
+  <div class="save-bar">
+    <button class="btn-sm" onclick="resetPeserta()">Reset Default</button>
+    <button class="btn-primary" onclick="simpanPeserta()">Simpan Perubahan</button>
+  </div>
+</div>
+
+<!-- PAGE: DASHBOARD -->
+<div id="page-dashboard" class="page">
+  <div class="page-header"><div class="page-header-inner">
+    <h1>Dashboard</h1><p>Statistik rapat KIP Pidie Jaya</p>
+  </div></div>
+  <div class="content-section">
+    <div class="stats-grid" id="stats-grid"></div>
+    <div class="chart-card">
+      <div class="chart-title">Jumlah Rapat per Bulan</div>
+      <div class="bar-chart" id="bar-chart"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: KALENDER -->
+<div id="page-kalender" class="page">
+  <div class="page-header"><div class="page-header-inner">
+    <h1>Kalender Rapat</h1><p>Jadwal berdasarkan arsip</p>
+  </div></div>
+  <div class="content-section">
+    <div class="form-card"><div class="form-body">
+      <div class="cal-header">
+        <div class="cal-title" id="cal-title"></div>
+        <div class="cal-nav">
+          <button onclick="changeMonth(-1)">‹</button>
+          <button onclick="changeMonth(1)">›</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- PAGE: PENGATURAN -->
+<div id="page-pengaturan" class="page">
+  <div class="page-header"><div class="page-header-inner">
+    <h1>Pengaturan</h1><p>Konfigurasi sistem SiRapat</p>
+  </div></div>
+  <div class="content-section">
+    <div class="form-card"><div class="form-body">
+      <div class="setting-group">
+        <h3>Informasi Instansi</h3>
+        <div class="form-row-2">
+          <div class="field"><label>Nama Instansi</label><input type="text" id="set-instansi"></div>
+          <div class="field"><label>Kota</label><input type="text" id="set-kota"></div>
+          <div class="field"><label>Nama Ketua (TTD)</label><input type="text" id="set-ketua"></div>
+          <div class="field"><label>Nama Sekretaris (TTD)</label><input type="text" id="set-sekretaris"></div>
+        </div>
+      </div>
+      <div class="setting-group">
+        <h3>Nomor Surat</h3>
+        <div class="form-row-2">
+          <div class="field"><label>Format Nomor Surat</label><input type="text" id="set-nomor-fmt"></div>
+          <div class="field"><label>Nomor Urut Terakhir</label><input type="number" id="set-nomor-last" min="0"></div>
+        </div>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:6px">Placeholder: <code style="background:rgba(122,16,32,0.07);padding:1px 6px;border-radius:4px;font-family:monospace">[NO]</code> <code style="background:rgba(122,16,32,0.07);padding:1px 6px;border-radius:4px;font-family:monospace">[BULAN]</code> <code style="background:rgba(122,16,32,0.07);padding:1px 6px;border-radius:4px;font-family:monospace">[TAHUN]</code></p>
+      </div>
+      <div class="setting-group">
+        <h3>URL Template (disimpan permanen)</h3>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Kosongkan jika pakai mode Otomatis (folder templates/ di repo sama).</p>
+        <div class="form-row-2">
+          <div class="field"><label>URL Template Undangan</label><input type="text" id="set-url-und" placeholder="./templates/UND_template.docx atau URL penuh"></div>
+          <div class="field"><label>URL Template Absen</label><input type="text" id="set-url-abs" placeholder="./templates/ABSEN_template.docx"></div>
+          <div class="field"><label>URL Template Risalah</label><input type="text" id="set-url-ris" placeholder="./templates/RISALAH_template.docx"></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end">
+        <button class="btn-primary" onclick="simpanPengaturan()">Simpan Pengaturan</button>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Detail Rapat</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+const DEFAULT_PESERTA = [
+  { nama: 'ISKANDAR, S.Sos.',            jabatan: 'Ketua' },
+  { nama: 'DARKASYI ABDUL HAMID, S.Pd.', jabatan: 'Anggota' },
+  { nama: 'ABDULLAH, S.Sos.',            jabatan: 'Anggota' },
+  { nama: 'MASRUR, MA.',                 jabatan: 'Anggota' },
+  { nama: 'HASMUNIR, SH.',               jabatan: 'Anggota' },
+  { nama: 'ISWANDI, S.Sos.',             jabatan: 'Sekretaris' },
+  { nama: 'DAHLAN, A.Md.',               jabatan: 'Kasubbag Keuangan, Umum, dan Logistik' },
+  { nama: 'MASYKUR, S.Pd.I.',            jabatan: 'Kasubbag Perencanaan, Data dan Informasi' },
+  { nama: 'MAHMUNIR, S.Kom.',            jabatan: 'Kasubbag Teknis Penyelenggaraan Pemilu, dan Hukum' },
+  { nama: 'MAIMUN MAHMILUL, S.IP.',      jabatan: 'Kasubbag Keuangan, Umum dan Logistik' },
+  { nama: 'ISNAINI, SE.',                jabatan: 'Analis Pengelola Keuangan APBN Ahli Muda' },
+  { nama: 'NURHAYATI, A.Md.',            jabatan: 'Bendahara Pengeluaran' },
+  { nama: 'FAZIL BASRI, S.Kom.',         jabatan: 'Notulen' },
+];
+
+let pesertaList = JSON.parse(localStorage.getItem('sirapat_peserta') || 'null') || DEFAULT_PESERTA.map(p=>({...p}));
+let arsipList   = JSON.parse(localStorage.getItem('sirapat_arsip')   || '[]');
+let settings    = JSON.parse(localStorage.getItem('sirapat_settings') || 'null') || {
+  instansi: 'KIP Kabupaten Pidie Jaya', kota: 'Meureudu',
+  ketua: 'Iskandar', sekretaris: 'Iswandi',
+  nomorFmt: '[NO]/PK.01-Und/1118/[BULAN]/[TAHUN]', nomorLast: 0,
+  urlUnd: '', urlAbs: '', urlRis: ''
+};
+
+// AUTO path defaults
+const AUTO_PATHS = {
+  und: './templates/UND_template.docx',
+  abs: './templates/ABSEN_template.docx',
+  ris: './templates/RISALAH_template.docx'
+};
+
+let tplMode = 'auto'; // 'auto' | 'manual'
+let calYear, calMonth;
+const today = new Date();
+
+// ── NAV ──
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'peserta')    renderPesertaManage();
+  if (id === 'arsip')      renderArsip();
+  if (id === 'dashboard')  renderDashboard();
+  if (id === 'kalender')   renderKalender();
+  if (id === 'pengaturan') loadPengaturan();
+}
+
+// ── TEMPLATE MODE ──
+function setTplMode(mode, btn) {
+  tplMode = mode;
+  document.querySelectorAll('.tpl-mode-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tpl-mode-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tpl-panel-' + mode).classList.add('active');
+}
+
+function getTemplateUrl(key) {
+  if (tplMode === 'auto') return AUTO_PATHS[key];
+  const el = document.getElementById('url-' + key);
+  return el ? el.value.trim() : '';
+}
+
+// ── TEST URLs ──
+async function testUrl(url) {
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error('HTTP ' + resp.status);
+  const buf = await resp.arrayBuffer();
+  if (buf.byteLength < 200) throw new Error('File terlalu kecil / bukan docx');
+  return buf.byteLength;
+}
+
+async function testAutoUrl(key) {
+  const badge = document.getElementById('st-auto-' + key);
+  badge.className = 'tpl-badge loading'; badge.textContent = 'Mengecek...';
+  try {
+    const size = await testUrl(AUTO_PATHS[key]);
+    badge.className = 'tpl-badge ok'; badge.textContent = `✓ OK (${(size/1024).toFixed(1)}KB)`;
+  } catch(e) {
+    badge.className = 'tpl-badge err'; badge.textContent = '✗ ' + e.message;
+  }
+}
+
+async function testSemuaAuto() {
+  await Promise.all(['und','abs','ris'].map(k => testAutoUrl(k)));
+}
+
+async function testManualUrl(key) {
+  const badge = document.getElementById('badge-' + key);
+  const url = document.getElementById('url-' + key).value.trim();
+  if (!url) { showToast('Masukkan URL terlebih dahulu', 'error'); return; }
+  badge.className = 'tpl-badge loading'; badge.textContent = 'Mengecek...';
+  try {
+    const size = await testUrl(url);
+    badge.className = 'tpl-badge ok'; badge.textContent = `✓ OK (${(size/1024).toFixed(1)}KB)`;
+    showToast('✓ Template dapat diakses!', 'success');
+  } catch(e) {
+    badge.className = 'tpl-badge err'; badge.textContent = '✗ ' + e.message;
+    showToast('Gagal akses: ' + e.message, 'error');
+  }
+}
+
+// ── PESERTA GEN ──
+function renderPesertaGen() {
+  document.getElementById('peserta-gen-grid').innerHTML = pesertaList.map((p,i) => `
+    <div class="peserta-item checked" id="pgen-${i}" onclick="togglePeserta(${i})">
+      <div class="peserta-check"></div>
+      <div class="peserta-info">
+        <div class="peserta-nama">${p.nama}</div>
+        <div class="peserta-jabatan">${p.jabatan}</div>
+      </div>
+    </div>`).join('');
+}
+
+function togglePeserta(i) { document.getElementById('pgen-'+i).classList.toggle('checked'); }
+function getCheckedPeserta() { return pesertaList.filter((_,i) => document.getElementById('pgen-'+i)?.classList.contains('checked')); }
+
+function pilihAgenda(el, text) {
+  document.querySelectorAll('.agenda-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const ta = document.getElementById('inp-agenda');
+  ta.value = text; ta.disabled = text !== '';
+  if (!text) { ta.disabled = false; ta.focus(); }
+}
+
+// ── PROGRESS ──
+function setPS(id, state) {
+  const el = document.getElementById(id);
+  if (el) { el.className = 'prog-step' + (state ? ' '+state : ''); }
+}
+
+// ── INJECT via docxtemplater ──
+async function fetchAndInject(url, data) {
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`Gagal mengambil template "${url}" (HTTP ${resp.status}). Pastikan file ada dan repo Public.`);
+  const buf = await resp.arrayBuffer();
+  const zip = new PizZip(buf);
+  const doc = new window.docxtemplater(zip, {
+    paragraphLoop: true,
+    linebreaks: true,
+    nullGetter: () => ''
+  });
+  doc.render(data);
+  return doc.getZip().generate({
+    type: 'blob',
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    compression: 'DEFLATE'
+  });
+}
+
+// ── GENERATE ──
+async function generateDokumen() {
+  const tanggalVal = document.getElementById('inp-tanggal').value;
+  const jamVal     = document.getElementById('inp-jam').value;
+  const tempat     = document.getElementById('inp-tempat').value.trim();
+  const agenda     = document.getElementById('inp-agenda').value.trim();
+
+  if (!tanggalVal) { showToast('Pilih tanggal rapat!', 'error'); return; }
+  if (!agenda)     { showToast('Isi agenda rapat!', 'error'); return; }
+
+  const urlUnd = getTemplateUrl('und');
+  const urlAbs = getTemplateUrl('abs');
+  const urlRis = getTemplateUrl('ris');
+
+  if (!urlUnd || !urlAbs || !urlRis) {
+    showToast('URL template belum lengkap!', 'error'); return;
+  }
+
+  const pesertaHadir = getCheckedPeserta();
+  if (!pesertaHadir.length) { showToast('Pilih minimal 1 peserta!', 'error'); return; }
+
+  const tgl = new Date(tanggalVal + 'T00:00:00');
+  const HARI  = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const hariStr  = HARI[tgl.getDay()];
+  const tglFull  = `${tgl.getDate()} ${BULAN[tgl.getMonth()]} ${tgl.getFullYear()}`;
+  const tahunStr = String(tgl.getFullYear());
+  const jamFmt   = jamVal + ' WIB s/d Selesai';
+
+  settings.nomorLast = (settings.nomorLast || 0) + 1;
+  const nomorSurat = settings.nomorFmt
+    .replace('[NO]', String(settings.nomorLast).padStart(3,'0'))
+    .replace('[BULAN]', tgl.getMonth()+1)
+    .replace('[TAHUN]', tahunStr);
+
+  const data = {
+    nomorSurat, hari: hariStr,
+    tanggal: tglFull,
+    tanggalHari: `${hariStr}, ${tglFull}`,
+    jam: jamFmt, jamPolos: jamVal,
+    tempat, agenda,
+    ketua: settings.ketua, sekretaris: settings.sekretaris,
+    kota: settings.kota, kotaTanggal: `${settings.kota}, ${tglFull}`,
+    tahun: tahunStr, bulan: BULAN[tgl.getMonth()],
+    instansi: settings.instansi,
+    jumlahPeserta: String(pesertaHadir.length),
+    peserta: pesertaHadir.map((p,i) => ({ no: String(i+1), nama: p.nama, jabatan: p.jabatan, ttd: '' }))
+  };
+
+  // UI loading
+  const btn = document.getElementById('btn-gen');
+  const sp  = document.getElementById('spinner');
+  const tx  = document.getElementById('btn-gen-text');
+  btn.disabled = true; sp.style.display = 'block';
+  document.getElementById('progress-bar').style.display = 'flex';
+  ['ps-fetch','ps-inject','ps-zip','ps-done'].forEach(id => setPS(id,''));
+
+  try {
+    setPS('ps-fetch','active'); tx.textContent = 'Mengambil template...';
+    let blobs;
+    try {
+      blobs = await Promise.all([
+        fetchAndInject(urlUnd, data),
+        fetchAndInject(urlAbs, data),
+        fetchAndInject(urlRis, data),
+      ]);
+    } catch(e) {
+      setPS('ps-fetch','err'); throw e;
+    }
+    setPS('ps-fetch','done');
+    setPS('ps-inject','done'); // inject sudah dilakukan dalam fetchAndInject
+
+    setPS('ps-zip','active'); tx.textContent = 'Membuat ZIP...';
+    const prefix = `Rapat_${tanggalVal.replace(/-/g,'')}`;
+    const zipOut = new JSZip();
+    zipOut.file(`${prefix}_Undangan.docx`, blobs[0]);
+    zipOut.file(`${prefix}_AbsenHadir.docx`, blobs[1]);
+    zipOut.file(`${prefix}_Risalah.docx`, blobs[2]);
+    const zipBlob = await zipOut.generateAsync({ type: 'blob' });
+    setPS('ps-zip','done');
+
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(zipBlob);
+    a.download = `${prefix}_DokumenRapat.zip`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    setPS('ps-done','done');
+
+    localStorage.setItem('sirapat_settings', JSON.stringify(settings));
+    arsipList.unshift({ id: Date.now(), tanggal: tanggalVal, hari: hariStr, jam: jamVal, tempat, agenda, peserta: pesertaHadir.map(p=>p.nama), nomorSurat });
+    localStorage.setItem('sirapat_arsip', JSON.stringify(arsipList));
+    showToast('✓ 3 dokumen berhasil diinject & diunduh!', 'success');
+
+  } catch(err) {
+    console.error(err);
+    showToast('❌ ' + err.message, 'error');
+  } finally {
+    btn.disabled = false; sp.style.display = 'none'; tx.textContent = 'Generate 3 Dokumen';
+  }
+}
+
+// ── ARSIP ──
+function renderArsip() {
+  const q   = (document.getElementById('search-inp').value||'').toLowerCase();
+  const bln = document.getElementById('filter-bulan').value;
+  const thn = document.getElementById('filter-tahun').value;
+  const BN  = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const list = arsipList.filter(r => {
+    const d = new Date(r.tanggal);
+    if (bln && BN[d.getMonth()+1] !== bln) return false;
+    if (thn && String(d.getFullYear()) !== thn) return false;
+    if (q && !JSON.stringify(r).toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const el = document.getElementById('arsip-list');
+  if (!list.length) {
+    el.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3>Belum ada arsip</h3><p>Arsip muncul setelah generate pertama.</p></div>`;
+    return;
+  }
+  const SH = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  el.innerHTML = list.map(r => {
+    const d = new Date(r.tanggal);
+    return `<div class="arsip-item" onclick="showArsipDetail(${r.id})">
+      <div class="arsip-date-box"><div class="day">${d.getDate()}</div><div class="month">${SH[d.getMonth()]}</div></div>
+      <div class="arsip-info">
+        <div class="arsip-title">${r.agenda.substring(0,60)}${r.agenda.length>60?'...':''}</div>
+        <div class="arsip-meta"><span>📅 ${r.hari}, ${d.getFullYear()}</span><span>🕐 ${r.jam} WIB</span><span>👥 ${r.peserta.length} peserta</span></div>
+      </div>
+      <div class="arsip-actions" onclick="event.stopPropagation()">
+        <button class="btn-sm" onclick="hapusArsip(${r.id})">Hapus</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function showArsipDetail(id) {
+  const r = arsipList.find(x => x.id === id); if (!r) return;
+  const d = new Date(r.tanggal);
+  document.getElementById('modal-title').textContent = 'Detail Rapat';
+  document.getElementById('modal-body').innerHTML = `
+    <p><strong>Tanggal:</strong> ${r.hari}, ${d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</p>
+    <p><strong>Pukul:</strong> ${r.jam} WIB</p><p><strong>Tempat:</strong> ${r.tempat}</p>
+    <p><strong>Agenda:</strong> ${r.agenda}</p><p><strong>Nomor Surat:</strong> ${r.nomorSurat||'-'}</p>
+    <p style="margin-top:12px"><strong>Peserta (${r.peserta.length}):</strong></p>
+    ${r.peserta.map((n,i)=>`<p style="font-size:13px;padding-left:12px">${i+1}. ${n}</p>`).join('')}`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function hapusArsip(id) {
+  if (!confirm('Hapus arsip ini?')) return;
+  arsipList = arsipList.filter(r => r.id !== id);
+  localStorage.setItem('sirapat_arsip', JSON.stringify(arsipList));
+  renderArsip(); showToast('Arsip dihapus', 'info');
+}
+
+function closeModal(e) {
+  if (!e || e.target.id==='modal-overlay' || e.currentTarget?.classList?.contains('modal-close'))
+    document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// ── PESERTA MANAGE ──
+function renderPesertaManage() {
+  document.getElementById('peserta-manage-list').innerHTML = pesertaList.map((p,i) => `
+    <div class="peserta-row">
+      <div class="peserta-num">${i+1}</div>
+      <input type="text" value="${p.nama}" placeholder="Nama + gelar" id="pm-nama-${i}">
+      <input type="text" value="${p.jabatan}" placeholder="Jabatan" id="pm-jab-${i}" style="max-width:280px">
+      <button class="btn-icon" onclick="hapusPesertaRow(${i})">✕</button>
+    </div>`).join('');
+}
+
+function tambahPeserta() {
+  pesertaList.push({nama:'',jabatan:''});
+  renderPesertaManage();
+  document.querySelectorAll('[id^="pm-nama-"]').forEach((el,_,arr) => { if(el===arr[arr.length-1]) el.focus(); });
+}
+
+function hapusPesertaRow(i) { pesertaList.splice(i,1); renderPesertaManage(); }
+
+function simpanPeserta() {
+  pesertaList = pesertaList.map((_,i)=>({ nama: document.getElementById('pm-nama-'+i)?.value||'', jabatan: document.getElementById('pm-jab-'+i)?.value||'' })).filter(p=>p.nama.trim());
+  localStorage.setItem('sirapat_peserta', JSON.stringify(pesertaList));
+  renderPesertaGen(); showToast('Daftar peserta disimpan!', 'success');
+}
+
+function resetPeserta() {
+  if (!confirm('Reset ke default?')) return;
+  pesertaList = DEFAULT_PESERTA.map(p=>({...p}));
+  localStorage.setItem('sirapat_peserta', JSON.stringify(pesertaList));
+  renderPesertaManage(); renderPesertaGen(); showToast('Direset ke default.', 'info');
+}
+
+// ── DASHBOARD ──
+function renderDashboard() {
+  const total = arsipList.length;
+  const ti = arsipList.filter(r=>new Date(r.tanggal).getFullYear()===today.getFullYear()).length;
+  const avg = total ? Math.round(arsipList.reduce((a,r)=>a+r.peserta.length,0)/total) : 0;
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total Rapat</div><div class="stat-value">${total}</div><div class="stat-sub">Sepanjang waktu</div></div>
+    <div class="stat-card"><div class="stat-label">Tahun ${today.getFullYear()}</div><div class="stat-value">${ti}</div><div class="stat-sub">Rapat tahun ini</div></div>
+    <div class="stat-card"><div class="stat-label">Rata-rata Peserta</div><div class="stat-value">${avg}</div><div class="stat-sub">Per rapat</div></div>
+    <div class="stat-card"><div class="stat-label">Dokumen Dibuat</div><div class="stat-value">${total*3}</div><div class="stat-sub">Undangan+Absen+Risalah</div></div>`;
+  const months = Array(12).fill(0);
+  arsipList.filter(r=>new Date(r.tanggal).getFullYear()===today.getFullYear()).forEach(r=>months[new Date(r.tanggal).getMonth()]++);
+  const max = Math.max(...months,1);
+  const SH = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  document.getElementById('bar-chart').innerHTML = months.map((n,i)=>
+    `<div class="bar-group"><div class="bar" style="height:${Math.round(n/max*90)}px" title="${n} rapat"></div><div class="bar-label">${SH[i]}</div></div>`).join('');
+}
+
+// ── KALENDER ──
+function initKalender() { calYear=today.getFullYear(); calMonth=today.getMonth(); }
+function changeMonth(d) { calMonth+=d; if(calMonth<0){calMonth=11;calYear--;}if(calMonth>11){calMonth=0;calYear++;} renderKalender(); }
+function renderKalender() {
+  if(calYear===undefined) initKalender();
+  const BN=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  document.getElementById('cal-title').textContent=`${BN[calMonth]} ${calYear}`;
+  const rapat=new Set(arsipList.map(r=>r.tanggal));
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  const todayStr=today.toISOString().split('T')[0];
+  let html=['Min','Sen','Sel','Rab','Kam','Jum','Sab'].map(d=>`<div class="cal-day-name">${d}</div>`).join('');
+  for(let i=0;i<firstDay;i++) html+=`<div class="cal-day other-month"></div>`;
+  for(let d=1;d<=days;d++){
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    html+=`<div class="cal-day${ds===todayStr?' today':''}${rapat.has(ds)?' has-event':''}" onclick="calClickDay('${ds}')">${d}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML=html;
+}
+function calClickDay(ds) {
+  const found=arsipList.find(r=>r.tanggal===ds);
+  if(found){showArsipDetail(found.id);return;}
+  if(confirm(`Buat rapat untuk ${ds}?`)){
+    document.getElementById('inp-tanggal').value=ds;
+    showPage('generate');
+    document.querySelectorAll('.nav-btn')[0].classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach((b,i)=>{if(i>0)b.classList.remove('active');});
+  }
+}
+
+// ── PENGATURAN ──
+function loadPengaturan() {
+  ['instansi','kota','ketua','sekretaris'].forEach(k=>{ document.getElementById('set-'+k).value=settings[k]||''; });
+  document.getElementById('set-nomor-fmt').value=settings.nomorFmt||'';
+  document.getElementById('set-nomor-last').value=settings.nomorLast||0;
+  document.getElementById('set-url-und').value=settings.urlUnd||'';
+  document.getElementById('set-url-abs').value=settings.urlAbs||'';
+  document.getElementById('set-url-ris').value=settings.urlRis||'';
+}
+
+function simpanPengaturan() {
+  ['instansi','kota','ketua','sekretaris'].forEach(k=>{ settings[k]=document.getElementById('set-'+k).value; });
+  settings.nomorFmt=document.getElementById('set-nomor-fmt').value;
+  settings.nomorLast=parseInt(document.getElementById('set-nomor-last').value)||0;
+  settings.urlUnd=document.getElementById('set-url-und').value;
+  settings.urlAbs=document.getElementById('set-url-abs').value;
+  settings.urlRis=document.getElementById('set-url-ris').value;
+  localStorage.setItem('sirapat_settings', JSON.stringify(settings));
+  // sync ke manual url inputs
+  if(settings.urlUnd) document.getElementById('url-und').value=settings.urlUnd;
+  if(settings.urlAbs) document.getElementById('url-abs').value=settings.urlAbs;
+  if(settings.urlRis) document.getElementById('url-ris').value=settings.urlRis;
+  showToast('Pengaturan disimpan!', 'success');
+}
+
+// ── TOAST ──
+let toastT;
+function showToast(msg, type='info') {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast ${type} show`;
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),4000);
+}
+
+// ── INIT ──
+document.getElementById('inp-tanggal').value = today.toISOString().split('T')[0];
+initKalender();
+renderPesertaGen();
+if(settings.urlUnd) document.getElementById('url-und').value=settings.urlUnd;
+if(settings.urlAbs) document.getElementById('url-abs').value=settings.urlAbs;
+if(settings.urlRis) document.getElementById('url-ris').value=settings.urlRis;
+</script>
+</body>
+</html>
