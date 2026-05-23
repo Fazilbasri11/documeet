@@ -731,18 +731,34 @@ function setPS(id, state) {
 // ── INJECT via docxtemplater ──
 async function fetchAndInject(url, data) {
   const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`Gagal mengambil template "${url}" (HTTP ${resp.status}). Pastikan file ada dan repo Public.`);
+
+  if (!resp.ok) {
+    throw new Error(
+      `Gagal mengambil template "${url}" (HTTP ${resp.status}).`
+    );
+  }
+
   const buf = await resp.arrayBuffer();
   const zip = new PizZip(buf);
+
   const doc = new window.docxtemplater(zip, {
     paragraphLoop: true,
     linebreaks: true,
+
+    delimiters: {
+      start: "[[",
+      end: "]]"
+    },
+
     nullGetter: () => ''
   });
+
   doc.render(data);
+
   return doc.getZip().generate({
     type: 'blob',
-    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    mimeType:
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     compression: 'DEFLATE'
   });
 }
