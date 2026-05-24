@@ -9,328 +9,534 @@
 <script src="https://unpkg.com/docxtemplater@3.44.0/build/docxtemplater.js"></script>
 <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
 <style>
-:root {
+:root{
   --maroon:#7a1020;--maroon-dark:#5a0b18;--maroon-deep:#3d0710;
   --maroon-light:#9b1a2e;--gold:#c9932a;--gold-light:#e8b84b;
   --cream:#fdf8f0;--cream-dark:#f5ede0;--text-dark:#1a0a0d;
   --text-mid:#5a3040;--text-muted:#8a6070;--white:#ffffff;
   --blue:#1565c0;--blue-light:#1976d2;--green:#2e7d32;
   --shadow:0 4px 24px rgba(90,10,24,.13);--shadow-lg:0 12px 48px rgba(90,10,24,.18);
+  --r:16px; /* border-radius base */
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--text-dark);min-height:100vh}
-nav{background:var(--maroon-deep);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:64px;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.3)}
-.nav-brand{display:flex;align-items:center;gap:12px}
-.nav-logo{width:38px;height:38px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--text-dark);min-height:100vh;overflow-x:hidden}
+
+/* ══ NAV ══ */
+nav{background:var(--maroon-deep);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:60px;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.3)}
+.nav-brand{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.nav-logo{width:36px;height:36px;border-radius:7px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .nav-logo img{width:100%;height:100%;object-fit:cover}
-.nav-logo-fallback{width:38px;height:38px;background:linear-gradient(135deg,var(--gold),var(--gold-light));border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--maroon-deep)}
+.nav-logo-fallback{width:36px;height:36px;background:linear-gradient(135deg,var(--gold),var(--gold-light));border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--maroon-deep)}
 .nav-title{display:flex;flex-direction:column}
-.nav-title span:first-child{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--white)}
+.nav-title span:first-child{font-family:'Playfair Display',serif;font-size:14px;font-weight:600;color:var(--white);line-height:1.2}
 .nav-title span:last-child{font-size:10px;color:var(--gold-light);letter-spacing:.08em;text-transform:uppercase}
-.nav-menu{display:flex;gap:4px;flex-wrap:wrap}
-.nav-btn{background:none;border:none;color:rgba(255,255,255,.65);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:8px 14px;border-radius:6px;cursor:pointer;transition:all .15s}
+.nav-menu{display:flex;gap:2px;flex-wrap:wrap;justify-content:flex-end}
+.nav-btn{background:none;border:none;color:rgba(255,255,255,.65);font-family:'Inter',sans-serif;font-size:12px;font-weight:500;padding:7px 11px;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .nav-btn:hover{background:rgba(255,255,255,.08);color:var(--white)}
 .nav-btn.active{background:var(--gold);color:var(--maroon-deep);font-weight:600}
+
+/* ══ MOBILE NAV HAMBURGER ══ */
+.nav-toggle{display:none;background:none;border:none;color:rgba(255,255,255,.8);font-size:22px;cursor:pointer;padding:6px;border-radius:6px;flex-shrink:0}
+.nav-toggle:hover{background:rgba(255,255,255,.1)}
+.nav-drawer{display:none;position:fixed;top:60px;left:0;right:0;background:var(--maroon-deep);z-index:99;padding:.75rem 1rem;border-bottom:1px solid rgba(255,255,255,.1);box-shadow:0 8px 24px rgba(0,0,0,.3);flex-direction:column;gap:4px}
+.nav-drawer.open{display:flex}
+.nav-drawer .nav-btn{text-align:left;padding:11px 14px;font-size:14px;border-radius:8px}
+
 .page{display:none}.page.active{display:block}
-.hero{background:linear-gradient(160deg,var(--maroon-deep) 0%,var(--maroon) 55%,var(--maroon-light) 100%);padding:3.5rem 2rem 3rem;position:relative;overflow:hidden;min-height:280px;}
+
+/* ══ HERO ══ */
+.hero{background:linear-gradient(160deg,var(--maroon-deep) 0%,var(--maroon) 55%,var(--maroon-light) 100%);padding:2.5rem 1.5rem 2.5rem;position:relative;overflow:hidden;min-height:240px}
 #hero-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.55}
-.hero-ring{position:absolute;border-radius:50%;border:1px solid rgba(201,147,42,.18);animation:ring-pulse 4s ease-in-out infinite;}
-.hero-ring:nth-child(1){width:340px;height:340px;top:-90px;right:-60px;animation-delay:0s}
-.hero-ring:nth-child(2){width:200px;height:200px;bottom:-70px;left:8%;animation-delay:1.4s;border-color:rgba(201,147,42,.1)}
-.hero-ring:nth-child(3){width:130px;height:130px;top:25%;right:22%;animation-delay:2.8s;border-color:rgba(255,255,255,.1)}
+.hero-ring{position:absolute;border-radius:50%;border:1px solid rgba(201,147,42,.18);animation:ring-pulse 4s ease-in-out infinite}
+.hero-ring:nth-child(1){width:320px;height:320px;top:-90px;right:-60px;animation-delay:0s}
+.hero-ring:nth-child(2){width:180px;height:180px;bottom:-60px;left:5%;animation-delay:1.4s;border-color:rgba(201,147,42,.1)}
+.hero-ring:nth-child(3){width:110px;height:110px;top:25%;right:20%;animation-delay:2.8s;border-color:rgba(255,255,255,.1)}
 @keyframes ring-pulse{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.06);opacity:1}}
-.hero-shimmer{position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 0%,var(--gold) 40%,var(--gold-light) 60%,transparent 100%);background-size:200% 100%;animation:shimmer-slide 3s linear infinite;opacity:.6;}
+.hero-shimmer{position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 0%,var(--gold) 40%,var(--gold-light) 60%,transparent 100%);background-size:200% 100%;animation:shimmer-slide 3s linear infinite;opacity:.6}
 @keyframes shimmer-slide{from{background-position:200% 0}to{background-position:-200% 0}}
-.hero-inner{max-width:900px;margin:0 auto;position:relative;z-index:2}
-.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(201,147,42,.15);border:1px solid rgba(201,147,42,.3);border-radius:20px;padding:5px 14px;font-size:11px;color:var(--gold-light);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem;opacity:0;animation:hero-up .7s .1s cubic-bezier(.22,1,.36,1) forwards;}
-.hero-badge::before{content:'●';font-size:8px;animation:blink 2s infinite}
+.hero-inner{max-width:860px;margin:0 auto;position:relative;z-index:2}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(201,147,42,.15);border:1px solid rgba(201,147,42,.3);border-radius:20px;padding:4px 12px;font-size:10px;color:var(--gold-light);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.75rem;opacity:0;animation:hero-up .7s .1s cubic-bezier(.22,1,.36,1) forwards}
+.hero-badge::before{content:'●';font-size:7px;animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.hero h1{font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:700;color:var(--white);line-height:1.2;margin-bottom:.5rem;opacity:0;animation:hero-up .7s .25s cubic-bezier(.22,1,.36,1) forwards;}
+.hero h1{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:700;color:var(--white);line-height:1.2;margin-bottom:.4rem;opacity:0;animation:hero-up .7s .25s cubic-bezier(.22,1,.36,1) forwards}
 .hero h1 em{font-style:italic;color:var(--gold-light)}
-.hero p{font-size:14px;color:rgba(255,255,255,.65);max-width:520px;line-height:1.7;opacity:0;animation:hero-up .7s .4s cubic-bezier(.22,1,.36,1) forwards;}
-.hero-stats{display:flex;gap:2rem;margin-top:1.8rem;opacity:0;animation:hero-up .7s .55s cubic-bezier(.22,1,.36,1) forwards;}
-.hero-stat-val{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--gold-light);line-height:1}
-.hero-stat-lbl{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+.hero p{font-size:13px;color:rgba(255,255,255,.65);max-width:480px;line-height:1.7;opacity:0;animation:hero-up .7s .4s cubic-bezier(.22,1,.36,1) forwards}
+.hero-stats{display:flex;gap:1.5rem;margin-top:1.4rem;opacity:0;animation:hero-up .7s .55s cubic-bezier(.22,1,.36,1) forwards;flex-wrap:wrap}
+.hero-stat-val{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--gold-light);line-height:1}
+.hero-stat-lbl{font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
 .hero-stat-sep{width:1px;background:rgba(255,255,255,.12);align-self:stretch}
-/* ── CLOUD SYNC INDICATOR DI HERO ── */
-.hero-sync-badge{display:inline-flex;align-items:center;gap:7px;margin-top:1rem;opacity:0;animation:hero-up .7s .7s cubic-bezier(.22,1,.36,1) forwards;font-size:11px;color:rgba(255,255,255,.5)}
+.hero-sync-badge{display:inline-flex;align-items:center;gap:7px;margin-top:.75rem;opacity:0;animation:hero-up .7s .7s cubic-bezier(.22,1,.36,1) forwards;font-size:11px;color:rgba(255,255,255,.5)}
 .hero-sync-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3);flex-shrink:0;transition:background .3s}
 .hero-sync-dot.syncing{background:var(--gold);animation:pulse 1s infinite}
 .hero-sync-dot.ok{background:#4caf50}
 .hero-sync-dot.err{background:#e53935}
 @keyframes hero-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.home-panel{max-width:900px;margin:0 auto;padding:2rem;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start}
-.cal-wrapper{background:var(--white);border-radius:16px;border:1px solid rgba(122,16,32,.08);overflow:hidden;box-shadow:var(--shadow)}
-.cal-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;background:var(--maroon);border-bottom:1px solid rgba(122,16,32,.1)}
-.cal-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;color:var(--white)}
-.cal-nav{display:flex;gap:6px}
-.cal-nav button{width:28px;height:28px;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);cursor:pointer;font-size:14px;color:rgba(255,255,255,.8);transition:all .15s;display:flex;align-items:center;justify-content:center}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══ HOME PANEL (kalender + grafik) ══ */
+.home-panel{max-width:860px;margin:0 auto;padding:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;align-items:start}
+
+/* ══ KALENDER ══ */
+.cal-wrapper{background:var(--white);border-radius:var(--r);border:1px solid rgba(122,16,32,.08);overflow:hidden;box-shadow:var(--shadow)}
+.cal-header{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.1rem;background:var(--maroon)}
+.cal-title{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:600;color:var(--white)}
+.cal-nav{display:flex;gap:5px}
+.cal-nav button{width:26px;height:26px;border-radius:5px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);cursor:pointer;font-size:13px;color:rgba(255,255,255,.8);transition:all .15s;display:flex;align-items:center;justify-content:center}
 .cal-nav button:hover{background:rgba(255,255,255,.2);color:var(--white)}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:.75rem}
-.cal-day-name{text-align:center;font-size:10px;font-weight:600;color:var(--text-muted);padding:6px 0}
-.cal-day{aspect-ratio:1;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;cursor:pointer;transition:all .15s;color:var(--text-dark);gap:2px;position:relative}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:.6rem}
+.cal-day-name{text-align:center;font-size:9px;font-weight:600;color:var(--text-muted);padding:5px 0}
+.cal-day{aspect-ratio:1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;cursor:pointer;transition:all .15s;color:var(--text-dark);gap:2px;position:relative}
 .cal-day:hover{background:rgba(122,16,32,.08)}
 .cal-day.today{background:var(--maroon);color:var(--white);font-weight:600}
 .cal-day.selected{outline:2px solid var(--gold);outline-offset:1px}
-/* ★ KALENDER: Tanda rapat (dot di bawah angka) ★ */
-.cal-day.has-event::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold);display:block}
+.cal-day.has-event::after{content:'';width:4px;height:4px;border-radius:50%;background:var(--gold);display:block}
 .cal-day.today.has-event::after{background:var(--gold-light)}
 .cal-day.booked{background:rgba(229,57,53,.1);color:#c62828}
-.cal-day.booked::after{content:'';width:5px;height:5px;border-radius:50%;background:#e53935;display:block}
+.cal-day.booked::after{content:'';width:4px;height:4px;border-radius:50%;background:#e53935;display:block}
 .cal-day.other-month{color:#ccc;pointer-events:none}
-/* Tooltip tanda rapat */
-.cal-day.has-event{cursor:pointer}
-.cal-day.has-event:hover::before{content:attr(data-tip);position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--maroon-deep);color:white;font-size:10px;padding:3px 7px;border-radius:5px;white-space:nowrap;z-index:10;pointer-events:none}
-.cal-legend{display:flex;gap:12px;padding:.5rem 1rem .75rem;flex-wrap:wrap}
-.cal-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted)}
-.cal-legend-dot{width:8px;height:8px;border-radius:50%}
-.stats-panel{display:flex;flex-direction:column;gap:12px}
-.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stat-card{background:var(--white);border-radius:12px;padding:1rem 1.2rem;box-shadow:var(--shadow);border:1px solid rgba(122,16,32,.06)}
-.stat-label{font-size:10px;font-weight:600;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
-.stat-value{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--maroon);line-height:1;margin-bottom:2px}
-.stat-sub{font-size:11px;color:var(--text-muted)}
-.chart-card{background:var(--white);border-radius:12px;padding:1.2rem 1.2rem 1rem;box-shadow:var(--shadow);border:1px solid rgba(122,16,32,.06)}
-.chart-title{font-size:12px;font-weight:600;color:var(--text-dark);margin-bottom:.9rem;letter-spacing:.02em}
-.bar-chart{display:flex;align-items:flex-end;gap:5px;height:88px}
-.bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
-.bar{width:100%;border-radius:3px 3px 0 0;min-height:3px;transition:height .4s ease}
+.cal-day.has-event:hover::before{content:attr(data-tip);position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--maroon-deep);color:white;font-size:9px;padding:3px 6px;border-radius:4px;white-space:nowrap;z-index:10;pointer-events:none;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+.cal-legend{display:flex;gap:10px;padding:.4rem .9rem .65rem;flex-wrap:wrap}
+.cal-legend-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-muted)}
+.cal-legend-dot{width:7px;height:7px;border-radius:50%}
+
+/* ══ STATS PANEL ══ */
+.stats-panel{display:flex;flex-direction:column;gap:10px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat-card{background:var(--white);border-radius:12px;padding:.9rem 1rem;box-shadow:var(--shadow);border:1px solid rgba(122,16,32,.06)}
+.stat-label{font-size:9px;font-weight:600;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+.stat-value{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--maroon);line-height:1;margin-bottom:2px}
+.stat-sub{font-size:10px;color:var(--text-muted)}
+.chart-card{background:var(--white);border-radius:12px;padding:1rem 1rem .85rem;box-shadow:var(--shadow);border:1px solid rgba(122,16,32,.06)}
+.chart-title{font-size:11px;font-weight:600;color:var(--text-dark);margin-bottom:.75rem}
+.bar-chart{display:flex;align-items:flex-end;gap:4px;height:80px}
+.bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bar{width:100%;border-radius:3px 3px 0 0;min-height:3px}
 .bar-inner{width:100%;height:100%;background:linear-gradient(180deg,var(--maroon-light) 0%,var(--maroon) 100%);border-radius:3px 3px 0 0}
-.bar-label{font-size:9px;color:var(--text-muted)}
-.bar-val{font-size:9px;font-weight:600;color:var(--maroon)}
-.form-section{max-width:900px;margin:0 auto;padding:0 2rem 2rem}
-.content-section{max-width:900px;margin:0 auto;padding:2rem}
-.form-card{background:var(--white);border-radius:16px;box-shadow:var(--shadow-lg);overflow:hidden}
-.form-card-header{background:var(--cream-dark);border-bottom:1px solid rgba(122,16,32,.1);padding:1.25rem 1.75rem;display:flex;align-items:center;gap:10px}
-.form-card-header h2{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;color:var(--maroon)}
-.step-dot{width:28px;height:28px;border-radius:50%;background:var(--maroon);color:var(--white);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.form-body{padding:1.75rem}
-.form-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.25rem}
-.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem}
-.field{display:flex;flex-direction:column;gap:6px}
-.field label{font-size:12px;font-weight:600;color:var(--text-mid);letter-spacing:.04em;text-transform:uppercase}
-.field input,.field select,.field textarea{font-family:'Inter',sans-serif;font-size:14px;padding:10px 14px;border:1.5px solid #e8ddd5;border-radius:8px;background:#fdfaf7;color:var(--text-dark);transition:border-color .15s;outline:none}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--maroon);box-shadow:0 0 0 3px rgba(122,16,32,.08);background:var(--white)}
-.field textarea{resize:vertical;min-height:72px}
-.section-divider{display:flex;align-items:center;gap:12px;margin:1.5rem 0 1.25rem}
-.section-divider span{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.bar-label{font-size:8px;color:var(--text-muted)}
+.bar-val{font-size:8px;font-weight:600;color:var(--maroon)}
+
+/* ══ FORM ══ */
+.form-section{max-width:860px;margin:0 auto;padding:0 1.5rem 2rem}
+.content-section{max-width:860px;margin:0 auto;padding:1.5rem}
+.form-card{background:var(--white);border-radius:var(--r);box-shadow:var(--shadow-lg);overflow:hidden}
+.form-card-header{background:var(--cream-dark);border-bottom:1px solid rgba(122,16,32,.1);padding:1.1rem 1.5rem;display:flex;align-items:center;gap:9px}
+.form-card-header h2{font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;color:var(--maroon)}
+.step-dot{width:26px;height:26px;border-radius:50%;background:var(--maroon);color:var(--white);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.form-body{padding:1.5rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.9rem;margin-bottom:1.1rem}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:1.1rem}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:600;color:var(--text-mid);letter-spacing:.04em;text-transform:uppercase}
+.field input,.field select,.field textarea{font-family:'Inter',sans-serif;font-size:13px;padding:9px 12px;border:1.5px solid #e8ddd5;border-radius:7px;background:#fdfaf7;color:var(--text-dark);transition:border-color .15s;outline:none;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--maroon);box-shadow:0 0 0 3px rgba(122,16,32,.07);background:var(--white)}
+.field textarea{resize:vertical;min-height:68px}
+.section-divider{display:flex;align-items:center;gap:10px;margin:1.25rem 0 1rem}
+.section-divider span{font-size:10px;font-weight:600;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
 .section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:#e8ddd5}
-.nomor-status-bar{display:flex;align-items:center;gap:10px;background:rgba(201,147,42,.08);border:1px solid rgba(201,147,42,.2);border-radius:10px;padding:10px 16px;margin-bottom:1.25rem;font-size:13px}
-.nomor-status-val{font-family:monospace;font-weight:700;color:var(--maroon);font-size:14px;flex:1}
-.nomor-refresh-btn{padding:5px 12px;border-radius:6px;border:1.5px solid rgba(201,147,42,.3);background:transparent;font-size:12px;color:var(--gold);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+.nomor-status-bar{display:flex;align-items:center;gap:8px;background:rgba(201,147,42,.08);border:1px solid rgba(201,147,42,.2);border-radius:9px;padding:9px 13px;margin-bottom:1.1rem;font-size:12px;flex-wrap:wrap;gap:8px}
+.nomor-status-val{font-family:monospace;font-weight:700;color:var(--maroon);font-size:13px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nomor-refresh-btn{padding:4px 10px;border-radius:5px;border:1.5px solid rgba(201,147,42,.3);background:transparent;font-size:11px;color:var(--gold);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;flex-shrink:0}
 .nomor-refresh-btn:hover{background:rgba(201,147,42,.1)}
-.nomor-dot{width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0}
+.nomor-dot{width:7px;height:7px;border-radius:50%;background:#ccc;flex-shrink:0}
 .nomor-dot.ok{background:#4caf50}.nomor-dot.loading{background:var(--gold);animation:pulse 1s infinite}.nomor-dot.err{background:#e53935}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.agenda-tabs{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
-.agenda-chip{padding:6px 14px;border-radius:20px;border:1.5px solid #e8ddd5;background:#fdfaf7;font-size:12px;font-weight:500;color:var(--text-mid);cursor:pointer;transition:all .15s}
+.agenda-tabs{display:flex;gap:5px;margin-bottom:7px;flex-wrap:wrap}
+.agenda-chip{padding:5px 12px;border-radius:18px;border:1.5px solid #e8ddd5;background:#fdfaf7;font-size:11px;font-weight:500;color:var(--text-mid);cursor:pointer;transition:all .15s}
 .agenda-chip:hover{border-color:var(--maroon);color:var(--maroon)}
 .agenda-chip.active{background:var(--maroon);border-color:var(--maroon);color:var(--white)}
-.peserta-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.peserta-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid #e8ddd5;border-radius:8px;background:#fdfaf7;cursor:pointer;transition:all .15s;user-select:none}
+.peserta-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px}
+.peserta-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1.5px solid #e8ddd5;border-radius:7px;background:#fdfaf7;cursor:pointer;transition:all .15s;user-select:none}
 .peserta-item:hover{border-color:var(--maroon-light)}
 .peserta-item.checked{border-color:var(--maroon);background:rgba(122,16,32,.04)}
-.peserta-check{width:18px;height:18px;border-radius:4px;border:2px solid #ccc;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.peserta-check{width:16px;height:16px;border-radius:3px;border:2px solid #ccc;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .peserta-item.checked .peserta-check{background:var(--maroon);border-color:var(--maroon)}
-.peserta-item.checked .peserta-check::after{content:'✓';color:white;font-size:11px;font-weight:700}
+.peserta-item.checked .peserta-check::after{content:'✓';color:white;font-size:10px;font-weight:700}
 .peserta-info{flex:1;min-width:0}
-.peserta-nama{font-size:13px;font-weight:500;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.peserta-jabatan{font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.progress-bar{display:none;align-items:center;gap:0;padding:0 1.75rem 1rem}
-.prog-step{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);padding:6px 12px;border-radius:20px;transition:all .3s}
+.peserta-nama{font-size:12px;font-weight:500;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.peserta-jabatan{font-size:10px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.progress-bar{display:none;align-items:center;gap:0;padding:0 1.5rem .85rem;flex-wrap:wrap}
+.prog-step{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);padding:5px 10px;border-radius:18px;transition:all .3s}
 .prog-step.active{background:rgba(201,147,42,.15);color:#8a6010;font-weight:600}
 .prog-step.done{background:rgba(76,175,80,.1);color:#2e7d32;font-weight:600}
 .prog-step.err{background:rgba(229,57,53,.1);color:#c62828}
-.prog-arrow{color:#ccc;font-size:12px;flex-shrink:0}
-.generate-area{padding:1.5rem 1.75rem;background:var(--cream-dark);border-top:1px solid rgba(122,16,32,.1);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
-.doc-preview{display:flex;gap:8px;flex-wrap:wrap}
-.doc-badge{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:500}
-.doc-badge::before{content:'📄';font-size:14px}
+.prog-arrow{color:#ccc;font-size:11px;flex-shrink:0}
+.generate-area{padding:1.25rem 1.5rem;background:var(--cream-dark);border-top:1px solid rgba(122,16,32,.1);display:flex;align-items:center;justify-content:space-between;gap:.9rem;flex-wrap:wrap}
+.doc-preview{display:flex;gap:6px;flex-wrap:wrap}
+.doc-badge{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:500}
+.doc-badge::before{content:'📄';font-size:12px}
 .doc-badge.undangan{background:rgba(122,16,32,.08);color:var(--maroon)}
 .doc-badge.absen{background:rgba(201,147,42,.12);color:#8a6010}
 .doc-badge.risalah{background:rgba(26,10,13,.06);color:var(--text-mid)}
-.gen-btns{display:flex;gap:10px;align-items:center}
-.btn-generate{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--maroon) 0%,var(--maroon-light) 100%);color:var(--white);border:none;border-radius:10px;padding:13px 28px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(122,16,32,.35)}
-.btn-generate:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(122,16,32,.45)}
+.gen-btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn-generate{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--maroon) 0%,var(--maroon-light) 100%);color:var(--white);border:none;border-radius:9px;padding:11px 22px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 4px 14px rgba(122,16,32,.35)}
+.btn-generate:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(122,16,32,.45)}
 .btn-generate:disabled{opacity:.65;cursor:not-allowed;transform:none}
-.btn-generate .gold-star{color:var(--gold-light);font-size:16px}
-.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite;display:none}
-@keyframes spin{to{transform:rotate(360deg)}}
-.btn-awan{display:none;align-items:center;gap:8px;background:linear-gradient(135deg,var(--blue) 0%,var(--blue-light) 100%);color:var(--white);border:none;border-radius:10px;padding:13px 22px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(21,101,192,.35)}
+.btn-generate .gold-star{color:var(--gold-light);font-size:14px}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite;display:none}
+.btn-awan{display:none;align-items:center;gap:7px;background:linear-gradient(135deg,var(--blue) 0%,var(--blue-light) 100%);color:var(--white);border:none;border-radius:9px;padding:11px 18px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 4px 14px rgba(21,101,192,.35)}
 .btn-awan:hover{transform:translateY(-1px)}
 .btn-awan.visible{display:flex;animation:fade-up .3s ease}
 @keyframes fade-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-.cloud-banner{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:10px;font-size:12px;margin-bottom:1rem;border:1px solid}
+
+/* ══ CLOUD BANNER ══ */
+.cloud-banner{display:flex;align-items:center;gap:9px;padding:9px 13px;border-radius:9px;font-size:11px;margin-bottom:.9rem;border:1px solid}
 .cloud-banner.loading{background:rgba(201,147,42,.08);border-color:rgba(201,147,42,.25);color:#7a5010}
 .cloud-banner.ok{background:rgba(76,175,80,.08);border-color:rgba(76,175,80,.25);color:#2e7d32}
 .cloud-banner.err{background:rgba(229,57,53,.06);border-color:rgba(229,57,53,.2);color:#c62828}
 .cloud-banner.warn{background:rgba(122,16,32,.05);border-color:rgba(122,16,32,.15);color:var(--maroon)}
-.cloud-spin{width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
-.page-header{background:linear-gradient(160deg,var(--maroon-deep) 0%,var(--maroon) 100%);padding:2.5rem 2rem 2rem}
-.page-header-inner{max-width:900px;margin:0 auto}
-.page-header h1{font-family:'Playfair Display',serif;font-size:2rem;color:var(--white);margin-bottom:4px}
-.page-header p{font-size:13px;color:rgba(255,255,255,.6)}
-.search-bar{display:flex;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap}
-.search-bar input{flex:1;min-width:160px;font-family:'Inter',sans-serif;font-size:14px;padding:11px 16px;border:1.5px solid #e8ddd5;border-radius:10px;background:var(--white);outline:none}
+.cloud-spin{width:13px;height:13px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+
+/* ══ PAGE HEADER ══ */
+.page-header{background:linear-gradient(160deg,var(--maroon-deep) 0%,var(--maroon) 100%);padding:2rem 1.5rem 1.75rem}
+.page-header-inner{max-width:860px;margin:0 auto}
+.page-header h1{font-family:'Playfair Display',serif;font-size:1.75rem;color:var(--white);margin-bottom:3px}
+.page-header p{font-size:12px;color:rgba(255,255,255,.6)}
+
+/* ══ SEARCH ══ */
+.search-bar{display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap}
+.search-bar input{flex:1;min-width:140px;font-family:'Inter',sans-serif;font-size:13px;padding:10px 14px;border:1.5px solid #e8ddd5;border-radius:9px;background:var(--white);outline:none}
 .search-bar input:focus{border-color:var(--maroon)}
-.search-bar select{font-family:'Inter',sans-serif;font-size:13px;padding:11px 14px;border:1.5px solid #e8ddd5;border-radius:10px;background:var(--white);outline:none;color:var(--text-dark);cursor:pointer}
-.arsip-list{display:flex;flex-direction:column;gap:10px}
-.arsip-item{background:var(--white);border-radius:12px;padding:1.1rem 1.4rem;display:flex;align-items:center;gap:1rem;box-shadow:0 2px 8px rgba(90,10,24,.07);border:1px solid rgba(122,16,32,.06);transition:all .15s;cursor:pointer}
-.arsip-item:hover{border-color:rgba(122,16,32,.2);box-shadow:0 4px 16px rgba(90,10,24,.12);transform:translateY(-1px)}
+.search-bar select{font-family:'Inter',sans-serif;font-size:12px;padding:10px 12px;border:1.5px solid #e8ddd5;border-radius:9px;background:var(--white);outline:none;color:var(--text-dark);cursor:pointer}
+
+/* ══ ARSIP LIST ══ */
+.arsip-list{display:flex;flex-direction:column;gap:8px}
+.arsip-item{background:var(--white);border-radius:11px;padding:1rem 1.25rem;display:flex;align-items:center;gap:.9rem;box-shadow:0 2px 8px rgba(90,10,24,.07);border:1px solid rgba(122,16,32,.06);transition:all .15s;cursor:pointer}
+.arsip-item:hover{border-color:rgba(122,16,32,.2);box-shadow:0 4px 14px rgba(90,10,24,.12);transform:translateY(-1px)}
 .arsip-item.highlight{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,147,42,.15)}
-.arsip-date-box{width:52px;height:52px;border-radius:10px;background:var(--maroon);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
-.arsip-date-box .day{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--white);line-height:1}
-.arsip-date-box .month{font-size:10px;color:var(--gold-light);letter-spacing:.06em;text-transform:uppercase}
+.arsip-date-box{width:48px;height:48px;border-radius:9px;background:var(--maroon);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.arsip-date-box .day{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--white);line-height:1}
+.arsip-date-box .month{font-size:9px;color:var(--gold-light);letter-spacing:.06em;text-transform:uppercase}
 .arsip-info{flex:1;min-width:0}
-.arsip-title{font-size:14px;font-weight:600;color:var(--text-dark);margin-bottom:3px}
-.arsip-meta{font-size:12px;color:var(--text-muted);display:flex;gap:12px;flex-wrap:wrap}
-.arsip-actions{display:flex;gap:6px}
-.btn-sm{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;border:1.5px solid #e8ddd5;background:var(--white);color:var(--text-mid);transition:all .15s}
+.arsip-title{font-size:13px;font-weight:600;color:var(--text-dark);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arsip-meta{font-size:11px;color:var(--text-muted);display:flex;gap:10px;flex-wrap:wrap}
+.arsip-actions{display:flex;gap:5px;flex-shrink:0}
+.btn-sm{padding:5px 12px;border-radius:5px;font-size:11px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;border:1.5px solid #e8ddd5;background:var(--white);color:var(--text-mid);transition:all .15s}
 .btn-sm:hover{border-color:var(--maroon);color:var(--maroon)}
-.empty-state{text-align:center;padding:3rem 1rem;color:var(--text-muted)}
-.empty-state .icon{font-size:3rem;margin-bottom:1rem;opacity:.5}
-.empty-state h3{font-size:16px;font-weight:500;margin-bottom:6px}
-.peserta-manage-list{display:flex;flex-direction:column;gap:8px}
-.peserta-row{background:var(--white);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(90,10,24,.06);border:1px solid rgba(122,16,32,.06)}
-.peserta-num{width:28px;height:28px;border-radius:50%;background:var(--cream-dark);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--maroon);flex-shrink:0}
-.peserta-row input{flex:1;font-family:'Inter',sans-serif;font-size:13px;padding:7px 10px;border:1.5px solid #e8ddd5;border-radius:6px;background:#fdfaf7;outline:none}
+.empty-state{text-align:center;padding:2.5rem 1rem;color:var(--text-muted)}
+.empty-state .icon{font-size:2.5rem;margin-bottom:.75rem;opacity:.5}
+.empty-state h3{font-size:15px;font-weight:500;margin-bottom:5px}
+
+/* ══ PESERTA MANAGE ══ */
+.peserta-manage-list{display:flex;flex-direction:column;gap:7px}
+.peserta-row{background:var(--white);border-radius:9px;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 4px rgba(90,10,24,.06);border:1px solid rgba(122,16,32,.06);flex-wrap:wrap}
+.peserta-num{width:26px;height:26px;border-radius:50%;background:var(--cream-dark);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--maroon);flex-shrink:0}
+.peserta-row input{flex:1;min-width:120px;font-family:'Inter',sans-serif;font-size:12px;padding:6px 9px;border:1.5px solid #e8ddd5;border-radius:5px;background:#fdfaf7;outline:none}
 .peserta-row input:focus{border-color:var(--maroon)}
-.btn-icon{width:32px;height:32px;border-radius:6px;border:1.5px solid #e8ddd5;background:var(--white);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.btn-icon{width:30px;height:30px;border-radius:5px;border:1.5px solid #e8ddd5;background:var(--white);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
 .btn-icon:hover{border-color:#e53935;background:#fff5f5}
-.btn-add{width:100%;padding:11px;border-radius:8px;border:1.5px dashed #e8ddd5;background:transparent;font-family:'Inter',sans-serif;font-size:13px;color:var(--text-muted);cursor:pointer;margin-top:8px;transition:all .15s}
+.btn-add{width:100%;padding:10px;border-radius:7px;border:1.5px dashed #e8ddd5;background:transparent;font-family:'Inter',sans-serif;font-size:12px;color:var(--text-muted);cursor:pointer;margin-top:7px;transition:all .15s}
 .btn-add:hover{border-color:var(--maroon);color:var(--maroon)}
-.save-bar{position:sticky;bottom:0;background:var(--white);border-top:1px solid #e8ddd5;padding:1rem 2rem;display:flex;justify-content:flex-end;gap:10px}
-.btn-primary{background:var(--maroon);color:var(--white);border:none;border-radius:8px;padding:10px 24px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.save-bar{position:sticky;bottom:0;background:var(--white);border-top:1px solid #e8ddd5;padding:.85rem 1.5rem;display:flex;justify-content:flex-end;gap:8px}
+.btn-primary{background:var(--maroon);color:var(--white);border:none;border-radius:7px;padding:9px 20px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
 .btn-primary:hover{background:var(--maroon-dark)}
-.setting-group{margin-bottom:2rem}
-.setting-group h3{font-size:13px;font-weight:600;color:var(--text-mid);letter-spacing:.06em;text-transform:uppercase;margin-bottom:1rem;padding-bottom:8px;border-bottom:1px solid #e8ddd5}
-.tpl-box{background:linear-gradient(135deg,rgba(61,7,16,.03),rgba(201,147,42,.05));border:1.5px solid rgba(201,147,42,.2);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem}
-.tpl-box-title{font-size:12px;font-weight:700;color:var(--maroon);letter-spacing:.06em;text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:8px}
-.tpl-box-title span{background:var(--maroon);color:white;padding:2px 8px;border-radius:4px;font-size:10px}
-.tpl-mode-tabs{display:flex;gap:6px;margin-bottom:1rem}
-.tpl-mode-tab{padding:7px 16px;border-radius:8px;border:1.5px solid #e8ddd5;background:var(--white);font-size:12px;font-weight:500;color:var(--text-muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+
+/* ══ PENGATURAN ══ */
+.setting-group{margin-bottom:1.75rem}
+.setting-group h3{font-size:12px;font-weight:600;color:var(--text-mid);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.85rem;padding-bottom:7px;border-bottom:1px solid #e8ddd5}
+.tpl-box{background:linear-gradient(135deg,rgba(61,7,16,.03),rgba(201,147,42,.05));border:1.5px solid rgba(201,147,42,.2);border-radius:11px;padding:1.1rem 1.25rem;margin-bottom:1.25rem}
+.tpl-box-title{font-size:11px;font-weight:700;color:var(--maroon);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.85rem;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.tpl-box-title span{background:var(--maroon);color:white;padding:2px 7px;border-radius:3px;font-size:9px}
+.tpl-mode-tabs{display:flex;gap:5px;margin-bottom:.85rem;flex-wrap:wrap}
+.tpl-mode-tab{padding:6px 13px;border-radius:7px;border:1.5px solid #e8ddd5;background:var(--white);font-size:11px;font-weight:500;color:var(--text-muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
 .tpl-mode-tab:hover{border-color:var(--maroon);color:var(--maroon)}
 .tpl-mode-tab.active{background:var(--maroon);border-color:var(--maroon);color:var(--white);font-weight:600}
 .tpl-mode-panel{display:none}.tpl-mode-panel.active{display:block}
-.auto-info{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:rgba(76,175,80,.07);border:1.5px solid rgba(76,175,80,.2);border-radius:10px;margin-bottom:12px}
-.auto-info-text{font-size:13px;color:var(--text-mid);line-height:1.6}
+.auto-info{display:flex;align-items:flex-start;gap:10px;padding:10px 13px;background:rgba(76,175,80,.07);border:1.5px solid rgba(76,175,80,.2);border-radius:9px;margin-bottom:10px}
+.auto-info-text{font-size:12px;color:var(--text-mid);line-height:1.6}
 .auto-info-text strong{color:var(--maroon)}
-.auto-info-text code{background:rgba(122,16,32,.08);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:12px;color:var(--maroon)}
-.tpl-status-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0e8e0}
+.auto-info-text code{background:rgba(122,16,32,.08);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:11px;color:var(--maroon)}
+.tpl-status-row{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid #f0e8e0;flex-wrap:wrap}
 .tpl-status-row:last-child{border-bottom:none}
-.tpl-status-label{font-size:12px;font-weight:600;color:var(--text-mid);min-width:120px}
-.tpl-status-path{font-size:12px;font-family:monospace;color:var(--text-muted);flex:1}
-.tpl-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;cursor:pointer}
+.tpl-status-label{font-size:11px;font-weight:600;color:var(--text-mid);min-width:100px}
+.tpl-status-path{font-size:11px;font-family:monospace;color:var(--text-muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tpl-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:18px;font-size:10px;font-weight:600;white-space:nowrap;cursor:pointer}
 .tpl-badge.ok{background:rgba(76,175,80,.12);color:#2e7d32}
 .tpl-badge.idle{background:rgba(180,180,180,.12);color:#888}
 .tpl-badge.loading{background:rgba(201,147,42,.15);color:#8a6010;animation:pulse 1s infinite}
 .tpl-badge.err{background:rgba(229,57,53,.1);color:#c62828}
-.tpl-url-row{display:grid;grid-template-columns:110px 1fr auto;gap:8px;align-items:center;margin-bottom:8px}
-.tpl-url-row input{font-family:'Inter',sans-serif;font-size:12px;padding:8px 12px;border:1.5px solid #e8ddd5;border-radius:7px;background:var(--white);outline:none;transition:border-color .15s}
+.tpl-url-row{display:grid;grid-template-columns:90px 1fr auto;gap:7px;align-items:center;margin-bottom:7px}
+.tpl-url-row input{font-family:'Inter',sans-serif;font-size:11px;padding:7px 10px;border:1.5px solid #e8ddd5;border-radius:6px;background:var(--white);outline:none;transition:border-color .15s}
 .tpl-url-row input:focus{border-color:var(--gold)}
-.tpl-test-btn{padding:8px 14px;border-radius:7px;border:1.5px solid #e8ddd5;background:var(--white);font-size:12px;font-weight:500;color:var(--text-mid);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
+.tpl-test-btn{padding:6px 11px;border-radius:6px;border:1.5px solid #e8ddd5;background:var(--white);font-size:11px;font-weight:500;color:var(--text-mid);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
 .tpl-test-btn:hover{border-color:var(--maroon);color:var(--maroon)}
-.tpl-hint{font-size:11px;color:var(--text-muted);line-height:1.7;margin-top:10px;padding:10px 14px;background:rgba(122,16,32,.03);border-radius:8px}
-.tpl-hint code{background:rgba(122,16,32,.08);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:11px;color:var(--maroon)}
-.ph-section{margin-top:1rem}
-.ph-section-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
-.placeholder-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
-.ph-chip{font-size:11px;font-family:monospace;background:rgba(122,16,32,.06);color:var(--maroon);padding:3px 9px;border-radius:4px;border:1px solid rgba(122,16,32,.12)}
+.tpl-hint{font-size:10px;color:var(--text-muted);line-height:1.7;margin-top:8px;padding:9px 12px;background:rgba(122,16,32,.03);border-radius:7px}
+.tpl-hint code{background:rgba(122,16,32,.08);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:10px;color:var(--maroon)}
+.ph-section{margin-top:.85rem}
+.ph-section-label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.placeholder-chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px}
+.ph-chip{font-size:10px;font-family:monospace;background:rgba(122,16,32,.06);color:var(--maroon);padding:2px 7px;border-radius:3px;border:1px solid rgba(122,16,32,.12)}
 .ph-chip.new{background:rgba(201,147,42,.12);color:#7a5010;border-color:rgba(201,147,42,.3)}
 .ph-loop{background:rgba(201,147,42,.1);color:#7a5010;border-color:rgba(201,147,42,.25)}
-.gas-banner{background:linear-gradient(135deg,rgba(21,101,192,.08),rgba(21,101,192,.04));border:1px solid rgba(21,101,192,.2);border-radius:10px;padding:12px 16px;font-size:12px;color:var(--blue);display:flex;align-items:flex-start;gap:10px}
-.gas-banner code{background:rgba(21,101,192,.1);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:11px}
-.gas-url-input{display:flex;gap:8px;margin-top:8px}
-.gas-url-input input{flex:1;font-family:'Inter',sans-serif;font-size:12px;padding:7px 12px;border:1.5px solid rgba(21,101,192,.3);border-radius:7px;background:white;outline:none;color:var(--text-dark)}
+.gas-banner{background:linear-gradient(135deg,rgba(21,101,192,.08),rgba(21,101,192,.04));border:1px solid rgba(21,101,192,.2);border-radius:9px;padding:11px 13px;font-size:12px;color:var(--blue);display:flex;align-items:flex-start;gap:9px}
+.gas-banner code{background:rgba(21,101,192,.1);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:10px}
+.gas-url-input{display:flex;gap:7px;margin-top:7px;flex-wrap:wrap}
+.gas-url-input input{flex:1;min-width:160px;font-family:'Inter',sans-serif;font-size:12px;padding:7px 10px;border:1.5px solid rgba(21,101,192,.3);border-radius:6px;background:white;outline:none;color:var(--text-dark)}
 .gas-url-input input:focus{border-color:var(--blue)}
-.gas-url-input button{padding:7px 16px;border-radius:7px;border:none;background:var(--blue);color:white;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+.gas-url-input button{padding:7px 14px;border-radius:6px;border:none;background:var(--blue);color:white;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap}
+
+/* ══ MODAL ══ */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-overlay.open{opacity:1;pointer-events:all}
-.modal{background:var(--white);border-radius:16px;width:100%;max-width:580px;box-shadow:var(--shadow-lg);transform:translateY(20px);transition:transform .2s;max-height:90vh;overflow-y:auto}
+.modal{background:var(--white);border-radius:var(--r);width:100%;max-width:560px;box-shadow:var(--shadow-lg);transform:translateY(20px);transition:transform .2s;max-height:92vh;overflow-y:auto}
 .modal-overlay.open .modal{transform:translateY(0)}
-.modal-header{background:var(--maroon);padding:1.2rem 1.5rem;border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1}
-.modal-header h3{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--white)}
-.modal-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:20px;cursor:pointer}
-.modal-body{padding:1.5rem}
-.detail-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f0e8e0;font-size:13px}
+.modal-header{background:var(--maroon);padding:1.1rem 1.35rem;border-radius:var(--r) var(--r) 0 0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1}
+.modal-header h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--white)}
+.modal-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:18px;cursor:pointer}
+.modal-body{padding:1.35rem}
+.detail-row{display:flex;gap:9px;padding:7px 0;border-bottom:1px solid #f0e8e0;font-size:12px}
 .detail-row:last-of-type{border-bottom:none}
-.detail-label{font-weight:600;color:var(--text-mid);min-width:140px;flex-shrink:0}
-.detail-val{color:var(--text-dark);flex:1}
-.upload-section{margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #e8ddd5}
-.upload-section-title{font-size:13px;font-weight:600;color:var(--maroon);margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.upload-section-title .folder-tag{font-size:11px;font-weight:400;color:var(--text-muted);background:var(--cream-dark);padding:2px 8px;border-radius:10px}
-.upload-zone{border:2px dashed #d0c0c5;border-radius:12px;padding:2rem 1.5rem;text-align:center;cursor:pointer;transition:all .2s;background:#fdfaf7}
+.detail-label{font-weight:600;color:var(--text-mid);min-width:130px;flex-shrink:0}
+.detail-val{color:var(--text-dark);flex:1;word-break:break-word}
+.upload-section{margin-top:1.35rem;padding-top:1.35rem;border-top:1px solid #e8ddd5}
+.upload-section-title{font-size:12px;font-weight:600;color:var(--maroon);margin-bottom:10px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.upload-section-title .folder-tag{font-size:10px;font-weight:400;color:var(--text-muted);background:var(--cream-dark);padding:2px 7px;border-radius:9px}
+.upload-zone{border:2px dashed #d0c0c5;border-radius:11px;padding:1.75rem 1.25rem;text-align:center;cursor:pointer;transition:all .2s;background:#fdfaf7}
 .upload-zone:hover,.upload-zone.dragover{border-color:var(--maroon);background:rgba(122,16,32,.03)}
-.upload-zone-icon{font-size:2rem;margin-bottom:8px}
-.upload-zone-text{font-size:13px;color:var(--text-muted);line-height:1.6}
+.upload-zone-icon{font-size:1.75rem;margin-bottom:6px}
+.upload-zone-text{font-size:12px;color:var(--text-muted);line-height:1.6}
 .upload-zone-text strong{color:var(--maroon)}
 .upload-zone input[type=file]{display:none}
-.uploaded-files{margin-top:12px;display:flex;flex-direction:column;gap:6px}
-.uploaded-file-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:rgba(122,16,32,.03);border:1px solid rgba(122,16,32,.1)}
-.file-icon{font-size:18px;flex-shrink:0}
-.file-name{flex:1;font-size:13px;font-weight:500;color:var(--text-dark);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.file-size{font-size:11px;color:var(--text-muted);flex-shrink:0}
-.file-status{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;flex-shrink:0}
+.uploaded-files{margin-top:10px;display:flex;flex-direction:column;gap:5px}
+.uploaded-file-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:7px;background:rgba(122,16,32,.03);border:1px solid rgba(122,16,32,.1);flex-wrap:wrap}
+.file-icon{font-size:16px;flex-shrink:0}
+.file-name{flex:1;min-width:80px;font-size:12px;font-weight:500;color:var(--text-dark);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-size{font-size:10px;color:var(--text-muted);flex-shrink:0}
+.file-status{font-size:10px;font-weight:600;padding:2px 7px;border-radius:9px;flex-shrink:0}
 .file-status.pending{background:rgba(201,147,42,.12);color:#8a6010}
 .file-status.uploading{background:rgba(21,101,192,.1);color:var(--blue);animation:pulse 1s infinite}
 .file-status.done{background:rgba(76,175,80,.12);color:#2e7d32}
 .file-status.err{background:rgba(229,57,53,.08);color:#c62828}
-.file-link{font-size:12px;color:var(--blue);text-decoration:none;font-weight:500;flex-shrink:0}
+.file-link{font-size:11px;color:var(--blue);text-decoration:none;font-weight:500;flex-shrink:0}
 .file-link:hover{text-decoration:underline}
-.file-actions{display:flex;gap:4px;flex-shrink:0}
-.file-actions button{background:none;border:none;cursor:pointer;font-size:13px;padding:2px 4px;border-radius:4px;transition:all .15s;color:var(--text-muted)}
+.file-actions{display:flex;gap:3px;flex-shrink:0}
+.file-actions button{background:none;border:none;cursor:pointer;font-size:12px;padding:2px 4px;border-radius:3px;transition:all .15s;color:var(--text-muted)}
 .file-actions button:hover{background:rgba(229,57,53,.1);color:#e53935}
-.upload-actions{margin-top:12px;display:flex;gap:8px;justify-content:flex-end}
-.btn-upload-all{background:linear-gradient(135deg,var(--blue),var(--blue-light));color:white;border:none;border-radius:8px;padding:9px 20px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+.upload-actions{margin-top:10px;display:flex;gap:7px;justify-content:flex-end}
+.btn-upload-all{background:linear-gradient(135deg,var(--blue),var(--blue-light));color:white;border:none;border-radius:7px;padding:8px 17px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px}
 .btn-upload-all:hover{opacity:.9}
 .btn-upload-all:disabled{opacity:.5;cursor:not-allowed}
-.no-gas-warning{background:rgba(229,57,53,.07);border:1px solid rgba(229,57,53,.2);border-radius:8px;padding:12px 16px;font-size:12px;color:#c62828;margin-bottom:12px}
-.about-hero{background:linear-gradient(160deg,var(--maroon-deep) 0%,var(--maroon) 100%);padding:3rem 2rem 2.5rem;position:relative;overflow:hidden}
-.about-logo-fallback{width:80px;height:80px;background:linear-gradient(135deg,var(--gold),var(--gold-light));border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--maroon-deep);margin-bottom:1rem}
-.about-name{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--white);font-weight:700;margin-bottom:.3rem}
-.about-sub{font-size:13px;color:rgba(255,255,255,.65)}
-.about-card{background:var(--white);border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(90,10,24,.07);border:1px solid rgba(122,16,32,.06);margin-bottom:1rem}
-.about-card h3{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--maroon);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:2px solid var(--cream-dark)}
-.about-row{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid #f5f0f0;font-size:13px}
+.no-gas-warning{background:rgba(229,57,53,.07);border:1px solid rgba(229,57,53,.2);border-radius:7px;padding:10px 13px;font-size:11px;color:#c62828;margin-bottom:10px}
+
+/* ══ TENTANG ══ */
+.about-hero{background:linear-gradient(160deg,var(--maroon-deep) 0%,var(--maroon) 100%);padding:2.5rem 1.5rem 2rem;position:relative;overflow:hidden}
+.about-logo-fallback{width:70px;height:70px;background:linear-gradient(135deg,var(--gold),var(--gold-light));border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--maroon-deep);margin-bottom:.85rem}
+.about-name{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--white);font-weight:700;margin-bottom:.25rem}
+.about-sub{font-size:12px;color:rgba(255,255,255,.65)}
+.about-card{background:var(--white);border-radius:11px;padding:1.35rem;box-shadow:0 2px 8px rgba(90,10,24,.07);border:1px solid rgba(122,16,32,.06);margin-bottom:.85rem}
+.about-card h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--maroon);margin-bottom:.85rem;padding-bottom:.45rem;border-bottom:2px solid var(--cream-dark)}
+.about-row{display:flex;gap:9px;padding:6px 0;border-bottom:1px solid #f5f0f0;font-size:12px;flex-wrap:wrap}
 .about-row:last-child{border-bottom:none}
-.about-row .lbl{font-weight:600;color:var(--text-mid);min-width:150px;flex-shrink:0}
-.about-row .val{color:var(--text-dark)}
-.faq-item{border:1px solid rgba(122,16,32,.1);border-radius:10px;overflow:hidden;margin-bottom:8px}
-.faq-q{padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;color:var(--text-dark);background:var(--white);user-select:none;transition:background .15s}
+.about-row .lbl{font-weight:600;color:var(--text-mid);min-width:130px;flex-shrink:0}
+.about-row .val{color:var(--text-dark);flex:1}
+.faq-item{border:1px solid rgba(122,16,32,.1);border-radius:9px;overflow:hidden;margin-bottom:7px}
+.faq-q{padding:12px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;color:var(--text-dark);background:var(--white);user-select:none;transition:background .15s;gap:8px}
 .faq-q:hover{background:var(--cream-dark)}
 .faq-q.open{background:var(--maroon);color:var(--white)}
-.faq-q .faq-arrow{font-size:12px;transition:transform .2s}
+.faq-q .faq-arrow{font-size:11px;transition:transform .2s;flex-shrink:0}
 .faq-q.open .faq-arrow{transform:rotate(180deg)}
-.faq-a{display:none;padding:12px 16px;font-size:13px;color:var(--text-mid);line-height:1.7;background:#fdfaf7;border-top:1px solid rgba(122,16,32,.08)}
+.faq-a{display:none;padding:10px 14px;font-size:12px;color:var(--text-mid);line-height:1.7;background:#fdfaf7;border-top:1px solid rgba(122,16,32,.08)}
 .faq-a.open{display:block}
-.faq-a ol,.faq-a ul{padding-left:1.2rem;margin-top:6px}
-.faq-a li{margin-bottom:4px}
-.faq-a code{background:rgba(122,16,32,.08);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:12px;color:var(--maroon)}
-.sync-indicator{position:fixed;bottom:2rem;left:2rem;background:var(--white);border:1px solid #e8ddd5;border-radius:10px;padding:8px 14px;font-size:12px;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow);transform:translateY(80px);opacity:0;transition:all .3s;z-index:99}
+.faq-a ol,.faq-a ul{padding-left:1.1rem;margin-top:5px}
+.faq-a li{margin-bottom:3px}
+.faq-a code{background:rgba(122,16,32,.08);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:11px;color:var(--maroon)}
+
+/* ══ SYNC / TOAST ══ */
+.sync-indicator{position:fixed;bottom:1.5rem;left:1.5rem;background:var(--white);border:1px solid #e8ddd5;border-radius:9px;padding:7px 12px;font-size:11px;display:flex;align-items:center;gap:7px;box-shadow:var(--shadow);transform:translateY(80px);opacity:0;transition:all .3s;z-index:99}
 .sync-indicator.show{transform:translateY(0);opacity:1}
-.sync-dot{width:7px;height:7px;border-radius:50%}
+.sync-dot{width:6px;height:6px;border-radius:50%}
 .sync-dot.syncing{background:var(--gold);animation:pulse 1s infinite}
 .sync-dot.ok{background:#4caf50}
 .sync-dot.err{background:#e53935}
-.toast{position:fixed;bottom:2rem;right:2rem;background:var(--maroon-deep);color:var(--white);padding:14px 20px;border-radius:10px;font-size:14px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow-lg);transform:translateY(100px);opacity:0;transition:all .3s;z-index:999;max-width:360px}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--maroon-deep);color:var(--white);padding:12px 18px;border-radius:9px;font-size:13px;display:flex;align-items:center;gap:9px;box-shadow:var(--shadow-lg);transform:translateY(100px);opacity:0;transition:all .3s;z-index:999;max-width:320px}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.success{border-left:4px solid #4caf50}
 .toast.error{border-left:4px solid #e53935}
 .toast.info{border-left:4px solid var(--gold)}
-@media(max-width:700px){
-  .home-panel{grid-template-columns:1fr}
-  .form-row,.form-row-2,.peserta-grid{grid-template-columns:1fr}
-  .tpl-url-row{grid-template-columns:1fr}
-  nav{padding:0 1rem}
-  .form-section,.content-section{padding:1rem}
-  .hero{padding:2rem 1rem 1.5rem}
-  .hero h1{font-size:1.8rem}
-  .gen-btns{flex-wrap:wrap}
+
+/* ══════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+══════════════════════════════════════════ */
+
+/* ── Tablet landscape & smaller desktop (≤900px) ── */
+@media(max-width:900px){
+  .home-panel{grid-template-columns:1fr 1fr;padding:1.25rem}
+  .form-row{grid-template-columns:1fr 1fr}
+}
+
+/* ── Tablet portrait (≤768px) ── */
+@media(max-width:768px){
+  /* Nav: sembunyikan menu biasa, tampilkan hamburger */
+  .nav-menu{display:none}
+  .nav-toggle{display:flex;align-items:center;justify-content:center}
+
+  .hero{padding:2rem 1rem 2rem}
+  .hero h1{font-size:2rem}
+  .hero p{font-size:12px}
+  .hero-stats{gap:1.1rem;margin-top:1.1rem}
+  .hero-stat-val{font-size:1.4rem}
+
+  .home-panel{grid-template-columns:1fr;padding:1rem}
+  /* Di tablet, kalender penuh lebar, grafik di bawahnya */
+
+  .form-section{padding:0 1rem 1.5rem}
+  .content-section{padding:1rem}
+  .form-body{padding:1.1rem}
+  .form-row{grid-template-columns:1fr 1fr}
+  .form-row-2{grid-template-columns:1fr 1fr}
+
   .stat-row{grid-template-columns:1fr 1fr}
+
+  .page-header{padding:1.5rem 1rem 1.25rem}
+  .page-header h1{font-size:1.5rem}
+
+  .arsip-item{padding:.85rem 1rem}
+  .arsip-title{font-size:12px}
+
+  .save-bar{padding:.75rem 1rem}
+
+  .modal{max-width:100%;margin:0;border-radius:var(--r) var(--r) 0 0;max-height:95vh}
+  .modal-overlay{align-items:flex-end;padding:0}
+  .modal-overlay.open .modal{transform:translateY(0)}
+
+  .tpl-url-row{grid-template-columns:1fr 1fr}
+  .tpl-url-row span:first-child{display:none}
+
+  .toast{right:.75rem;left:.75rem;max-width:none;font-size:12px}
+  .sync-indicator{left:.75rem;bottom:.75rem;font-size:10px;padding:6px 10px}
+}
+
+/* ── Mobile (≤480px) ── */
+@media(max-width:480px){
+  nav{padding:0 .9rem;height:56px}
+  .nav-title span:last-child{display:none}
+  .nav-logo{width:32px;height:32px}
+  .nav-logo-fallback{width:32px;height:32px;font-size:12px}
+
+  /* Kalender: grid hari lebih kecil */
+  .cal-grid{padding:.4rem}
+  .cal-day{font-size:10px}
+  .cal-day-name{font-size:8px;padding:4px 0}
+  .cal-legend{gap:7px;padding:.3rem .7rem .55rem}
+  .cal-legend-item{font-size:9px}
+
+  .hero{padding:1.5rem .9rem 1.75rem;min-height:unset}
+  .hero h1{font-size:1.65rem;line-height:1.15}
+  .hero h1 br{display:none}
+  .hero p{display:none} /* Sembunyikan deskripsi panjang di layar kecil */
+  .hero-stats{gap:.9rem;margin-top:1rem}
+  .hero-stat-val{font-size:1.25rem}
+  .hero-stat-lbl{font-size:9px}
+  .hero-stat-sep{display:none}
+  /* Tata ulang stats jadi 3 kolom */
+  .hero-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
+  .hero-stat{text-align:center}
+
+  .home-panel{padding:.75rem}
+  .stat-row{grid-template-columns:1fr 1fr}
+  .stat-value{font-size:1.4rem}
+
+  .form-section{padding:0 .75rem 1.25rem}
+  .content-section{padding:.75rem}
+  .form-body{padding:.9rem}
+  .form-row{grid-template-columns:1fr}   /* 1 kolom di mobile */
+  .form-row-2{grid-template-columns:1fr}
+  .form-card-header{padding:.9rem 1rem}
+  .form-card-header h2{font-size:.9rem}
+
+  /* Peserta: 1 kolom di mobile */
+  .peserta-grid{grid-template-columns:1fr}
+  .peserta-item{padding:8px 9px}
+  .peserta-nama{font-size:11px}
+
+  /* Nomor bar: bungkus */
+  .nomor-status-bar{flex-wrap:wrap;padding:8px 11px}
+  .nomor-status-val{width:100%;flex:none}
+
+  .agenda-tabs{gap:4px}
+  .agenda-chip{font-size:10px;padding:4px 10px}
+
+  .generate-area{padding:1rem;gap:.75rem}
+  .doc-preview{gap:4px}
+  .doc-badge{font-size:10px;padding:3px 8px}
+  .doc-badge::before{font-size:11px}
+  .gen-btns{width:100%;justify-content:flex-end}
+  .btn-generate{flex:1;justify-content:center;padding:10px 14px;font-size:12px}
+  .btn-awan{padding:10px 14px;font-size:12px}
+
+  .arsip-item{padding:.75rem .9rem;gap:.65rem}
+  .arsip-date-box{width:42px;height:42px}
+  .arsip-date-box .day{font-size:14px}
+  .arsip-meta{gap:6px;font-size:10px}
+  /* Sembunyikan nomor surat di mobile agar tidak overflow */
+  .arsip-meta span:last-child{display:none}
+
+  .page-header{padding:1.25rem .9rem 1rem}
+  .page-header h1{font-size:1.3rem}
+
+  .search-bar{gap:6px}
+  .search-bar input{font-size:12px;padding:8px 11px}
+  .search-bar select{font-size:11px;padding:8px 10px}
+
+  /* Peserta manage: input jabatan wrap */
+  .peserta-row{flex-wrap:wrap;padding:8px 10px}
+  .peserta-row input[style*="max-width"]{max-width:100%!important;width:100%}
+
+  .save-bar{padding:.65rem .75rem;gap:6px}
+  .btn-primary{font-size:11px;padding:8px 16px}
+  .btn-sm{font-size:10px;padding:5px 10px}
+
+  /* Setting: url row jadi 1 kolom */
+  .tpl-url-row{grid-template-columns:1fr}
+  .gas-url-input{flex-direction:column}
+  .gas-url-input input,.gas-url-input button{width:100%}
+
+  /* Modal jadi full bottom sheet */
+  .modal{border-radius:14px 14px 0 0}
+  .modal-body{padding:1rem}
+  .detail-row{flex-direction:column;gap:2px}
+  .detail-label{min-width:unset}
+
+  /* Tentang */
+  .about-hero{padding:1.75rem .9rem 1.5rem}
+  .about-name{font-size:1.35rem}
+  .about-card{padding:1.1rem}
+  .about-row{flex-direction:column;gap:2px}
+  .about-row .lbl{min-width:unset;color:var(--text-muted);font-size:11px}
+  .about-row .val{font-size:12px}
+
+  /* Toast full width */
+  .toast{right:.5rem;left:.5rem;bottom:.5rem;font-size:11px;padding:10px 13px}
+  .sync-indicator{display:none} /* terlalu sempit, hide */
+
+  /* Progress bar wrap */
+  .progress-bar{gap:3px;padding:0 .9rem .75rem}
+  .prog-step{font-size:10px;padding:4px 8px}
+  .prog-arrow{font-size:10px}
+}
+
+/* ── Very small (≤360px) ── */
+@media(max-width:360px){
+  .hero h1{font-size:1.4rem}
+  .hero-stats{grid-template-columns:1fr 1fr}
+  .hero-stat:last-child{display:none}
+  .stat-row{grid-template-columns:1fr}
+  .stat-value{font-size:1.5rem}
+}
+
+/* ══ TOUCH: Bigger tap targets ══ */
+@media(hover:none) and (pointer:coarse){
+  .cal-day{min-height:32px}
+  .btn-sm,.btn-primary,.btn-generate,.btn-awan,.btn-upload-all{min-height:40px}
+  .nomor-refresh-btn{min-height:36px;min-width:36px}
+  .nav-toggle{min-height:44px;min-width:44px}
+  .peserta-item{min-height:44px}
+  .faq-q{min-height:44px}
+  .agenda-chip{min-height:36px;display:flex;align-items:center}
 }
 </style>
 </head>
 <body>
+
 <nav>
   <div class="nav-brand">
     <div class="nav-logo">
@@ -349,7 +555,18 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
     <button class="nav-btn" onclick="showPage('pengaturan',this)">⚙ Pengaturan</button>
     <button class="nav-btn" onclick="showPage('tentang',this)">ℹ Tentang</button>
   </div>
+  <!-- Hamburger untuk mobile -->
+  <button class="nav-toggle" id="nav-toggle" aria-label="Menu" onclick="toggleDrawer()">☰</button>
 </nav>
+
+<!-- Mobile drawer -->
+<div class="nav-drawer" id="nav-drawer">
+  <button class="nav-btn active" onclick="showPage('generate',this);closeDrawer()">✦ Generate Dokumen</button>
+  <button class="nav-btn" onclick="showPage('arsip',this);closeDrawer()">📁 Arsip Rapat</button>
+  <button class="nav-btn" onclick="showPage('peserta',this);closeDrawer()">👥 Peserta</button>
+  <button class="nav-btn" onclick="showPage('pengaturan',this);closeDrawer()">⚙ Pengaturan</button>
+  <button class="nav-btn" onclick="showPage('tentang',this);closeDrawer()">ℹ Tentang</button>
+</div>
 
 <!-- PAGE: GENERATE -->
 <div id="page-generate" class="page active">
@@ -362,22 +579,12 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
       <h1>Generate Dokumen<br><em>Rapat KIP</em></h1>
       <p>Template Word diambil dari repo GitHub, data diinject, 3 dokumen resmi siap diunduh sebagai ZIP.</p>
       <div class="hero-stats">
-        <div class="hero-stat">
-          <div class="hero-stat-val" id="hs-total">0</div>
-          <div class="hero-stat-lbl">Total Rapat</div>
-        </div>
+        <div class="hero-stat"><div class="hero-stat-val" id="hs-total">0</div><div class="hero-stat-lbl">Total Rapat</div></div>
         <div class="hero-stat-sep"></div>
-        <div class="hero-stat">
-          <div class="hero-stat-val" id="hs-tahun">0</div>
-          <div class="hero-stat-lbl">Tahun Ini</div>
-        </div>
+        <div class="hero-stat"><div class="hero-stat-val" id="hs-tahun">0</div><div class="hero-stat-lbl">Tahun Ini</div></div>
         <div class="hero-stat-sep"></div>
-        <div class="hero-stat">
-          <div class="hero-stat-val" id="hs-nomor">—</div>
-          <div class="hero-stat-lbl">Nomor Berikutnya</div>
-        </div>
+        <div class="hero-stat"><div class="hero-stat-val" id="hs-nomor">—</div><div class="hero-stat-lbl">Nomor Berikutnya</div></div>
       </div>
-      <!-- ★ SYNC STATUS DI HERO ★ -->
       <div class="hero-sync-badge">
         <div class="hero-sync-dot" id="hero-sync-dot"></div>
         <span id="hero-sync-text">Memuat data cloud...</span>
@@ -397,16 +604,16 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
       <div class="cal-grid" id="cal-grid-inline"></div>
       <div class="cal-legend">
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--maroon)"></div>Hari ini</div>
-        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--gold)"></div>Ada/pernah rapat</div>
-        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#e53935"></div>Konflik ruangan</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--gold)"></div>Ada rapat</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#e53935"></div>Konflik</div>
       </div>
     </div>
     <div class="stats-panel">
       <div class="stat-row">
         <div class="stat-card"><div class="stat-label">Total Rapat</div><div class="stat-value" id="dash-total">0</div><div class="stat-sub">Sepanjang waktu</div></div>
         <div class="stat-card"><div class="stat-label">Tahun Ini</div><div class="stat-value" id="dash-tahun">0</div><div class="stat-sub" id="dash-tahun-lbl">Rapat 2026</div></div>
-        <div class="stat-card"><div class="stat-label">Rata-rata Peserta</div><div class="stat-value" id="dash-avg">0</div><div class="stat-sub">Per rapat</div></div>
-        <div class="stat-card"><div class="stat-label">Dokumen Dibuat</div><div class="stat-value" id="dash-dok">0</div><div class="stat-sub">Und+Absen+Risalah</div></div>
+        <div class="stat-card"><div class="stat-label">Avg Peserta</div><div class="stat-value" id="dash-avg">0</div><div class="stat-sub">Per rapat</div></div>
+        <div class="stat-card"><div class="stat-label">Dokumen</div><div class="stat-value" id="dash-dok">0</div><div class="stat-sub">Und+Absen+Risalah</div></div>
       </div>
       <div class="chart-card">
         <div class="chart-title">Rapat per Bulan — <span id="chart-tahun-lbl"></span></div>
@@ -421,7 +628,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
       <div class="form-body">
         <div class="nomor-status-bar">
           <div class="nomor-dot" id="nomor-dot"></div>
-          <span style="font-weight:500;color:var(--text-muted);font-size:12px">Nomor berikutnya:</span>
+          <span style="font-weight:500;color:var(--text-muted);font-size:11px">Nomor berikutnya:</span>
           <span class="nomor-status-val" id="nomor-preview">— (isi URL Apps Script di Pengaturan)</span>
           <button class="nomor-refresh-btn" onclick="fetchNomor()">↻ Refresh</button>
         </div>
@@ -430,19 +637,19 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
           <div class="field"><label>Pukul Mulai</label><input type="time" id="inp-jam" value="09:00" onchange="checkBooking()"></div>
           <div class="field"><label>Tempat / Ruangan</label><input type="text" id="inp-tempat" value="Aula Kantor KIP Kabupaten Pidie Jaya" onchange="checkBooking()"></div>
         </div>
-        <div id="booking-warn" style="display:none;background:rgba(229,57,53,.08);border:1px solid rgba(229,57,53,.25);border-radius:8px;padding:10px 14px;font-size:12px;color:#c62828;margin-bottom:1rem">
+        <div id="booking-warn" style="display:none;background:rgba(229,57,53,.08);border:1px solid rgba(229,57,53,.25);border-radius:7px;padding:9px 12px;font-size:11px;color:#c62828;margin-bottom:1rem">
           ⚠ Ruangan ini sudah dipakai pada tanggal & jam yang sama!
         </div>
         <div class="section-divider"><span>Agenda Rapat</span></div>
         <div class="agenda-tabs">
           <div class="agenda-chip active" onclick="pilihAgenda(this,'Rapat Pleno Rutin, Evaluasi Pelaksanaan Kegiatan Mingguan dan Hal-hal lain yang dianggap perlu.')">Pleno Rutin</div>
           <div class="agenda-chip" onclick="pilihAgenda(this,'Evaluasi Pelaksanaan Kegiatan Bulanan dan Hal-hal lain yang dianggap perlu.')">Evaluasi Bulanan</div>
-          <div class="agenda-chip" onclick="pilihAgenda(this,'Rapat Koordinasi Internal KIP Kabupaten Pidie Jaya.')">Koordinasi Internal</div>
+          <div class="agenda-chip" onclick="pilihAgenda(this,'Rapat Koordinasi Internal KIP Kabupaten Pidie Jaya.')">Koordinasi</div>
           <div class="agenda-chip" onclick="pilihAgenda(this,'')">✏ Ketik Sendiri</div>
         </div>
         <div class="field"><textarea id="inp-agenda" rows="2">Rapat Pleno Rutin, Evaluasi Pelaksanaan Kegiatan Mingguan dan Hal-hal lain yang dianggap perlu.</textarea></div>
         <div class="section-divider"><span>Peserta yang Diundang</span></div>
-        <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Centang peserta yang hadir.</p>
+        <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Centang peserta yang hadir.</p>
         <div class="peserta-grid" id="peserta-gen-grid"></div>
       </div>
       <div class="progress-bar" id="progress-bar">
@@ -453,12 +660,12 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
       </div>
       <div class="generate-area">
         <div class="doc-preview">
-          <span class="doc-badge undangan">Surat Undangan</span>
-          <span class="doc-badge absen">Daftar Hadir</span>
-          <span class="doc-badge risalah">Risalah/Notulen</span>
+          <span class="doc-badge undangan">Undangan</span>
+          <span class="doc-badge absen">Absen</span>
+          <span class="doc-badge risalah">Risalah</span>
         </div>
         <div class="gen-btns">
-          <button class="btn-awan" id="btn-awan" onclick="simpanKeAwan()">☁ Simpan ke Awan</button>
+          <button class="btn-awan" id="btn-awan" onclick="simpanKeAwan()">☁ Awan</button>
           <button class="btn-generate" onclick="generateDokumen()" id="btn-gen">
             <div class="spinner" id="spinner"></div>
             <span class="gold-star">✦</span>
@@ -474,7 +681,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 <div id="page-arsip" class="page">
   <div class="page-header"><div class="page-header-inner">
     <h1>Arsip Rapat</h1>
-    <p>Data disimpan di Google Sheets — aman meski browser di-clear atau dibuka di perangkat lain.</p>
+    <p>Tersimpan di Google Sheets — aman & multi-device</p>
   </div></div>
   <div class="content-section">
     <div id="cloud-status-banner" class="cloud-banner loading" style="display:none">
@@ -490,8 +697,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
         <option>September</option><option>Oktober</option><option>November</option><option>Desember</option>
       </select>
       <select id="filter-tahun" onchange="renderArsip()">
-        <option value="">Semua Tahun</option>
-        <option>2026</option><option>2025</option>
+        <option value="">Semua Tahun</option><option>2026</option><option>2025</option>
       </select>
       <button class="btn-sm" onclick="refreshArsipCloud()">☁ Sync</button>
     </div>
@@ -502,7 +708,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 <!-- PAGE: PESERTA -->
 <div id="page-peserta" class="page">
   <div class="page-header"><div class="page-header-inner">
-    <h1>Manajemen Peserta</h1><p>Daftar peserta default untuk setiap generate dokumen</p>
+    <h1>Manajemen Peserta</h1><p>Daftar peserta default untuk setiap generate</p>
   </div></div>
   <div class="content-section">
     <div class="peserta-manage-list" id="peserta-manage-list"></div>
@@ -522,15 +728,15 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
       <div class="setting-group">
         <h3>⚡ Koneksi Google Apps Script</h3>
         <div class="gas-banner">
-          <div style="font-size:16px;flex-shrink:0">☁</div>
-          <div>
+          <div style="font-size:15px;flex-shrink:0">☁</div>
+          <div style="flex:1;min-width:0">
             Tempel URL deployment GAS di sini.<br>
-            <em style="font-size:11px;color:#1976d2">Deploy di <code>script.google.com</code> → Execute as: Me | Access: Anyone</em>
-            <div class="gas-url-input" style="margin-top:8px">
+            <em style="font-size:10px;color:#1976d2">Deploy di <code>script.google.com</code> → Execute as: Me | Access: Anyone</em>
+            <div class="gas-url-input" style="margin-top:7px">
               <input type="text" id="set-gas-url" placeholder="https://script.google.com/macros/s/.../exec">
               <button onclick="testGasUrl()">Test Koneksi</button>
             </div>
-            <div id="gas-status" style="margin-top:6px;font-size:11px;color:#888"></div>
+            <div id="gas-status" style="margin-top:5px;font-size:11px;color:#888"></div>
           </div>
         </div>
       </div>
@@ -543,19 +749,19 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
             <button class="tpl-mode-tab" onclick="setTplMode('manual',this)">🔗 URL Manual</button>
           </div>
           <div class="tpl-mode-panel active" id="tpl-panel-auto">
-            <div class="auto-info"><div style="font-size:20px;flex-shrink:0">✅</div>
+            <div class="auto-info"><div style="font-size:18px;flex-shrink:0">✅</div>
               <div class="auto-info-text">Fetch dari <strong>folder <code>templates/</code></strong> di repo yang sama.<br>
               <code>UND_template.docx</code> · <code>ABSEN_template.docx</code> · <code>RISALAH_template.docx</code></div>
             </div>
             <div class="tpl-status-row"><span class="tpl-status-label">📄 Undangan</span><span class="tpl-status-path">./templates/UND_template.docx</span><span class="tpl-badge idle" id="st-auto-und" onclick="testAutoUrl('und')">Test</span></div>
             <div class="tpl-status-row"><span class="tpl-status-label">📋 Absen</span><span class="tpl-status-path">./templates/ABSEN_template.docx</span><span class="tpl-badge idle" id="st-auto-abs" onclick="testAutoUrl('abs')">Test</span></div>
             <div class="tpl-status-row"><span class="tpl-status-label">📝 Risalah</span><span class="tpl-status-path">./templates/RISALAH_template.docx</span><span class="tpl-badge idle" id="st-auto-ris" onclick="testAutoUrl('ris')">Test</span></div>
-            <button class="tpl-test-btn" style="width:100%;margin-top:10px;padding:10px;border-radius:8px" onclick="testSemuaAuto()">🔍 Test Semua Template</button>
+            <button class="tpl-test-btn" style="width:100%;margin-top:9px;padding:9px;border-radius:7px" onclick="testSemuaAuto()">🔍 Test Semua Template</button>
           </div>
           <div class="tpl-mode-panel" id="tpl-panel-manual">
-            <div class="tpl-url-row"><span style="font-size:12px;font-weight:600;color:var(--text-mid)">📄 Undangan</span><input type="text" id="url-und" placeholder="https://…/UND_template.docx"><div style="display:flex;gap:6px;align-items:center"><span class="tpl-badge idle" id="badge-und">—</span><button class="tpl-test-btn" onclick="testManualUrl('und')">Test</button></div></div>
-            <div class="tpl-url-row"><span style="font-size:12px;font-weight:600;color:var(--text-mid)">📋 Absen</span><input type="text" id="url-abs" placeholder="https://…/ABSEN_template.docx"><div style="display:flex;gap:6px;align-items:center"><span class="tpl-badge idle" id="badge-abs">—</span><button class="tpl-test-btn" onclick="testManualUrl('abs')">Test</button></div></div>
-            <div class="tpl-url-row"><span style="font-size:12px;font-weight:600;color:var(--text-mid)">📝 Risalah</span><input type="text" id="url-ris" placeholder="https://…/RISALAH_template.docx"><div style="display:flex;gap:6px;align-items:center"><span class="tpl-badge idle" id="badge-ris">—</span><button class="tpl-test-btn" onclick="testManualUrl('ris')">Test</button></div></div>
+            <div class="tpl-url-row"><span style="font-size:11px;font-weight:600;color:var(--text-mid)">📄 Undangan</span><input type="text" id="url-und" placeholder="https://…/UND_template.docx"><div style="display:flex;gap:5px;align-items:center"><span class="tpl-badge idle" id="badge-und">—</span><button class="tpl-test-btn" onclick="testManualUrl('und')">Test</button></div></div>
+            <div class="tpl-url-row"><span style="font-size:11px;font-weight:600;color:var(--text-mid)">📋 Absen</span><input type="text" id="url-abs" placeholder="https://…/ABSEN_template.docx"><div style="display:flex;gap:5px;align-items:center"><span class="tpl-badge idle" id="badge-abs">—</span><button class="tpl-test-btn" onclick="testManualUrl('abs')">Test</button></div></div>
+            <div class="tpl-url-row"><span style="font-size:11px;font-weight:600;color:var(--text-mid)">📝 Risalah</span><input type="text" id="url-ris" placeholder="https://…/RISALAH_template.docx"><div style="display:flex;gap:5px;align-items:center"><span class="tpl-badge idle" id="badge-ris">—</span><button class="tpl-test-btn" onclick="testManualUrl('ris')">Test</button></div></div>
             <div class="tpl-hint">⚠ Gunakan URL <strong>github.io</strong>. Repo harus <strong>Public</strong> dan GitHub Pages aktif.</div>
           </div>
           <div class="ph-section">
@@ -567,7 +773,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
               <span class="ph-chip">[[kota]]</span><span class="ph-chip">[[kotaTanggal]]</span><span class="ph-chip">[[tahun]]</span>
               <span class="ph-chip">[[jumlahPeserta]]</span><span class="ph-chip new">[[tgl_generet]] ✦</span>
             </div>
-            <div class="ph-section-label" style="margin-top:8px">Loop peserta:</div>
+            <div class="ph-section-label" style="margin-top:7px">Loop peserta:</div>
             <div class="placeholder-chips">
               <span class="ph-chip ph-loop">{#peserta}</span><span class="ph-chip">[[no]]</span><span class="ph-chip">[[nama]]</span><span class="ph-chip">[[jabatan]]</span><span class="ph-chip ph-loop">{/peserta}</span>
             </div>
@@ -587,12 +793,12 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
         <h3>🔢 Format Nomor Surat</h3>
         <div class="form-row-2">
           <div class="field"><label>Format</label><input type="text" id="set-nomor-fmt"></div>
-          <div class="field"><label>Nomor Urut Terakhir (lokal)</label><input type="number" id="set-nomor-last" min="0"></div>
+          <div class="field"><label>Nomor Urut Terakhir</label><input type="number" id="set-nomor-last" min="0"></div>
         </div>
-        <p style="font-size:12px;color:var(--text-muted);margin-top:6px">Placeholder: <code style="background:rgba(122,16,32,.07);padding:1px 6px;border-radius:4px;font-family:monospace">[NO]</code> <code style="background:rgba(122,16,32,.07);padding:1px 6px;border-radius:4px;font-family:monospace">[BULAN]</code> <code style="background:rgba(122,16,32,.07);padding:1px 6px;border-radius:4px;font-family:monospace">[TAHUN]</code></p>
+        <p style="font-size:11px;color:var(--text-muted);margin-top:5px">Placeholder: <code style="background:rgba(122,16,32,.07);padding:1px 5px;border-radius:3px;font-family:monospace">[NO]</code> <code style="background:rgba(122,16,32,.07);padding:1px 5px;border-radius:3px;font-family:monospace">[BULAN]</code> <code style="background:rgba(122,16,32,.07);padding:1px 5px;border-radius:3px;font-family:monospace">[TAHUN]</code></p>
       </div>
       <div style="display:flex;justify-content:flex-end">
-        <button class="btn-primary" onclick="simpanPengaturan()">💾 Simpan Semua Pengaturan</button>
+        <button class="btn-primary" onclick="simpanPengaturan()">💾 Simpan Pengaturan</button>
       </div>
     </div></div>
   </div>
@@ -603,7 +809,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
   <div class="about-hero">
     <div class="hero-inner">
       <div><img src="https://drive.google.com/thumbnail?id=1q9StOGlf7EQqrHh8Y_B5j4avQVbUtLBH&sz=w160" alt="KIP Logo"
-           style="width:80px;height:80px;border-radius:16px;object-fit:cover;margin-bottom:1rem;box-shadow:0 4px 16px rgba(0,0,0,.3)"
+           style="width:70px;height:70px;border-radius:14px;object-fit:cover;margin-bottom:.85rem;box-shadow:0 4px 16px rgba(0,0,0,.3)"
            onerror="this.outerHTML='<div class=about-logo-fallback>KIP</div>'"></div>
       <div class="about-name">KIP Kabupaten Pidie Jaya</div>
       <div class="about-sub">Komisi Independen Pemilihan Kabupaten Pidie Jaya, Aceh</div>
@@ -620,9 +826,9 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
     <div class="about-card">
       <h3>💻 Tentang SiRapat</h3>
       <div class="about-row"><div class="lbl">Nama Sistem</div><div class="val">SiRapat — Sistem Rapat Digital KIP Pidie Jaya</div></div>
-      <div class="about-row"><div class="lbl">Fungsi Utama</div><div class="val">Generate otomatis 3 dokumen rapat (Undangan, Absen, Risalah) dari template Word</div></div>
-      <div class="about-row"><div class="lbl">Teknologi</div><div class="val">HTML5 + JavaScript · docxtemplater · Google Apps Script · Google Drive</div></div>
-      <div class="about-row"><div class="lbl">Penyimpanan</div><div class="val">Google Sheets (permanen, multi-device) + localStorage (cache lokal)</div></div>
+      <div class="about-row"><div class="lbl">Fungsi Utama</div><div class="val">Generate otomatis 3 dokumen rapat dari template Word</div></div>
+      <div class="about-row"><div class="lbl">Teknologi</div><div class="val">HTML5 · docxtemplater · Google Apps Script · Drive</div></div>
+      <div class="about-row"><div class="lbl">Penyimpanan</div><div class="val">Google Sheets (permanen) + localStorage (cache)</div></div>
     </div>
     <div class="about-card">
       <h3>❓ FAQ</h3>
@@ -656,13 +862,29 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
     <div class="modal-body" id="modal-body"></div>
   </div>
 </div>
+
 <script>
-// ════════════════════════════════════════════════
-//  HERO CANVAS
-// ════════════════════════════════════════════════
+// ════ HAMBURGER NAV ════
+function toggleDrawer(){
+  const d=document.getElementById('nav-drawer');
+  const t=document.getElementById('nav-toggle');
+  const open=d.classList.toggle('open');
+  t.textContent=open?'✕':'☰';
+}
+function closeDrawer(){
+  document.getElementById('nav-drawer').classList.remove('open');
+  document.getElementById('nav-toggle').textContent='☰';
+}
+document.addEventListener('click',function(e){
+  const d=document.getElementById('nav-drawer');
+  const t=document.getElementById('nav-toggle');
+  if(d.classList.contains('open')&&!d.contains(e.target)&&!t.contains(e.target)){closeDrawer();}
+});
+
+// ════ HERO CANVAS ════
 (function(){
-  const canvas=document.getElementById('hero-canvas'); if(!canvas) return;
-  const ctx=canvas.getContext('2d'); let W,H,particles=[];
+  const canvas=document.getElementById('hero-canvas');if(!canvas) return;
+  const ctx=canvas.getContext('2d');let W,H,particles=[];
   function resize(){const h=canvas.parentElement;W=canvas.width=h.offsetWidth;H=canvas.height=h.offsetHeight;}
   function mk(){return{x:Math.random()*W,y:H+10,r:Math.random()*2.5+.5,speed:Math.random()*.6+.3,opacity:Math.random()*.6+.2,drift:(Math.random()-.5)*.4,life:0,maxLife:Math.random()*160+80};}
   function draw(){
@@ -671,12 +893,10 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
     particles=particles.filter(p=>{p.y-=p.speed;p.x+=p.drift;p.life++;const t=p.life/p.maxLife;const a=t<.2?t/.2:t>.8?(1-t)/.2:1;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(201,147,42,${p.opacity*a})`;ctx.fill();return p.life<p.maxLife&&p.y>-10;});
     requestAnimationFrame(draw);
   }
-  resize(); window.addEventListener('resize',resize); draw();
+  resize();window.addEventListener('resize',resize);draw();
 })();
 
-// ════════════════════════════════════════════════
-//  STATE
-// ════════════════════════════════════════════════
+// ════ STATE ════
 const DEFAULT_PESERTA=[
   {nama:'ISKANDAR, S.Sos.',jabatan:'Ketua'},
   {nama:'DARKASYI ABDUL HAMID, S.Pd.',jabatan:'Anggota'},
@@ -693,8 +913,8 @@ const DEFAULT_PESERTA=[
   {nama:'FAZIL BASRI, S.Kom.',jabatan:'Notulen'},
 ];
 let pesertaList=JSON.parse(localStorage.getItem('sirapat_peserta')||'null')||DEFAULT_PESERTA.map(p=>({...p}));
-let arsipList  =JSON.parse(localStorage.getItem('sirapat_arsip')||'[]');
-let settings   =JSON.parse(localStorage.getItem('sirapat_settings')||'null')||{
+let arsipList=JSON.parse(localStorage.getItem('sirapat_arsip')||'[]');
+let settings=JSON.parse(localStorage.getItem('sirapat_settings')||'null')||{
   instansi:'KIP Kabupaten Pidie Jaya',kota:'Meureudu',ketua:'Iskandar',sekretaris:'Iswandi',
   nomorFmt:'[NO]/PK.01-Und/1118/[BULAN]/[TAHUN]',nomorLast:0,
   gasUrl:'',urlUnd:'',urlAbs:'',urlRis:'',tplMode:'auto'
@@ -709,81 +929,32 @@ const today=new Date();
 let lastGenId=null;
 let uploadFiles={};
 
-// ════════════════════════════════════════════════
-//  HELPERS
-// ════════════════════════════════════════════════
 function getGasUrl(){return(settings.gasUrl||'').trim();}
-function buildNomor(no,tgl){
-  return settings.nomorFmt.replace('[NO]',String(no))
-    .replace('[BULAN]',tgl instanceof Date?tgl.getMonth()+1:no)
-    .replace('[TAHUN]',tgl instanceof Date?tgl.getFullYear():today.getFullYear());
-}
+function buildNomor(no,tgl){return settings.nomorFmt.replace('[NO]',String(no)).replace('[BULAN]',tgl instanceof Date?tgl.getMonth()+1:no).replace('[TAHUN]',tgl instanceof Date?tgl.getFullYear():today.getFullYear());}
 function tglGeneret(){return`${today.getDate()} ${BULAN_ID[today.getMonth()]} ${today.getFullYear()}`;}
 function tglFull(d){return`${d.getDate()} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;}
 function saveLocal(){localStorage.setItem('sirapat_arsip',JSON.stringify(arsipList));}
 
-// ════════════════════════════════════════════════
-//  ★ SANITASI DATA DARI GAS SHEETS ★
-//  Bersihkan format tanggal/jam ISO yang datang dari Sheets
-// ════════════════════════════════════════════════
 function sanitasiArsip(list){
   return list.map(r=>{
-    // FIX tanggal: "2026-05-23T17:00:00.000Z" → "2026-05-23"
-    if(r.tanggal && String(r.tanggal).includes('T')){
-      r.tanggal=String(r.tanggal).split('T')[0];
-    }
-
-    // FIX jam: GAS kadang simpan time sebagai "1899-12-30T01:52:48.000Z"
-    // 1899-12-30 adalah epoch GAS untuk nilai time-only
-    if(r.jam && String(r.jam).includes('T')){
-      try{
-        const d=new Date(r.jam);
-        r.jam=String(d.getUTCHours()).padStart(2,'0')+':'+String(d.getUTCMinutes()).padStart(2,'0');
-      }catch(e){r.jam='00:00';}
-    }
-    // Potong jadi HH:MM kalau ada detik "09:00:00"
-    if(r.jam && String(r.jam).length>5 && String(r.jam).includes(':')){
-      r.jam=String(r.jam).substring(0,5);
-    }
-    // Buang suffix " WIB..." kalau ikut tersimpan
-    if(r.jam && String(r.jam).includes(' ')){
-      r.jam=String(r.jam).split(' ')[0];
-    }
-
-    // FIX tglGeneret: "2026-05-23T17:00:00.000Z" → "23 Mei 2026"
-    if(r.tglGeneret && String(r.tglGeneret).includes('T')){
-      try{
-        const d=new Date(r.tglGeneret);
-        r.tglGeneret=d.getUTCDate()+' '+BULAN_ID[d.getUTCMonth()]+' '+d.getUTCFullYear();
-      }catch(e){}
-    }
-    // Format YYYY-MM-DD biasa → Indonesia
-    if(r.tglGeneret && /^\d{4}-\d{2}-\d{2}$/.test(String(r.tglGeneret))){
-      try{
-        const p=r.tglGeneret.split('-');
-        r.tglGeneret=parseInt(p[2])+' '+BULAN_ID[parseInt(p[1])-1]+' '+p[0];
-      }catch(e){}
-    }
-
+    if(r.tanggal&&String(r.tanggal).includes('T')) r.tanggal=String(r.tanggal).split('T')[0];
+    if(r.jam&&String(r.jam).includes('T')){try{const d=new Date(r.jam);r.jam=String(d.getUTCHours()).padStart(2,'0')+':'+String(d.getUTCMinutes()).padStart(2,'0');}catch(e){r.jam='00:00';}}
+    if(r.jam&&String(r.jam).length>5&&String(r.jam).includes(':')) r.jam=String(r.jam).substring(0,5);
+    if(r.jam&&String(r.jam).includes(' ')) r.jam=String(r.jam).split(' ')[0];
+    if(r.tglGeneret&&String(r.tglGeneret).includes('T')){try{const d=new Date(r.tglGeneret);r.tglGeneret=d.getUTCDate()+' '+BULAN_ID[d.getUTCMonth()]+' '+d.getUTCFullYear();}catch(e){}}
+    if(r.tglGeneret&&/^\d{4}-\d{2}-\d{2}$/.test(String(r.tglGeneret))){try{const p=r.tglGeneret.split('-');r.tglGeneret=parseInt(p[2])+' '+BULAN_ID[parseInt(p[1])-1]+' '+p[0];}catch(e){}}
     return r;
   });
 }
 
-// ════════════════════════════════════════════════
-//  HERO STATS + DASHBOARD PANEL
-// ════════════════════════════════════════════════
 function updateHeroStats(){
   const total=arsipList.length;
   const ti=arsipList.filter(r=>new Date(r.tanggal).getFullYear()===today.getFullYear()).length;
-  const nextNo=settings.nomorLast+1;
   const ht=document.getElementById('hs-total');if(ht) animCount(ht,total);
   const hy=document.getElementById('hs-tahun');if(hy) animCount(hy,ti);
-  const hn=document.getElementById('hs-nomor');if(hn) hn.textContent='#'+nextNo;
+  const hn=document.getElementById('hs-nomor');if(hn) hn.textContent='#'+(settings.nomorLast+1);
 }
-function animCount(el,target){
-  let cur=0;const step=Math.max(1,Math.floor(target/20));
-  const t=setInterval(()=>{cur=Math.min(cur+step,target);el.textContent=cur;if(cur>=target)clearInterval(t);},40);
-}
+function animCount(el,target){let cur=0;const step=Math.max(1,Math.floor(target/20));const t=setInterval(()=>{cur=Math.min(cur+step,target);el.textContent=cur;if(cur>=target)clearInterval(t);},40);}
 function renderDashHome(){
   const total=arsipList.length;
   const ti=arsipList.filter(r=>new Date(r.tanggal).getFullYear()===today.getFullYear()).length;
@@ -801,9 +972,6 @@ function renderDashHome(){
   if(bc) bc.innerHTML=months.map((n,i)=>`<div class="bar-group">${n>0?`<div class="bar-val">${n}</div>`:''}<div class="bar" style="height:${Math.round(n/max*80)}px"><div class="bar-inner" style="height:100%"></div></div><div class="bar-label">${SH_ID[i]}</div></div>`).join('');
 }
 
-// ════════════════════════════════════════════════
-//  SYNC INDICATOR
-// ════════════════════════════════════════════════
 let syncTimer;
 function showSync(msg,state='syncing'){
   const el=document.getElementById('sync-indicator');
@@ -817,28 +985,12 @@ function setHeroSync(state,msg){
   const dot=document.getElementById('hero-sync-dot');
   const tx=document.getElementById('hero-sync-text');
   if(dot) dot.className='hero-sync-dot '+state;
-  if(tx)  tx.textContent=msg;
+  if(tx) tx.textContent=msg;
 }
 
-// ════════════════════════════════════════════════
-//  GAS API
-// ════════════════════════════════════════════════
-async function gasGet(action){
-  const url=getGasUrl();if(!url) throw new Error('GAS URL belum diisi');
-  const r=await fetch(`${url}?action=${action}`);
-  const d=await r.json();if(d.error) throw new Error(d.error);
-  return d;
-}
-async function gasPost(payload){
-  const url=getGasUrl();if(!url) throw new Error('GAS URL belum diisi');
-  const r=await fetch(url,{method:'POST',body:JSON.stringify(payload)});
-  const d=await r.json();if(d.error) throw new Error(d.error);
-  return d;
-}
+async function gasGet(action){const url=getGasUrl();if(!url) throw new Error('GAS URL belum diisi');const r=await fetch(`${url}?action=${action}`);const d=await r.json();if(d.error) throw new Error(d.error);return d;}
+async function gasPost(payload){const url=getGasUrl();if(!url) throw new Error('GAS URL belum diisi');const r=await fetch(url,{method:'POST',body:JSON.stringify(payload)});const d=await r.json();if(d.error) throw new Error(d.error);return d;}
 
-// ════════════════════════════════════════════════
-//  ★ CLOUD ARSIP — DIPANGGIL SAAT WEB DIBUKA ★
-// ════════════════════════════════════════════════
 function setCloudBanner(state,msg){
   const b=document.getElementById('cloud-status-banner');
   const sp=document.getElementById('cloud-spin');
@@ -851,80 +1003,42 @@ function setCloudBanner(state,msg){
 }
 
 async function loadArsipFromCloud(){
-  if(!getGasUrl()){
-    setHeroSync('err','GAS URL belum diisi');
-    setCloudBanner('warn','URL GAS belum diisi — data hanya dari browser lokal. Isi di Pengaturan.');
-    return;
-  }
-  setHeroSync('syncing','Menyinkron data cloud...');
-  showSync('Memuat dari cloud...','syncing');
+  if(!getGasUrl()){setHeroSync('err','GAS URL belum diisi');setCloudBanner('warn','URL GAS belum diisi — data hanya dari browser lokal.');return;}
+  setHeroSync('syncing','Menyinkron data cloud...');showSync('Memuat dari cloud...','syncing');
   try{
     const data=await gasGet('getArsip');
-    // ★ SANITASI: bersihkan format ISO dari Sheets
     const cloudArsip=sanitasiArsip(data.arsip||[]);
     const cloudIds=new Set(cloudArsip.map(r=>String(r.id)));
     const localOnly=arsipList.filter(r=>!cloudIds.has(String(r.id)));
     arsipList=[...cloudArsip,...localOnly];
     arsipList.sort((a,b)=>String(b.id).localeCompare(String(a.id)));
     saveLocal();
-    arsipList.forEach(r=>{
-      if(r.uploadedFiles&&r.uploadedFiles.length&&!(uploadFiles[r.id]||[]).length){
-        uploadFiles[r.id]=r.uploadedFiles.map(f=>({...f,file:null}));
-      }
-    });
-    if(localOnly.length){
-      for(const item of localOnly) gasPost({action:'simpanArsip',...item}).catch(()=>{});
-    }
+    arsipList.forEach(r=>{if(r.uploadedFiles&&r.uploadedFiles.length&&!(uploadFiles[r.id]||[]).length) uploadFiles[r.id]=r.uploadedFiles.map(f=>({...f,file:null}));});
+    if(localOnly.length) for(const item of localOnly) gasPost({action:'simpanArsip',...item}).catch(()=>{});
     setHeroSync('ok',`✓ ${arsipList.length} arsip tersinkron`);
     showSync(`${arsipList.length} arsip tersinkron`,'ok');
     setCloudBanner('ok',`✓ ${arsipList.length} arsip dimuat dari cloud`);
-    // Render ulang semua komponen yang bergantung pada arsipList
-    renderArsip();
-    renderCalInline();
-    renderDashHome();
-    updateHeroStats();
+    renderArsip();renderCalInline();renderDashHome();updateHeroStats();
   }catch(e){
     setHeroSync('err','Gagal sync — menggunakan data lokal');
     setCloudBanner('err','❌ Gagal memuat dari cloud: '+e.message);
     showSync('Gagal sync cloud','err');
   }
 }
-
 async function refreshArsipCloud(){await loadArsipFromCloud();}
-
 async function syncArsipToCloud(item){
-  if(!getGasUrl()) return;
-  showSync('Menyimpan ke cloud...','syncing');
-  try{
-    const payload={...item,uploadedFiles:(uploadFiles[item.id]||[]).map(f=>({name:f.name,size:f.size,status:f.status,url:f.url||null}))};
-    await gasPost({action:'simpanArsip',...payload});
-    showSync('Tersimpan ke cloud','ok');
-  }catch(e){showSync('Gagal sync cloud','err');}
+  if(!getGasUrl()) return;showSync('Menyimpan ke cloud...','syncing');
+  try{await gasPost({action:'simpanArsip',...item,uploadedFiles:(uploadFiles[item.id]||[]).map(f=>({name:f.name,size:f.size,status:f.status,url:f.url||null}))});showSync('Tersimpan ke cloud','ok');}
+  catch(e){showSync('Gagal sync cloud','err');}
 }
+async function hapusArsipCloud(id){if(!getGasUrl()) return;try{await gasPost({action:'hapusArsip',id});}catch(e){}}
 
-async function hapusArsipCloud(id){
-  if(!getGasUrl()) return;
-  try{await gasPost({action:'hapusArsip',id});}catch(e){}
-}
-
-// ════════════════════════════════════════════════
-//  NOMOR SURAT
-// ════════════════════════════════════════════════
 async function fetchNomor(){
-  const dot=document.getElementById('nomor-dot');
-  const prev=document.getElementById('nomor-preview');
+  const dot=document.getElementById('nomor-dot');const prev=document.getElementById('nomor-preview');
   if(!getGasUrl()){dot.className='nomor-dot err';prev.textContent='— isi URL Apps Script di Pengaturan';return;}
   dot.className='nomor-dot loading';prev.textContent='Membaca dari Sheets...';
-  try{
-    const data=await gasGet('getLastNomor');
-    settings.nomorLast=data.lastNomor;
-    localStorage.setItem('sirapat_settings',JSON.stringify(settings));
-    dot.className='nomor-dot ok';
-    updateNomorPreview();updateHeroStats();
-  }catch(e){
-    dot.className='nomor-dot err';
-    prev.textContent='❌ Gagal — pakai nomor lokal: '+(settings.nomorLast+1);
-  }
+  try{const data=await gasGet('getLastNomor');settings.nomorLast=data.lastNomor;localStorage.setItem('sirapat_settings',JSON.stringify(settings));dot.className='nomor-dot ok';updateNomorPreview();updateHeroStats();}
+  catch(e){dot.className='nomor-dot err';prev.textContent='❌ Gagal — pakai nomor lokal: '+(settings.nomorLast+1);}
 }
 function updateNomorPreview(){
   const tgl=document.getElementById('inp-tanggal').value;if(!tgl) return;
@@ -932,21 +1046,13 @@ function updateNomorPreview(){
   document.getElementById('nomor-preview').textContent=buildNomor(settings.nomorLast+1,d)+` (urut ke-${settings.nomorLast+1})`;
 }
 
-// ════════════════════════════════════════════════
-//  TEMPLATE MODE
-// ════════════════════════════════════════════════
 function setTplMode(mode,btn){
   tplMode=mode;settings.tplMode=mode;
-  document.querySelectorAll('.tpl-mode-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('.tpl-mode-panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('tpl-panel-'+mode).classList.add('active');
+  document.querySelectorAll('.tpl-mode-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  document.querySelectorAll('.tpl-mode-panel').forEach(p=>p.classList.remove('active'));document.getElementById('tpl-panel-'+mode).classList.add('active');
 }
 function getTemplateUrl(key){if(tplMode==='auto') return AUTO_PATHS[key];return(document.getElementById('url-'+key)||{value:''}).value.trim();}
 
-// ════════════════════════════════════════════════
-//  TEST URLs
-// ════════════════════════════════════════════════
 async function testUrl(url){const r=await fetch(url);if(!r.ok) throw new Error('HTTP '+r.status);const buf=await r.arrayBuffer();if(buf.byteLength<200) throw new Error('Bukan docx');return buf.byteLength;}
 async function testAutoUrl(key){const b=document.getElementById('st-auto-'+key);b.className='tpl-badge loading';b.textContent='Mengecek...';try{const s=await testUrl(AUTO_PATHS[key]);b.className='tpl-badge ok';b.textContent=`✓ OK (${(s/1024).toFixed(1)}KB)`;}catch(e){b.className='tpl-badge err';b.textContent='✗ '+e.message;}}
 async function testSemuaAuto(){await Promise.all(['und','abs','ris'].map(k=>testAutoUrl(k)));}
@@ -960,9 +1066,6 @@ async function testGasUrl(){
   catch(e){st.textContent='❌ Gagal: '+e.message;st.style.color='#c62828';showToast('GAS gagal: '+e.message,'error');}
 }
 
-// ════════════════════════════════════════════════
-//  PESERTA GEN
-// ════════════════════════════════════════════════
 function renderPesertaGen(){
   document.getElementById('peserta-gen-grid').innerHTML=pesertaList.map((p,i)=>`
     <div class="peserta-item checked" id="pgen-${i}" onclick="togglePeserta(${i})">
@@ -973,93 +1076,50 @@ function renderPesertaGen(){
 function togglePeserta(i){document.getElementById('pgen-'+i).classList.toggle('checked');}
 function getCheckedPeserta(){return pesertaList.filter((_,i)=>document.getElementById('pgen-'+i)?.classList.contains('checked'));}
 function pilihAgenda(el,text){
-  document.querySelectorAll('.agenda-chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
-  const ta=document.getElementById('inp-agenda');
-  ta.value=text;ta.disabled=!!text;
-  if(!text){ta.disabled=false;ta.focus();}
+  document.querySelectorAll('.agenda-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');
+  const ta=document.getElementById('inp-agenda');ta.value=text;ta.disabled=!!text;if(!text){ta.disabled=false;ta.focus();}
 }
 
-// ════════════════════════════════════════════════
-//  ★ KALENDER — TANDA RAPAT DARI ARSIP ★
-// ════════════════════════════════════════════════
 function initCalInline(){calYearInline=today.getFullYear();calMonthInline=today.getMonth();}
-function changeMonthInline(d){
-  calMonthInline+=d;
-  if(calMonthInline<0){calMonthInline=11;calYearInline--;}
-  if(calMonthInline>11){calMonthInline=0;calYearInline++;}
-  renderCalInline();
-}
+function changeMonthInline(d){calMonthInline+=d;if(calMonthInline<0){calMonthInline=11;calYearInline--;}if(calMonthInline>11){calMonthInline=0;calYearInline++;}renderCalInline();}
 function renderCalInline(){
   if(calYearInline===undefined) initCalInline();
   document.getElementById('cal-title-inline').textContent=`${BULAN_ID[calMonthInline]} ${calYearInline}`;
-
-  // ★ Buat map tanggal → daftar rapat (bisa >1 rapat per tanggal)
   const rapatMap={};
-  arsipList.forEach(r=>{
-    if(!rapatMap[r.tanggal]) rapatMap[r.tanggal]=[];
-    rapatMap[r.tanggal].push({jam:r.jam,tempat:r.tempat,agenda:r.agenda});
-  });
-
+  arsipList.forEach(r=>{if(!rapatMap[r.tanggal]) rapatMap[r.tanggal]=[];rapatMap[r.tanggal].push({jam:r.jam,tempat:r.tempat,agenda:r.agenda});});
   const selectedTgl=document.getElementById('inp-tanggal').value;
   const selectedJam=document.getElementById('inp-jam').value;
   const selectedTempat=document.getElementById('inp-tempat').value.trim();
   const firstDay=new Date(calYearInline,calMonthInline,1).getDay();
   const days=new Date(calYearInline,calMonthInline+1,0).getDate();
   const todayStr=today.toISOString().split('T')[0];
-
   let html=HARI_ID.map((_,i)=>`<div class="cal-day-name">${['Min','Sen','Sel','Rab','Kam','Jum','Sab'][i]}</div>`).join('');
   for(let i=0;i<firstDay;i++) html+=`<div class="cal-day other-month"></div>`;
-
   for(let d=1;d<=days;d++){
     const ds=`${calYearInline}-${String(calMonthInline+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isToday=ds===todayStr;
-    const isSel=ds===selectedTgl;
-    const events=rapatMap[ds]||[];
-    const hasEvent=events.length>0;
-
-    // Cek konflik: ada rapat lain di tanggal+jam+tempat yang sama
-    const isBooked=hasEvent && ds===selectedTgl && events.some(e=>e.jam===selectedJam && e.tempat===selectedTempat);
-
+    const isToday=ds===todayStr,isSel=ds===selectedTgl;
+    const events=rapatMap[ds]||[];const hasEvent=events.length>0;
+    const isBooked=hasEvent&&ds===selectedTgl&&events.some(e=>e.jam===selectedJam&&e.tempat===selectedTempat);
     let cls='cal-day';
-    if(isToday) cls+=' today';
-    if(isSel&&!isToday) cls+=' selected';
-    if(isBooked) cls+=' booked';
-    else if(hasEvent) cls+=' has-event';
-
-    // Tooltip: daftar agenda di tanggal tersebut
-    let tip='';
-    if(hasEvent){
-      tip=events.map(e=>`${e.jam} – ${(e.agenda||'').substring(0,30)}`).join(' | ');
-    }
-
+    if(isToday) cls+=' today';if(isSel&&!isToday) cls+=' selected';
+    if(isBooked) cls+=' booked';else if(hasEvent) cls+=' has-event';
+    const tip=hasEvent?events.map(e=>`${e.jam} – ${(e.agenda||'').substring(0,25)}`).join(' | '):'';
     html+=`<div class="${cls}" ${tip?`data-tip="${tip.replace(/"/g,'&quot;')}"`:''} onclick="calClickInline('${ds}')">${d}</div>`;
   }
   document.getElementById('cal-grid-inline').innerHTML=html;
 }
-
 function calClickInline(ds){
   const events=arsipList.filter(r=>r.tanggal===ds);
-  if(events.length===1){showArsipDetail(events[0].id);return;}
-  if(events.length>1){
-    // Pilih event terbaru
-    showArsipDetail(events[0].id);return;
-  }
+  if(events.length>=1){showArsipDetail(events[0].id);return;}
   document.getElementById('inp-tanggal').value=ds;
   renderCalInline();updateNomorPreview();checkBooking();
 }
 function checkBooking(){
-  const tgl=document.getElementById('inp-tanggal').value;
-  const jam=document.getElementById('inp-jam').value;
-  const tempat=document.getElementById('inp-tempat').value.trim();
+  const tgl=document.getElementById('inp-tanggal').value;const jam=document.getElementById('inp-jam').value;const tempat=document.getElementById('inp-tempat').value.trim();
   const conflict=arsipList.find(r=>r.tanggal===tgl&&r.jam===jam&&r.tempat===tempat);
-  document.getElementById('booking-warn').style.display=conflict?'block':'none';
-  renderCalInline();
+  document.getElementById('booking-warn').style.display=conflict?'block':'none';renderCalInline();
 }
 
-// ════════════════════════════════════════════════
-//  INJECT docxtemplater
-// ════════════════════════════════════════════════
 function setPS(id,state){const el=document.getElementById(id);if(el) el.className='prog-step'+(state?' '+state:'');}
 async function fetchAndInject(url,data){
   const r=await fetch(url);if(!r.ok) throw new Error(`HTTP ${r.status} untuk "${url}"`);
@@ -1070,9 +1130,6 @@ async function fetchAndInject(url,data){
   return doc.getZip().generate({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',compression:'DEFLATE'});
 }
 
-// ════════════════════════════════════════════════
-//  GENERATE DOKUMEN
-// ════════════════════════════════════════════════
 async function generateDokumen(){
   const tanggalVal=document.getElementById('inp-tanggal').value;
   const jamVal=document.getElementById('inp-jam').value;
@@ -1084,102 +1141,50 @@ async function generateDokumen(){
   if(!urlUnd||!urlAbs||!urlRis){showToast('URL template belum lengkap!','error');return;}
   const pesertaHadir=getCheckedPeserta();
   if(!pesertaHadir.length){showToast('Pilih minimal 1 peserta!','error');return;}
-
   document.getElementById('btn-awan').classList.remove('visible');lastGenId=null;
   const tgl=new Date(tanggalVal+'T00:00:00');
-  const hariStr=HARI_ID[tgl.getDay()];
-  const tglStr=tglFull(tgl);
-  const tglGen=tglGeneret();
-  const jamFmt=jamVal+' WIB s/d Selesai';
-
+  const hariStr=HARI_ID[tgl.getDay()];const tglStr=tglFull(tgl);const tglGen=tglGeneret();const jamFmt=jamVal+' WIB s/d Selesai';
   let nextNo=settings.nomorLast+1;
   if(getGasUrl()){try{const d=await gasGet('getLastNomor');nextNo=d.nextNomor;}catch(e){}}
   const nomorSurat=buildNomor(nextNo,tgl);
-
-  const data={
-    nomorSurat,hari:hariStr,tanggal:tglStr,tanggalHari:`${hariStr}, ${tglStr}`,
-    jam:jamFmt,jamPolos:jamVal,tempat,agenda,
-    ketua:settings.ketua,sekretaris:settings.sekretaris,
-    kota:settings.kota,kotaTanggal:`${settings.kota}, ${tglStr}`,
-    tahun:String(tgl.getFullYear()),bulan:BULAN_ID[tgl.getMonth()],
-    instansi:settings.instansi,jumlahPeserta:String(pesertaHadir.length),tgl_generet:tglGen,
-    peserta:pesertaHadir.map((p,i)=>({no:String(i+1),nama:p.nama,jabatan:p.jabatan,ttd:''}))
-  };
-
+  const data={nomorSurat,hari:hariStr,tanggal:tglStr,tanggalHari:`${hariStr}, ${tglStr}`,jam:jamFmt,jamPolos:jamVal,tempat,agenda,ketua:settings.ketua,sekretaris:settings.sekretaris,kota:settings.kota,kotaTanggal:`${settings.kota}, ${tglStr}`,tahun:String(tgl.getFullYear()),bulan:BULAN_ID[tgl.getMonth()],instansi:settings.instansi,jumlahPeserta:String(pesertaHadir.length),tgl_generet:tglGen,peserta:pesertaHadir.map((p,i)=>({no:String(i+1),nama:p.nama,jabatan:p.jabatan,ttd:''}))};
   const btn=document.getElementById('btn-gen'),sp=document.getElementById('spinner'),tx=document.getElementById('btn-gen-text');
-  btn.disabled=true;sp.style.display='block';
-  document.getElementById('progress-bar').style.display='flex';
+  btn.disabled=true;sp.style.display='block';document.getElementById('progress-bar').style.display='flex';
   ['ps-fetch','ps-inject','ps-zip','ps-done'].forEach(id=>setPS(id,''));
-
   try{
     setPS('ps-fetch','active');tx.textContent='Mengambil template...';
-    let blobs;
-    try{blobs=await Promise.all([fetchAndInject(urlUnd,data),fetchAndInject(urlAbs,data),fetchAndInject(urlRis,data)]);}
-    catch(e){setPS('ps-fetch','err');throw e;}
-    setPS('ps-fetch','done');setPS('ps-inject','done');
-    setPS('ps-zip','active');tx.textContent='Membuat ZIP...';
+    let blobs;try{blobs=await Promise.all([fetchAndInject(urlUnd,data),fetchAndInject(urlAbs,data),fetchAndInject(urlRis,data)]);}catch(e){setPS('ps-fetch','err');throw e;}
+    setPS('ps-fetch','done');setPS('ps-inject','done');setPS('ps-zip','active');tx.textContent='Membuat ZIP...';
     const prefix=`Rapat_${tanggalVal.replace(/-/g,'')}`;
     const zipOut=new JSZip();
-    zipOut.file(`${prefix}_Undangan.docx`,blobs[0]);
-    zipOut.file(`${prefix}_AbsenHadir.docx`,blobs[1]);
-    zipOut.file(`${prefix}_Risalah.docx`,blobs[2]);
-    const zipBlob=await zipOut.generateAsync({type:'blob'});
-    setPS('ps-zip','done');
-    const a=document.createElement('a');a.href=URL.createObjectURL(zipBlob);
-    a.download=`${prefix}_DokumenRapat.zip`;a.click();URL.revokeObjectURL(a.href);
+    zipOut.file(`${prefix}_Undangan.docx`,blobs[0]);zipOut.file(`${prefix}_AbsenHadir.docx`,blobs[1]);zipOut.file(`${prefix}_Risalah.docx`,blobs[2]);
+    const zipBlob=await zipOut.generateAsync({type:'blob'});setPS('ps-zip','done');
+    const a=document.createElement('a');a.href=URL.createObjectURL(zipBlob);a.download=`${prefix}_DokumenRapat.zip`;a.click();URL.revokeObjectURL(a.href);
     setPS('ps-done','done');
-
     const arsipId=Date.now();
     const newItem={id:arsipId,tanggal:tanggalVal,hari:hariStr,jam:jamVal,tempat,agenda,nomorSurat,tglGeneret:tglGen,peserta:pesertaHadir.map(p=>p.nama),uploadedFiles:[]};
-    arsipList.unshift(newItem);saveLocal();
-    settings.nomorLast=nextNo;localStorage.setItem('sirapat_settings',JSON.stringify(settings));
-    if(getGasUrl()){
-      gasPost({action:'simpanNomor',nomorUrut:nextNo,nomorSurat,tanggal:tglStr,agenda,tujuan:'',tglGeneret:tglGen,pesertaCount:pesertaHadir.length}).catch(()=>{});
-      syncArsipToCloud(newItem);
-    }
-    lastGenId=arsipId;
-    document.getElementById('btn-awan').classList.add('visible');
+    arsipList.unshift(newItem);saveLocal();settings.nomorLast=nextNo;localStorage.setItem('sirapat_settings',JSON.stringify(settings));
+    if(getGasUrl()){gasPost({action:'simpanNomor',nomorUrut:nextNo,nomorSurat,tanggal:tglStr,agenda,tujuan:'',tglGeneret:tglGen,pesertaCount:pesertaHadir.length}).catch(()=>{});syncArsipToCloud(newItem);}
+    lastGenId=arsipId;document.getElementById('btn-awan').classList.add('visible');
     updateNomorPreview();renderCalInline();renderDashHome();updateHeroStats();
-    showToast('✓ 3 dokumen berhasil diunduh! Arsip disimpan ke cloud.','success');
-  }catch(err){
-    console.error(err);showToast('❌ '+err.message,'error');
-  }finally{
-    btn.disabled=false;sp.style.display='none';tx.textContent='Generate 3 Dokumen';
-  }
+    showToast('✓ 3 dokumen berhasil diunduh!','success');
+  }catch(err){console.error(err);showToast('❌ '+err.message,'error');}
+  finally{btn.disabled=false;sp.style.display='none';tx.textContent='Generate 3 Dokumen';}
 }
 
-// ════════════════════════════════════════════════
-//  SIMPAN KE AWAN
-// ════════════════════════════════════════════════
 function simpanKeAwan(){
   if(!lastGenId) return;
   showPage('arsip',document.querySelectorAll('.nav-btn')[1]);
-  setTimeout(()=>{
-    const el=document.getElementById('arsip-item-'+lastGenId);
-    if(el){el.classList.add('highlight');el.scrollIntoView({behavior:'smooth',block:'center'});}
-    showArsipDetail(lastGenId);
-  },200);
+  setTimeout(()=>{const el=document.getElementById('arsip-item-'+lastGenId);if(el){el.classList.add('highlight');el.scrollIntoView({behavior:'smooth',block:'center'});}showArsipDetail(lastGenId);},200);
 }
 
-// ════════════════════════════════════════════════
-//  ARSIP RENDER
-// ════════════════════════════════════════════════
 function renderArsip(){
   const q=(document.getElementById('search-inp')?.value||'').toLowerCase();
   const bln=document.getElementById('filter-bulan')?.value||'';
   const thn=document.getElementById('filter-tahun')?.value||'';
-  const list=arsipList.filter(r=>{
-    const d=new Date(r.tanggal);
-    if(bln&&BULAN_ID[d.getMonth()]!==bln) return false;
-    if(thn&&String(d.getFullYear())!==thn) return false;
-    if(q&&!JSON.stringify(r).toLowerCase().includes(q)) return false;
-    return true;
-  });
+  const list=arsipList.filter(r=>{const d=new Date(r.tanggal);if(bln&&BULAN_ID[d.getMonth()]!==bln) return false;if(thn&&String(d.getFullYear())!==thn) return false;if(q&&!JSON.stringify(r).toLowerCase().includes(q)) return false;return true;});
   const el=document.getElementById('arsip-list');
-  if(!list.length){
-    el.innerHTML=`<div class="empty-state"><div class="icon">📭</div><h3>Belum ada arsip</h3><p>${getGasUrl()?'Data cloud kosong atau belum ada rapat.':'Arsip muncul setelah generate pertama.'}</p></div>`;
-    return;
-  }
+  if(!list.length){el.innerHTML=`<div class="empty-state"><div class="icon">📭</div><h3>Belum ada arsip</h3><p>${getGasUrl()?'Data cloud kosong.':'Arsip muncul setelah generate pertama.'}</p></div>`;return;}
   el.innerHTML=list.map(r=>{
     const d=new Date(r.tanggal);
     const files=uploadFiles[r.id]||[];
@@ -1191,8 +1196,8 @@ function renderArsip(){
         <div class="arsip-meta">
           <span>📅 ${r.hari}, ${d.getFullYear()}</span>
           <span>🕐 ${r.jam} WIB</span>
-          <span>👥 ${(r.peserta||[]).length} peserta</span>
-          ${totalCloud?`<span style="color:var(--blue)">☁ ${totalCloud} file</span>`:''}
+          <span>👥 ${(r.peserta||[]).length}</span>
+          ${totalCloud?`<span style="color:var(--blue)">☁ ${totalCloud}</span>`:''}
           ${r.nomorSurat?`<span>${r.nomorSurat}</span>`:''}
         </div>
       </div>
@@ -1202,25 +1207,17 @@ function renderArsip(){
     </div>`;
   }).join('');
 }
-
 function hapusArsip(id){
   if(!confirm('Hapus arsip ini dari lokal dan cloud?')) return;
-  arsipList=arsipList.filter(r=>r.id!==id);saveLocal();
-  delete uploadFiles[id];hapusArsipCloud(id);
-  renderArsip();renderCalInline();renderDashHome();updateHeroStats();
-  showToast('Arsip dihapus','info');
+  arsipList=arsipList.filter(r=>r.id!==id);saveLocal();delete uploadFiles[id];hapusArsipCloud(id);
+  renderArsip();renderCalInline();renderDashHome();updateHeroStats();showToast('Arsip dihapus','info');
 }
 
-// ════════════════════════════════════════════════
-//  MODAL DETAIL + UPLOAD
-// ════════════════════════════════════════════════
 function showArsipDetail(id){
   const r=arsipList.find(x=>x.id===id);if(!r) return;
   const d=new Date(r.tanggal);
   const folderName=`${String(d.getDate()).padStart(2,'0')} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;
-  if(r.uploadedFiles&&r.uploadedFiles.length&&!(uploadFiles[id]||[]).length){
-    uploadFiles[id]=r.uploadedFiles.map(f=>({...f,file:null}));
-  }
+  if(r.uploadedFiles&&r.uploadedFiles.length&&!(uploadFiles[id]||[]).length) uploadFiles[id]=r.uploadedFiles.map(f=>({...f,file:null}));
   document.getElementById('modal-title').textContent='Detail Rapat';
   document.getElementById('modal-body').innerHTML=`
     <div class="detail-row"><div class="detail-label">Tanggal</div><div class="detail-val">${r.hari}, ${tglFull(d)}</div></div>
@@ -1228,18 +1225,16 @@ function showArsipDetail(id){
     <div class="detail-row"><div class="detail-label">Tempat</div><div class="detail-val">${r.tempat}</div></div>
     <div class="detail-row"><div class="detail-label">Agenda</div><div class="detail-val">${r.agenda}</div></div>
     <div class="detail-row"><div class="detail-label">Nomor Surat</div><div class="detail-val">${r.nomorSurat||'-'}</div></div>
-    <div class="detail-row"><div class="detail-label">Di-generate pada</div><div class="detail-val">${r.tglGeneret||'-'}</div></div>
+    <div class="detail-row"><div class="detail-label">Di-generate</div><div class="detail-val">${r.tglGeneret||'-'}</div></div>
     <div class="detail-row" style="border-bottom:none"><div class="detail-label">Peserta (${(r.peserta||[]).length})</div>
       <div class="detail-val">${(r.peserta||[]).map((n,i)=>`${i+1}. ${n}`).join('<br>')}</div>
     </div>
     <div class="upload-section">
-      <div class="upload-section-title">☁ Upload Dokumen ke Google Drive <span class="folder-tag">📁 ${folderName}</span></div>
+      <div class="upload-section-title">☁ Upload Dokumen ke Drive <span class="folder-tag">📁 ${folderName}</span></div>
       ${!getGasUrl()?'<div class="no-gas-warning">⚠ URL Apps Script belum diisi di Pengaturan.</div>':''}
-      <div class="upload-zone" id="dropzone-${id}"
-           ondrop="handleDrop(event,${id})" ondragover="event.preventDefault();this.classList.add('dragover')"
-           ondragleave="this.classList.remove('dragover')" onclick="document.getElementById('fi-${id}').click()">
+      <div class="upload-zone" id="dropzone-${id}" ondrop="handleDrop(event,${id})" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" onclick="document.getElementById('fi-${id}').click()">
         <div class="upload-zone-icon">📂</div>
-        <div class="upload-zone-text"><strong>Drag & drop file di sini</strong><br>atau klik untuk pilih<br><span style="font-size:11px">.docx .pdf .zip — maks. 10MB</span></div>
+        <div class="upload-zone-text"><strong>Drag & drop file</strong><br>atau klik untuk pilih<br><span style="font-size:10px">.docx .pdf .zip — maks 10MB</span></div>
         <input type="file" id="fi-${id}" multiple onchange="handleFileInput(event,${id})">
       </div>
       <div class="uploaded-files" id="file-list-${id}"></div>
@@ -1247,13 +1242,10 @@ function showArsipDetail(id){
         <button class="btn-upload-all" id="upload-btn-${id}" onclick="uploadSemuaFile(${id},'${folderName}')">☁ Upload ke Drive</button>
       </div>
     </div>`;
-  renderFileList(id);
-  document.getElementById('modal-overlay').classList.add('open');
+  renderFileList(id);document.getElementById('modal-overlay').classList.add('open');
 }
-
 function renderFileList(id){
-  const files=uploadFiles[id]||[];
-  const el=document.getElementById(`file-list-${id}`);if(!el) return;
+  const files=uploadFiles[id]||[];const el=document.getElementById(`file-list-${id}`);if(!el) return;
   const actEl=document.getElementById(`upload-actions-${id}`);if(actEl) actEl.style.display=files.length?'flex':'none';
   if(!files.length){el.innerHTML='';return;}
   el.innerHTML=files.map((f,i)=>`
@@ -1265,14 +1257,11 @@ function renderFileList(id){
       <div class="file-actions">${f.status!=='uploading'?`<button onclick="hapusFile(${id},${i})" title="Hapus">✕</button>`:''}</div>
     </div>`).join('');
 }
-
 function getFileIcon(n){const e=(n||'').split('.').pop().toLowerCase();return{pdf:'📕',doc:'📝',docx:'📝',zip:'📦',jpg:'🖼️',jpeg:'🖼️',png:'🖼️'}[e]||'📄';}
 function fmtSize(b){if(!b) return '';if(b<1024) return b+'B';if(b<1048576) return (b/1024).toFixed(1)+'KB';return (b/1048576).toFixed(1)+'MB';}
 function statusLbl(s){return{pending:'Menunggu',uploading:'Uploading...',done:'Tersimpan',err:'Gagal'}[s]||s;}
-
 function hapusFile(id,i){
-  if(!uploadFiles[id]) return;
-  uploadFiles[id].splice(i,1);renderFileList(id);
+  if(!uploadFiles[id]) return;uploadFiles[id].splice(i,1);renderFileList(id);
   const r=arsipList.find(x=>x.id===id);
   if(r){r.uploadedFiles=uploadFiles[id].filter(f=>f.status==='done').map(f=>({name:f.name,size:f.size,status:f.status,url:f.url||null}));saveLocal();if(getGasUrl()) gasPost({action:'updateArsipFiles',id,uploadedFiles:r.uploadedFiles}).catch(()=>{});}
   renderArsip();
@@ -1288,20 +1277,14 @@ async function uploadSemuaFile(id,folderName){
   if(!getGasUrl()){showToast('URL Apps Script belum diisi!','error');return;}
   const pending=(uploadFiles[id]||[]).filter(f=>f.status==='pending'||f.status==='err');
   if(!pending.length){showToast('Tidak ada file yang perlu diupload.','info');return;}
-  const btn=document.getElementById(`upload-btn-${id}`);
-  if(btn){btn.disabled=true;btn.textContent='⏳ Mengupload...';}
+  const btn=document.getElementById(`upload-btn-${id}`);if(btn){btn.disabled=true;btn.textContent='⏳ Mengupload...';}
   let ok=0,fail=0;
   for(let i=0;i<(uploadFiles[id]||[]).length;i++){
-    const f=uploadFiles[id][i];
-    if(f.status!=='pending'&&f.status!=='err') continue;
+    const f=uploadFiles[id][i];if(f.status!=='pending'&&f.status!=='err') continue;
     if(!f.file){uploadFiles[id][i].status='err';fail++;renderFileList(id);continue;}
     uploadFiles[id][i].status='uploading';renderFileList(id);
-    try{
-      const b64=await toBase64(f.file);
-      const res=await gasPost({action:'uploadFile',fileName:f.name,fileBase64:b64,mimeType:f.file.type||'application/octet-stream',folderName});
-      if(!res.success) throw new Error(res.error||'Unknown error');
-      uploadFiles[id][i].status='done';uploadFiles[id][i].url=res.fileUrl;ok++;
-    }catch(e){uploadFiles[id][i].status='err';fail++;console.error(e);}
+    try{const b64=await toBase64(f.file);const res=await gasPost({action:'uploadFile',fileName:f.name,fileBase64:b64,mimeType:f.file.type||'application/octet-stream',folderName});if(!res.success) throw new Error(res.error||'Unknown');uploadFiles[id][i].status='done';uploadFiles[id][i].url=res.fileUrl;ok++;}
+    catch(e){uploadFiles[id][i].status='err';fail++;console.error(e);}
     renderFileList(id);
   }
   if(btn){btn.disabled=false;btn.textContent='☁ Upload ke Drive';}
@@ -1313,15 +1296,12 @@ async function uploadSemuaFile(id,folderName){
 function toBase64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('Baca gagal'));r.readAsDataURL(file);});}
 function closeModal(e){if(!e||e.target.id==='modal-overlay') document.getElementById('modal-overlay').classList.remove('open');}
 
-// ════════════════════════════════════════════════
-//  PESERTA MANAGE
-// ════════════════════════════════════════════════
 function renderPesertaManage(){
   document.getElementById('peserta-manage-list').innerHTML=pesertaList.map((p,i)=>`
     <div class="peserta-row">
       <div class="peserta-num">${i+1}</div>
       <input type="text" value="${p.nama}" placeholder="Nama + gelar" id="pm-nama-${i}">
-      <input type="text" value="${p.jabatan}" placeholder="Jabatan" id="pm-jab-${i}" style="max-width:280px">
+      <input type="text" value="${p.jabatan}" placeholder="Jabatan" id="pm-jab-${i}" style="max-width:260px">
       <button class="btn-icon" onclick="hapusPesertaRow(${i})">✕</button>
     </div>`).join('');
 }
@@ -1329,20 +1309,15 @@ function tambahPeserta(){pesertaList.push({nama:'',jabatan:''});renderPesertaMan
 function hapusPesertaRow(i){pesertaList.splice(i,1);renderPesertaManage();}
 function simpanPeserta(){
   pesertaList=pesertaList.map((_,i)=>({nama:document.getElementById('pm-nama-'+i)?.value||'',jabatan:document.getElementById('pm-jab-'+i)?.value||''})).filter(p=>p.nama.trim());
-  localStorage.setItem('sirapat_peserta',JSON.stringify(pesertaList));
-  renderPesertaGen();showToast('Daftar peserta disimpan!','success');
+  localStorage.setItem('sirapat_peserta',JSON.stringify(pesertaList));renderPesertaGen();showToast('Daftar peserta disimpan!','success');
   if(getGasUrl()) gasPost({action:'simpanPeserta',peserta:pesertaList}).catch(()=>{});
 }
 function resetPeserta(){
   if(!confirm('Reset ke default?')) return;
-  pesertaList=DEFAULT_PESERTA.map(p=>({...p}));
-  localStorage.setItem('sirapat_peserta',JSON.stringify(pesertaList));
+  pesertaList=DEFAULT_PESERTA.map(p=>({...p}));localStorage.setItem('sirapat_peserta',JSON.stringify(pesertaList));
   renderPesertaManage();renderPesertaGen();showToast('Direset ke default.','info');
 }
 
-// ════════════════════════════════════════════════
-//  PENGATURAN
-// ════════════════════════════════════════════════
 function loadPengaturan(){
   ['instansi','kota','ketua','sekretaris'].forEach(k=>{const el=document.getElementById('set-'+k);if(el)el.value=settings[k]||'';});
   const nf=document.getElementById('set-nomor-fmt');if(nf)nf.value=settings.nomorFmt||'';
@@ -1361,28 +1336,21 @@ function simpanPengaturan(){
   const uu=document.getElementById('url-und');if(uu)settings.urlUnd=uu.value;
   const ua=document.getElementById('url-abs');if(ua)settings.urlAbs=ua.value;
   const ur=document.getElementById('url-ris');if(ur)settings.urlRis=ur.value;
-  settings.tplMode=tplMode;
-  localStorage.setItem('sirapat_settings',JSON.stringify(settings));
+  settings.tplMode=tplMode;localStorage.setItem('sirapat_settings',JSON.stringify(settings));
   showToast('Pengaturan disimpan!','success');fetchNomor();
 }
 function toggleFaq(el){el.classList.toggle('open');el.nextElementSibling.classList.toggle('open');}
 
-// ════════════════════════════════════════════════
-//  NAV — ★ arsip TIDAK lagi memanggil cloud sync ★
-// ════════════════════════════════════════════════
 function showPage(id,btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.nav-btn, .nav-drawer .nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   if(btn) btn.classList.add('active');
-  if(id==='peserta')    renderPesertaManage();
-  if(id==='arsip')      renderArsip();        // hanya render, sync sudah dilakukan di INIT
+  if(id==='peserta') renderPesertaManage();
+  if(id==='arsip') renderArsip();
   if(id==='pengaturan') loadPengaturan();
 }
 
-// ════════════════════════════════════════════════
-//  TOAST
-// ════════════════════════════════════════════════
 let toastT;
 function showToast(msg,type='info'){
   const t=document.getElementById('toast');
@@ -1390,27 +1358,14 @@ function showToast(msg,type='info'){
   clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),4500);
 }
 
-// ════════════════════════════════════════════════
-//  ★ INIT — SYNC CLOUD SAAT WEB PERTAMA DIBUKA ★
-// ════════════════════════════════════════════════
+// ════ INIT ════
 document.getElementById('inp-tanggal').value=today.toISOString().split('T')[0];
-initCalInline();renderCalInline();
-renderPesertaGen();
-renderDashHome();
-updateHeroStats();
+initCalInline();renderCalInline();renderPesertaGen();renderDashHome();updateHeroStats();
 if(settings.tplMode==='manual'){tplMode='manual';document.querySelectorAll('.tpl-mode-tab')[1]?.click();}
-
-// ★ Sync cloud langsung saat halaman dibuka (bukan saat klik Arsip)
-// fetchNomor dan loadArsipFromCloud berjalan paralel
 Promise.all([
-  getGasUrl() ? fetchNomor() : Promise.resolve(),
-  loadArsipFromCloud()   // sudah handle kasus gasUrl kosong
-]).then(()=>{
-  renderCalInline();
-  renderDashHome();
-  updateHeroStats();
-  updateNomorPreview();
-});
+  getGasUrl()?fetchNomor():Promise.resolve(),
+  loadArsipFromCloud()
+]).then(()=>{renderCalInline();renderDashHome();updateHeroStats();updateNomorPreview();});
 </script>
 </body>
 </html>
