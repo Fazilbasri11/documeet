@@ -32,102 +32,33 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 .nav-btn:hover{background:rgba(255,255,255,.08);color:var(--white)}
 .nav-btn.active{background:var(--gold);color:var(--maroon-deep);font-weight:600}
 .page{display:none}.page.active{display:block}
-
-/* ══════════════════════════════════════════
-   HERO — ANIMATED
-══════════════════════════════════════════ */
-.hero{
-  background:linear-gradient(160deg,var(--maroon-deep) 0%,var(--maroon) 55%,var(--maroon-light) 100%);
-  padding:3.5rem 2rem 3rem;position:relative;overflow:hidden;
-  min-height:280px;
-}
-
-/* Particle canvas */
+.hero{background:linear-gradient(160deg,var(--maroon-deep) 0%,var(--maroon) 55%,var(--maroon-light) 100%);padding:3.5rem 2rem 3rem;position:relative;overflow:hidden;min-height:280px;}
 #hero-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.55}
-
-/* Animated rings */
-.hero-ring{
-  position:absolute;border-radius:50%;
-  border:1px solid rgba(201,147,42,.18);
-  animation:ring-pulse 4s ease-in-out infinite;
-}
+.hero-ring{position:absolute;border-radius:50%;border:1px solid rgba(201,147,42,.18);animation:ring-pulse 4s ease-in-out infinite;}
 .hero-ring:nth-child(1){width:340px;height:340px;top:-90px;right:-60px;animation-delay:0s}
 .hero-ring:nth-child(2){width:200px;height:200px;bottom:-70px;left:8%;animation-delay:1.4s;border-color:rgba(201,147,42,.1)}
 .hero-ring:nth-child(3){width:130px;height:130px;top:25%;right:22%;animation-delay:2.8s;border-color:rgba(255,255,255,.1)}
-
-@keyframes ring-pulse{
-  0%,100%{transform:scale(1);opacity:.6}
-  50%{transform:scale(1.06);opacity:1}
-}
-
-/* Floating dots */
-.hero-dot{
-  position:absolute;border-radius:50%;background:var(--gold);
-  animation:dot-float 6s ease-in-out infinite;
-  opacity:0;
-}
-@keyframes dot-float{
-  0%{opacity:0;transform:translateY(0) scale(0)}
-  20%{opacity:.7;transform:translateY(-12px) scale(1)}
-  80%{opacity:.4;transform:translateY(-40px) scale(.7)}
-  100%{opacity:0;transform:translateY(-60px) scale(0)}
-}
-
+@keyframes ring-pulse{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.06);opacity:1}}
+.hero-shimmer{position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 0%,var(--gold) 40%,var(--gold-light) 60%,transparent 100%);background-size:200% 100%;animation:shimmer-slide 3s linear infinite;opacity:.6;}
+@keyframes shimmer-slide{from{background-position:200% 0}to{background-position:-200% 0}}
 .hero-inner{max-width:900px;margin:0 auto;position:relative;z-index:2}
-
-/* Staggered text animations */
-.hero-badge{
-  display:inline-flex;align-items:center;gap:6px;
-  background:rgba(201,147,42,.15);border:1px solid rgba(201,147,42,.3);
-  border-radius:20px;padding:5px 14px;font-size:11px;
-  color:var(--gold-light);letter-spacing:.1em;text-transform:uppercase;
-  margin-bottom:1rem;
-  opacity:0;animation:hero-up .7s .1s cubic-bezier(.22,1,.36,1) forwards;
-}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(201,147,42,.15);border:1px solid rgba(201,147,42,.3);border-radius:20px;padding:5px 14px;font-size:11px;color:var(--gold-light);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem;opacity:0;animation:hero-up .7s .1s cubic-bezier(.22,1,.36,1) forwards;}
 .hero-badge::before{content:'●';font-size:8px;animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-
-.hero h1{
-  font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:700;
-  color:var(--white);line-height:1.2;margin-bottom:.5rem;
-  opacity:0;animation:hero-up .7s .25s cubic-bezier(.22,1,.36,1) forwards;
-}
+.hero h1{font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:700;color:var(--white);line-height:1.2;margin-bottom:.5rem;opacity:0;animation:hero-up .7s .25s cubic-bezier(.22,1,.36,1) forwards;}
 .hero h1 em{font-style:italic;color:var(--gold-light)}
-
-.hero p{
-  font-size:14px;color:rgba(255,255,255,.65);max-width:520px;
-  line-height:1.7;
-  opacity:0;animation:hero-up .7s .4s cubic-bezier(.22,1,.36,1) forwards;
-}
-
-/* Stats row in hero */
-.hero-stats{
-  display:flex;gap:2rem;margin-top:1.8rem;
-  opacity:0;animation:hero-up .7s .55s cubic-bezier(.22,1,.36,1) forwards;
-}
-.hero-stat{text-align:left}
+.hero p{font-size:14px;color:rgba(255,255,255,.65);max-width:520px;line-height:1.7;opacity:0;animation:hero-up .7s .4s cubic-bezier(.22,1,.36,1) forwards;}
+.hero-stats{display:flex;gap:2rem;margin-top:1.8rem;opacity:0;animation:hero-up .7s .55s cubic-bezier(.22,1,.36,1) forwards;}
 .hero-stat-val{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--gold-light);line-height:1}
 .hero-stat-lbl{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
 .hero-stat-sep{width:1px;background:rgba(255,255,255,.12);align-self:stretch}
-
-/* Shimmer line across bottom of hero */
-.hero-shimmer{
-  position:absolute;bottom:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent 0%,var(--gold) 40%,var(--gold-light) 60%,transparent 100%);
-  background-size:200% 100%;
-  animation:shimmer-slide 3s linear infinite;
-  opacity:.6;
-}
-@keyframes shimmer-slide{from{background-position:200% 0}to{background-position:-200% 0}}
-
-@keyframes hero-up{
-  from{opacity:0;transform:translateY(20px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-/* ══════════════════════════════════════════
-   KALENDER + GRAFIK PANEL — di bawah hero
-══════════════════════════════════════════ */
+/* ── CLOUD SYNC INDICATOR DI HERO ── */
+.hero-sync-badge{display:inline-flex;align-items:center;gap:7px;margin-top:1rem;opacity:0;animation:hero-up .7s .7s cubic-bezier(.22,1,.36,1) forwards;font-size:11px;color:rgba(255,255,255,.5)}
+.hero-sync-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3);flex-shrink:0;transition:background .3s}
+.hero-sync-dot.syncing{background:var(--gold);animation:pulse 1s infinite}
+.hero-sync-dot.ok{background:#4caf50}
+.hero-sync-dot.err{background:#e53935}
+@keyframes hero-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .home-panel{max-width:900px;margin:0 auto;padding:2rem;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start}
 .cal-wrapper{background:var(--white);border-radius:16px;border:1px solid rgba(122,16,32,.08);overflow:hidden;box-shadow:var(--shadow)}
 .cal-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;background:var(--maroon);border-bottom:1px solid rgba(122,16,32,.1)}
@@ -137,20 +68,22 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 .cal-nav button:hover{background:rgba(255,255,255,.2);color:var(--white)}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:.75rem}
 .cal-day-name{text-align:center;font-size:10px;font-weight:600;color:var(--text-muted);padding:6px 0}
-.cal-day{aspect-ratio:1;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;cursor:pointer;transition:all .15s;color:var(--text-dark);gap:3px}
+.cal-day{aspect-ratio:1;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;cursor:pointer;transition:all .15s;color:var(--text-dark);gap:2px;position:relative}
 .cal-day:hover{background:rgba(122,16,32,.08)}
 .cal-day.today{background:var(--maroon);color:var(--white);font-weight:600}
 .cal-day.selected{outline:2px solid var(--gold);outline-offset:1px}
-.cal-day.has-event{position:relative}
-.cal-day.has-event::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold)}
+/* ★ KALENDER: Tanda rapat (dot di bawah angka) ★ */
+.cal-day.has-event::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold);display:block}
+.cal-day.today.has-event::after{background:var(--gold-light)}
 .cal-day.booked{background:rgba(229,57,53,.1);color:#c62828}
-.cal-day.booked::after{content:'';width:5px;height:5px;border-radius:50%;background:#e53935}
+.cal-day.booked::after{content:'';width:5px;height:5px;border-radius:50%;background:#e53935;display:block}
 .cal-day.other-month{color:#ccc;pointer-events:none}
+/* Tooltip tanda rapat */
+.cal-day.has-event{cursor:pointer}
+.cal-day.has-event:hover::before{content:attr(data-tip);position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--maroon-deep);color:white;font-size:10px;padding:3px 7px;border-radius:5px;white-space:nowrap;z-index:10;pointer-events:none}
 .cal-legend{display:flex;gap:12px;padding:.5rem 1rem .75rem;flex-wrap:wrap}
 .cal-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted)}
 .cal-legend-dot{width:8px;height:8px;border-radius:50%}
-
-/* GRAFIK PANEL */
 .stats-panel{display:flex;flex-direction:column;gap:12px}
 .stat-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .stat-card{background:var(--white);border-radius:12px;padding:1rem 1.2rem;box-shadow:var(--shadow);border:1px solid rgba(122,16,32,.06)}
@@ -165,10 +98,6 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 .bar-inner{width:100%;height:100%;background:linear-gradient(180deg,var(--maroon-light) 0%,var(--maroon) 100%);border-radius:3px 3px 0 0}
 .bar-label{font-size:9px;color:var(--text-muted)}
 .bar-val{font-size:9px;font-weight:600;color:var(--maroon)}
-
-/* ══════════════════════════════════════════
-   FORM SECTION
-══════════════════════════════════════════ */
 .form-section{max-width:900px;margin:0 auto;padding:0 2rem 2rem}
 .content-section{max-width:900px;margin:0 auto;padding:2rem}
 .form-card{background:var(--white);border-radius:16px;box-shadow:var(--shadow-lg);overflow:hidden}
@@ -231,15 +160,12 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 .btn-awan:hover{transform:translateY(-1px)}
 .btn-awan.visible{display:flex;animation:fade-up .3s ease}
 @keyframes fade-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-
-/* ── CLOUD STATUS BANNER ── */
 .cloud-banner{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:10px;font-size:12px;margin-bottom:1rem;border:1px solid}
 .cloud-banner.loading{background:rgba(201,147,42,.08);border-color:rgba(201,147,42,.25);color:#7a5010}
 .cloud-banner.ok{background:rgba(76,175,80,.08);border-color:rgba(76,175,80,.25);color:#2e7d32}
 .cloud-banner.err{background:rgba(229,57,53,.06);border-color:rgba(229,57,53,.2);color:#c62828}
 .cloud-banner.warn{background:rgba(122,16,32,.05);border-color:rgba(122,16,32,.15);color:var(--maroon)}
 .cloud-spin{width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
-
 .page-header{background:linear-gradient(160deg,var(--maroon-deep) 0%,var(--maroon) 100%);padding:2.5rem 2rem 2rem}
 .page-header-inner{max-width:900px;margin:0 auto}
 .page-header h1{font-family:'Playfair Display',serif;font-size:2rem;color:var(--white);margin-bottom:4px}
@@ -276,7 +202,6 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 .save-bar{position:sticky;bottom:0;background:var(--white);border-top:1px solid #e8ddd5;padding:1rem 2rem;display:flex;justify-content:flex-end;gap:10px}
 .btn-primary{background:var(--maroon);color:var(--white);border:none;border-radius:8px;padding:10px 24px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
 .btn-primary:hover{background:var(--maroon-dark)}
-
 .setting-group{margin-bottom:2rem}
 .setting-group h3{font-size:13px;font-weight:600;color:var(--text-mid);letter-spacing:.06em;text-transform:uppercase;margin-bottom:1rem;padding-bottom:8px;border-bottom:1px solid #e8ddd5}
 .tpl-box{background:linear-gradient(135deg,rgba(61,7,16,.03),rgba(201,147,42,.05));border:1.5px solid rgba(201,147,42,.2);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem}
@@ -327,10 +252,9 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 .modal-header h3{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--white)}
 .modal-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:20px;cursor:pointer}
 .modal-body{padding:1.5rem}
-.modal-body p{font-size:14px;color:var(--text-mid);margin-bottom:8px}
 .detail-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f0e8e0;font-size:13px}
 .detail-row:last-of-type{border-bottom:none}
-.detail-label{font-weight:600;color:var(--text-mid);min-width:120px;flex-shrink:0}
+.detail-label{font-weight:600;color:var(--text-mid);min-width:140px;flex-shrink:0}
 .detail-val{color:var(--text-dark);flex:1}
 .upload-section{margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #e8ddd5}
 .upload-section-title{font-size:13px;font-weight:600;color:var(--maroon);margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -407,7 +331,6 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 </style>
 </head>
 <body>
-
 <nav>
   <div class="nav-brand">
     <div class="nav-logo">
@@ -430,20 +353,15 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 
 <!-- PAGE: GENERATE -->
 <div id="page-generate" class="page active">
-
-  <!-- ★ HERO DENGAN ANIMASI ★ -->
   <div class="hero">
     <canvas id="hero-canvas"></canvas>
-    <div class="hero-ring"></div>
-    <div class="hero-ring"></div>
-    <div class="hero-ring"></div>
-    <!-- Floating dots spawned by JS -->
+    <div class="hero-ring"></div><div class="hero-ring"></div><div class="hero-ring"></div>
     <div class="hero-shimmer"></div>
     <div class="hero-inner">
       <div class="hero-badge">Sistem Rapat Digital</div>
       <h1>Generate Dokumen<br><em>Rapat KIP</em></h1>
       <p>Template Word diambil dari repo GitHub, data diinject, 3 dokumen resmi siap diunduh sebagai ZIP.</p>
-      <div class="hero-stats" id="hero-stats">
+      <div class="hero-stats">
         <div class="hero-stat">
           <div class="hero-stat-val" id="hs-total">0</div>
           <div class="hero-stat-lbl">Total Rapat</div>
@@ -459,12 +377,15 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
           <div class="hero-stat-lbl">Nomor Berikutnya</div>
         </div>
       </div>
+      <!-- ★ SYNC STATUS DI HERO ★ -->
+      <div class="hero-sync-badge">
+        <div class="hero-sync-dot" id="hero-sync-dot"></div>
+        <span id="hero-sync-text">Memuat data cloud...</span>
+      </div>
     </div>
   </div>
 
-  <!-- ★ KALENDER + GRAFIK PANEL ★ -->
   <div class="home-panel">
-    <!-- KIRI: Kalender -->
     <div class="cal-wrapper">
       <div class="cal-header">
         <div class="cal-title" id="cal-title-inline"></div>
@@ -476,34 +397,16 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
       <div class="cal-grid" id="cal-grid-inline"></div>
       <div class="cal-legend">
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--maroon)"></div>Hari ini</div>
-        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--gold)"></div>Ada rapat</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--gold)"></div>Ada/pernah rapat</div>
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#e53935"></div>Konflik ruangan</div>
       </div>
     </div>
-
-    <!-- KANAN: Statistik + Grafik -->
     <div class="stats-panel">
       <div class="stat-row">
-        <div class="stat-card">
-          <div class="stat-label">Total Rapat</div>
-          <div class="stat-value" id="dash-total">0</div>
-          <div class="stat-sub">Sepanjang waktu</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Tahun Ini</div>
-          <div class="stat-value" id="dash-tahun">0</div>
-          <div class="stat-sub" id="dash-tahun-lbl">Rapat 2025</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Rata-rata Peserta</div>
-          <div class="stat-value" id="dash-avg">0</div>
-          <div class="stat-sub">Per rapat</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Dokumen Dibuat</div>
-          <div class="stat-value" id="dash-dok">0</div>
-          <div class="stat-sub">Und+Absen+Risalah</div>
-        </div>
+        <div class="stat-card"><div class="stat-label">Total Rapat</div><div class="stat-value" id="dash-total">0</div><div class="stat-sub">Sepanjang waktu</div></div>
+        <div class="stat-card"><div class="stat-label">Tahun Ini</div><div class="stat-value" id="dash-tahun">0</div><div class="stat-sub" id="dash-tahun-lbl">Rapat 2026</div></div>
+        <div class="stat-card"><div class="stat-label">Rata-rata Peserta</div><div class="stat-value" id="dash-avg">0</div><div class="stat-sub">Per rapat</div></div>
+        <div class="stat-card"><div class="stat-label">Dokumen Dibuat</div><div class="stat-value" id="dash-dok">0</div><div class="stat-sub">Und+Absen+Risalah</div></div>
       </div>
       <div class="chart-card">
         <div class="chart-title">Rapat per Bulan — <span id="chart-tahun-lbl"></span></div>
@@ -512,13 +415,9 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
     </div>
   </div>
 
-  <!-- FORM GENERATE -->
   <div class="form-section">
     <div class="form-card">
-      <div class="form-card-header">
-        <div class="step-dot">1</div>
-        <h2>Waktu & Tempat Rapat</h2>
-      </div>
+      <div class="form-card-header"><div class="step-dot">1</div><h2>Waktu & Tempat Rapat</h2></div>
       <div class="form-body">
         <div class="nomor-status-bar">
           <div class="nomor-dot" id="nomor-dot"></div>
@@ -527,18 +426,9 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
           <button class="nomor-refresh-btn" onclick="fetchNomor()">↻ Refresh</button>
         </div>
         <div class="form-row">
-          <div class="field">
-            <label>Tanggal Rapat</label>
-            <input type="date" id="inp-tanggal" onchange="updateNomorPreview()">
-          </div>
-          <div class="field">
-            <label>Pukul Mulai</label>
-            <input type="time" id="inp-jam" value="09:00" onchange="checkBooking()">
-          </div>
-          <div class="field">
-            <label>Tempat / Ruangan</label>
-            <input type="text" id="inp-tempat" value="Aula Kantor KIP Kabupaten Pidie Jaya">
-          </div>
+          <div class="field"><label>Tanggal Rapat</label><input type="date" id="inp-tanggal" onchange="updateNomorPreview();checkBooking()"></div>
+          <div class="field"><label>Pukul Mulai</label><input type="time" id="inp-jam" value="09:00" onchange="checkBooking()"></div>
+          <div class="field"><label>Tempat / Ruangan</label><input type="text" id="inp-tempat" value="Aula Kantor KIP Kabupaten Pidie Jaya" onchange="checkBooking()"></div>
         </div>
         <div id="booking-warn" style="display:none;background:rgba(229,57,53,.08);border:1px solid rgba(229,57,53,.25);border-radius:8px;padding:10px 14px;font-size:12px;color:#c62828;margin-bottom:1rem">
           ⚠ Ruangan ini sudah dipakai pada tanggal & jam yang sama!
@@ -603,7 +493,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
         <option value="">Semua Tahun</option>
         <option>2026</option><option>2025</option>
       </select>
-      <button class="btn-sm" onclick="refreshArsipCloud()" title="Muat ulang dari cloud">☁ Sync</button>
+      <button class="btn-sm" onclick="refreshArsipCloud()">☁ Sync</button>
     </div>
     <div class="arsip-list" id="arsip-list"></div>
   </div>
@@ -612,8 +502,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 <!-- PAGE: PESERTA -->
 <div id="page-peserta" class="page">
   <div class="page-header"><div class="page-header-inner">
-    <h1>Manajemen Peserta</h1>
-    <p>Daftar peserta default untuk setiap generate dokumen</p>
+    <h1>Manajemen Peserta</h1><p>Daftar peserta default untuk setiap generate dokumen</p>
   </div></div>
   <div class="content-section">
     <div class="peserta-manage-list" id="peserta-manage-list"></div>
@@ -627,9 +516,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 
 <!-- PAGE: PENGATURAN -->
 <div id="page-pengaturan" class="page">
-  <div class="page-header"><div class="page-header-inner">
-    <h1>Pengaturan</h1><p>Konfigurasi sistem SiRapat</p>
-  </div></div>
+  <div class="page-header"><div class="page-header-inner"><h1>Pengaturan</h1><p>Konfigurasi sistem SiRapat</p></div></div>
   <div class="content-section">
     <div class="form-card"><div class="form-body">
       <div class="setting-group">
@@ -637,7 +524,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
         <div class="gas-banner">
           <div style="font-size:16px;flex-shrink:0">☁</div>
           <div>
-            Tempel URL deployment GAS di sini. Digunakan untuk baca nomor dari Sheets, simpan arsip ke Cloud, dan upload ke Drive.<br>
+            Tempel URL deployment GAS di sini.<br>
             <em style="font-size:11px;color:#1976d2">Deploy di <code>script.google.com</code> → Execute as: Me | Access: Anyone</em>
             <div class="gas-url-input" style="margin-top:8px">
               <input type="text" id="set-gas-url" placeholder="https://script.google.com/macros/s/.../exec">
@@ -656,12 +543,9 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
             <button class="tpl-mode-tab" onclick="setTplMode('manual',this)">🔗 URL Manual</button>
           </div>
           <div class="tpl-mode-panel active" id="tpl-panel-auto">
-            <div class="auto-info">
-              <div style="font-size:20px;flex-shrink:0">✅</div>
-              <div class="auto-info-text">
-                Fetch dari <strong>folder <code>templates/</code></strong> di repo yang sama.<br>
-                <code>UND_template.docx</code> · <code>ABSEN_template.docx</code> · <code>RISALAH_template.docx</code>
-              </div>
+            <div class="auto-info"><div style="font-size:20px;flex-shrink:0">✅</div>
+              <div class="auto-info-text">Fetch dari <strong>folder <code>templates/</code></strong> di repo yang sama.<br>
+              <code>UND_template.docx</code> · <code>ABSEN_template.docx</code> · <code>RISALAH_template.docx</code></div>
             </div>
             <div class="tpl-status-row"><span class="tpl-status-label">📄 Undangan</span><span class="tpl-status-path">./templates/UND_template.docx</span><span class="tpl-badge idle" id="st-auto-und" onclick="testAutoUrl('und')">Test</span></div>
             <div class="tpl-status-row"><span class="tpl-status-label">📋 Absen</span><span class="tpl-status-path">./templates/ABSEN_template.docx</span><span class="tpl-badge idle" id="st-auto-abs" onclick="testAutoUrl('abs')">Test</span></div>
@@ -718,11 +602,9 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 <div id="page-tentang" class="page">
   <div class="about-hero">
     <div class="hero-inner">
-      <div>
-        <img src="https://drive.google.com/thumbnail?id=1q9StOGlf7EQqrHh8Y_B5j4avQVbUtLBH&sz=w160"
-             alt="KIP Logo" style="width:80px;height:80px;border-radius:16px;object-fit:cover;margin-bottom:1rem;box-shadow:0 4px 16px rgba(0,0,0,.3)"
-             onerror="this.outerHTML='<div class=about-logo-fallback>KIP</div>'">
-      </div>
+      <div><img src="https://drive.google.com/thumbnail?id=1q9StOGlf7EQqrHh8Y_B5j4avQVbUtLBH&sz=w160" alt="KIP Logo"
+           style="width:80px;height:80px;border-radius:16px;object-fit:cover;margin-bottom:1rem;box-shadow:0 4px 16px rgba(0,0,0,.3)"
+           onerror="this.outerHTML='<div class=about-logo-fallback>KIP</div>'"></div>
       <div class="about-name">KIP Kabupaten Pidie Jaya</div>
       <div class="about-sub">Komisi Independen Pemilihan Kabupaten Pidie Jaya, Aceh</div>
     </div>
@@ -743,32 +625,18 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
       <div class="about-row"><div class="lbl">Penyimpanan</div><div class="val">Google Sheets (permanen, multi-device) + localStorage (cache lokal)</div></div>
     </div>
     <div class="about-card">
-      <h3>❓ FAQ — Cara Penggunaan</h3>
+      <h3>❓ FAQ</h3>
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">1. Kenapa data arsip hilang saat clear browser? <span class="faq-arrow">▼</span></div>
-        <div class="faq-a">Data arsip kini disimpan permanen di <strong>Google Sheets</strong> via GAS. localStorage hanya sebagai cache cepat. Pastikan URL GAS sudah diisi di Pengaturan — data akan tersedia di browser manapun.</div>
+        <div class="faq-a">Data arsip disimpan permanen di Google Sheets via GAS. localStorage hanya cache. Pastikan URL GAS diisi di Pengaturan.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">2. Cara deploy Google Apps Script? <span class="faq-arrow">▼</span></div>
-        <div class="faq-a">
-          <ol>
-            <li>Buka <a href="https://script.google.com" target="_blank" style="color:var(--blue)">script.google.com</a> → Proyek Baru</li>
-            <li>Paste isi file <code>gas_backend_fixed.js</code></li>
-            <li>Isi <code>SS_SURAT_ID</code>, <code>SS_ARSIP_ID</code>, dan <code>DRIVE_FOLDER_ID</code></li>
-            <li>Deploy → Web App → Execute as: Me · Access: Anyone</li>
-            <li>Salin URL → paste ke Pengaturan SiRapat</li>
-          </ol>
-        </div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">3. Cara generate dokumen rapat? <span class="faq-arrow">▼</span></div>
-        <div class="faq-a">
-          <ol>
-            <li>Pilih tanggal, jam, tempat, agenda, dan centang peserta</li>
-            <li>Klik <strong>Generate 3 Dokumen</strong> — ZIP otomatis terunduh dan arsip langsung disimpan ke cloud</li>
-            <li>Cek di menu Arsip — data sudah tersinkron</li>
-          </ol>
-        </div>
+        <div class="faq-q" onclick="toggleFaq(this)">2. Cara generate dokumen rapat? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a"><ol>
+          <li>Pilih tanggal, jam, tempat, agenda, centang peserta</li>
+          <li>Klik <strong>Generate 3 Dokumen</strong> — ZIP terunduh otomatis</li>
+          <li>Arsip langsung tersimpan ke cloud</li>
+        </ol></div>
       </div>
     </div>
   </div>
@@ -779,7 +647,6 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
   <div class="sync-dot" id="sync-dot"></div>
   <span id="sync-text"></span>
 </div>
-
 <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
   <div class="modal">
     <div class="modal-header">
@@ -789,65 +656,28 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
     <div class="modal-body" id="modal-body"></div>
   </div>
 </div>
-
 <script>
 // ════════════════════════════════════════════════
-//  HERO CANVAS ANIMATION — Floating particles
+//  HERO CANVAS
 // ════════════════════════════════════════════════
 (function(){
-  const canvas = document.getElementById('hero-canvas');
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  let W, H, particles = [], raf;
-
-  function resize(){
-    const hero = canvas.parentElement;
-    W = canvas.width  = hero.offsetWidth;
-    H = canvas.height = hero.offsetHeight;
-  }
-
-  function mkParticle(){
-    return {
-      x: Math.random()*W,
-      y: H + 10,
-      r: Math.random()*2.5 + .5,
-      speed: Math.random()*.6 + .3,
-      opacity: Math.random()*.6 + .2,
-      drift: (Math.random()-.5)*.4,
-      life: 0,
-      maxLife: Math.random()*160 + 80
-    };
-  }
-
+  const canvas=document.getElementById('hero-canvas'); if(!canvas) return;
+  const ctx=canvas.getContext('2d'); let W,H,particles=[];
+  function resize(){const h=canvas.parentElement;W=canvas.width=h.offsetWidth;H=canvas.height=h.offsetHeight;}
+  function mk(){return{x:Math.random()*W,y:H+10,r:Math.random()*2.5+.5,speed:Math.random()*.6+.3,opacity:Math.random()*.6+.2,drift:(Math.random()-.5)*.4,life:0,maxLife:Math.random()*160+80};}
   function draw(){
     ctx.clearRect(0,0,W,H);
-    // add new particles gradually
-    if(particles.length < 55 && Math.random() < .35) particles.push(mkParticle());
-
-    particles = particles.filter(p=>{
-      p.y  -= p.speed;
-      p.x  += p.drift;
-      p.life++;
-      const t = p.life/p.maxLife;
-      const alpha = t < .2 ? t/.2 : t > .8 ? (1-t)/.2 : 1;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(201,147,42,${p.opacity * alpha})`;
-      ctx.fill();
-      return p.life < p.maxLife && p.y > -10;
-    });
-    raf = requestAnimationFrame(draw);
+    if(particles.length<55&&Math.random()<.35) particles.push(mk());
+    particles=particles.filter(p=>{p.y-=p.speed;p.x+=p.drift;p.life++;const t=p.life/p.maxLife;const a=t<.2?t/.2:t>.8?(1-t)/.2:1;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(201,147,42,${p.opacity*a})`;ctx.fill();return p.life<p.maxLife&&p.y>-10;});
+    requestAnimationFrame(draw);
   }
-
-  resize();
-  window.addEventListener('resize', resize);
-  draw();
+  resize(); window.addEventListener('resize',resize); draw();
 })();
 
 // ════════════════════════════════════════════════
 //  STATE
 // ════════════════════════════════════════════════
-const DEFAULT_PESERTA = [
+const DEFAULT_PESERTA=[
   {nama:'ISKANDAR, S.Sos.',jabatan:'Ketua'},
   {nama:'DARKASYI ABDUL HAMID, S.Pd.',jabatan:'Anggota'},
   {nama:'ABDULLAH, S.Sos.',jabatan:'Anggota'},
@@ -862,87 +692,113 @@ const DEFAULT_PESERTA = [
   {nama:'NURHAYATI, A.Md.',jabatan:'Bendahara Pengeluaran'},
   {nama:'FAZIL BASRI, S.Kom.',jabatan:'Notulen'},
 ];
-
-let pesertaList = JSON.parse(localStorage.getItem('sirapat_peserta')||'null') || DEFAULT_PESERTA.map(p=>({...p}));
-let arsipList   = JSON.parse(localStorage.getItem('sirapat_arsip')||'[]');
-let settings    = JSON.parse(localStorage.getItem('sirapat_settings')||'null') || {
-  instansi:'KIP Kabupaten Pidie Jaya', kota:'Meureudu',
-  ketua:'Iskandar', sekretaris:'Iswandi',
-  nomorFmt:'[NO]/PK.01-Und/1118/[BULAN]/[TAHUN]', nomorLast:0,
-  gasUrl:'', urlUnd:'', urlAbs:'', urlRis:'', tplMode:'auto'
+let pesertaList=JSON.parse(localStorage.getItem('sirapat_peserta')||'null')||DEFAULT_PESERTA.map(p=>({...p}));
+let arsipList  =JSON.parse(localStorage.getItem('sirapat_arsip')||'[]');
+let settings   =JSON.parse(localStorage.getItem('sirapat_settings')||'null')||{
+  instansi:'KIP Kabupaten Pidie Jaya',kota:'Meureudu',ketua:'Iskandar',sekretaris:'Iswandi',
+  nomorFmt:'[NO]/PK.01-Und/1118/[BULAN]/[TAHUN]',nomorLast:0,
+  gasUrl:'',urlUnd:'',urlAbs:'',urlRis:'',tplMode:'auto'
 };
-
-const AUTO_PATHS = {und:'./templates/UND_template.docx',abs:'./templates/ABSEN_template.docx',ris:'./templates/RISALAH_template.docx'};
-const BULAN_ID   = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-const HARI_ID    = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-const SH_ID      = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-
-let tplMode       = settings.tplMode || 'auto';
-let calYearInline, calMonthInline;
-const today       = new Date();
-let lastGenId     = null;
-let uploadFiles   = {};
+const AUTO_PATHS={und:'./templates/UND_template.docx',abs:'./templates/ABSEN_template.docx',ris:'./templates/RISALAH_template.docx'};
+const BULAN_ID=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const HARI_ID=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const SH_ID=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+let tplMode=settings.tplMode||'auto';
+let calYearInline,calMonthInline;
+const today=new Date();
+let lastGenId=null;
+let uploadFiles={};
 
 // ════════════════════════════════════════════════
 //  HELPERS
 // ════════════════════════════════════════════════
-function getGasUrl(){ return (settings.gasUrl||'').trim(); }
-function buildNomor(no, tgl){
-  return settings.nomorFmt
-    .replace('[NO]', String(no))
-    .replace('[BULAN]', tgl instanceof Date ? tgl.getMonth()+1 : no)
-    .replace('[TAHUN]', tgl instanceof Date ? tgl.getFullYear() : today.getFullYear());
+function getGasUrl(){return(settings.gasUrl||'').trim();}
+function buildNomor(no,tgl){
+  return settings.nomorFmt.replace('[NO]',String(no))
+    .replace('[BULAN]',tgl instanceof Date?tgl.getMonth()+1:no)
+    .replace('[TAHUN]',tgl instanceof Date?tgl.getFullYear():today.getFullYear());
 }
-function tglGeneret(){ return `${today.getDate()} ${BULAN_ID[today.getMonth()]} ${today.getFullYear()}`; }
-function tglFull(d){ return `${d.getDate()} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`; }
-function saveLocal(){ localStorage.setItem('sirapat_arsip',JSON.stringify(arsipList)); }
+function tglGeneret(){return`${today.getDate()} ${BULAN_ID[today.getMonth()]} ${today.getFullYear()}`;}
+function tglFull(d){return`${d.getDate()} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;}
+function saveLocal(){localStorage.setItem('sirapat_arsip',JSON.stringify(arsipList));}
+
+// ════════════════════════════════════════════════
+//  ★ SANITASI DATA DARI GAS SHEETS ★
+//  Bersihkan format tanggal/jam ISO yang datang dari Sheets
+// ════════════════════════════════════════════════
+function sanitasiArsip(list){
+  return list.map(r=>{
+    // FIX tanggal: "2026-05-23T17:00:00.000Z" → "2026-05-23"
+    if(r.tanggal && String(r.tanggal).includes('T')){
+      r.tanggal=String(r.tanggal).split('T')[0];
+    }
+
+    // FIX jam: GAS kadang simpan time sebagai "1899-12-30T01:52:48.000Z"
+    // 1899-12-30 adalah epoch GAS untuk nilai time-only
+    if(r.jam && String(r.jam).includes('T')){
+      try{
+        const d=new Date(r.jam);
+        r.jam=String(d.getUTCHours()).padStart(2,'0')+':'+String(d.getUTCMinutes()).padStart(2,'0');
+      }catch(e){r.jam='00:00';}
+    }
+    // Potong jadi HH:MM kalau ada detik "09:00:00"
+    if(r.jam && String(r.jam).length>5 && String(r.jam).includes(':')){
+      r.jam=String(r.jam).substring(0,5);
+    }
+    // Buang suffix " WIB..." kalau ikut tersimpan
+    if(r.jam && String(r.jam).includes(' ')){
+      r.jam=String(r.jam).split(' ')[0];
+    }
+
+    // FIX tglGeneret: "2026-05-23T17:00:00.000Z" → "23 Mei 2026"
+    if(r.tglGeneret && String(r.tglGeneret).includes('T')){
+      try{
+        const d=new Date(r.tglGeneret);
+        r.tglGeneret=d.getUTCDate()+' '+BULAN_ID[d.getUTCMonth()]+' '+d.getUTCFullYear();
+      }catch(e){}
+    }
+    // Format YYYY-MM-DD biasa → Indonesia
+    if(r.tglGeneret && /^\d{4}-\d{2}-\d{2}$/.test(String(r.tglGeneret))){
+      try{
+        const p=r.tglGeneret.split('-');
+        r.tglGeneret=parseInt(p[2])+' '+BULAN_ID[parseInt(p[1])-1]+' '+p[0];
+      }catch(e){}
+    }
+
+    return r;
+  });
+}
 
 // ════════════════════════════════════════════════
 //  HERO STATS + DASHBOARD PANEL
 // ════════════════════════════════════════════════
 function updateHeroStats(){
-  const total = arsipList.length;
-  const ti    = arsipList.filter(r=>new Date(r.tanggal).getFullYear()===today.getFullYear()).length;
-  const nextNo= settings.nomorLast + 1;
-  const ht = document.getElementById('hs-total'); if(ht) animCount(ht, total);
-  const hy = document.getElementById('hs-tahun'); if(hy) animCount(hy, ti);
-  const hn = document.getElementById('hs-nomor'); if(hn) hn.textContent = '#'+nextNo;
+  const total=arsipList.length;
+  const ti=arsipList.filter(r=>new Date(r.tanggal).getFullYear()===today.getFullYear()).length;
+  const nextNo=settings.nomorLast+1;
+  const ht=document.getElementById('hs-total');if(ht) animCount(ht,total);
+  const hy=document.getElementById('hs-tahun');if(hy) animCount(hy,ti);
+  const hn=document.getElementById('hs-nomor');if(hn) hn.textContent='#'+nextNo;
 }
-
-function animCount(el, target){
-  let cur = 0; const step = Math.max(1, Math.floor(target/20));
-  const t = setInterval(()=>{
-    cur = Math.min(cur+step, target);
-    el.textContent = cur;
-    if(cur>=target) clearInterval(t);
-  }, 40);
+function animCount(el,target){
+  let cur=0;const step=Math.max(1,Math.floor(target/20));
+  const t=setInterval(()=>{cur=Math.min(cur+step,target);el.textContent=cur;if(cur>=target)clearInterval(t);},40);
 }
-
 function renderDashHome(){
-  const total = arsipList.length;
-  const ti    = arsipList.filter(r=>new Date(r.tanggal).getFullYear()===today.getFullYear()).length;
-  const avg   = total ? Math.round(arsipList.reduce((a,r)=>a+(r.peserta||[]).length,0)/total) : 0;
-  const dt = document.getElementById('dash-total'); if(dt) animCount(dt,total);
-  const dy = document.getElementById('dash-tahun'); if(dy) animCount(dy,ti);
-  const da = document.getElementById('dash-avg');   if(da) animCount(da,avg);
-  const dd = document.getElementById('dash-dok');   if(dd) animCount(dd,total*3);
-  const dl = document.getElementById('dash-tahun-lbl'); if(dl) dl.textContent='Rapat '+today.getFullYear();
-  const cl = document.getElementById('chart-tahun-lbl'); if(cl) cl.textContent=today.getFullYear();
-
-  const months = Array(12).fill(0);
-  arsipList.filter(r=>new Date(r.tanggal).getFullYear()===today.getFullYear())
-           .forEach(r=>months[new Date(r.tanggal).getMonth()]++);
-  const max = Math.max(...months, 1);
-
-  const bc = document.getElementById('bar-chart-home');
-  if(bc) bc.innerHTML = months.map((n,i)=>`
-    <div class="bar-group">
-      ${n>0?`<div class="bar-val">${n}</div>`:''}
-      <div class="bar" style="height:${Math.round(n/max*80)}px">
-        <div class="bar-inner" style="height:100%"></div>
-      </div>
-      <div class="bar-label">${SH_ID[i]}</div>
-    </div>`).join('');
+  const total=arsipList.length;
+  const ti=arsipList.filter(r=>new Date(r.tanggal).getFullYear()===today.getFullYear()).length;
+  const avg=total?Math.round(arsipList.reduce((a,r)=>a+(r.peserta||[]).length,0)/total):0;
+  const dt=document.getElementById('dash-total');if(dt) animCount(dt,total);
+  const dy=document.getElementById('dash-tahun');if(dy) animCount(dy,ti);
+  const da=document.getElementById('dash-avg');if(da) animCount(da,avg);
+  const dd=document.getElementById('dash-dok');if(dd) animCount(dd,total*3);
+  const dl=document.getElementById('dash-tahun-lbl');if(dl) dl.textContent='Rapat '+today.getFullYear();
+  const cl=document.getElementById('chart-tahun-lbl');if(cl) cl.textContent=today.getFullYear();
+  const months=Array(12).fill(0);
+  arsipList.filter(r=>new Date(r.tanggal).getFullYear()===today.getFullYear()).forEach(r=>months[new Date(r.tanggal).getMonth()]++);
+  const max=Math.max(...months,1);
+  const bc=document.getElementById('bar-chart-home');
+  if(bc) bc.innerHTML=months.map((n,i)=>`<div class="bar-group">${n>0?`<div class="bar-val">${n}</div>`:''}<div class="bar" style="height:${Math.round(n/max*80)}px"><div class="bar-inner" style="height:100%"></div></div><div class="bar-label">${SH_ID[i]}</div></div>`).join('');
 }
 
 // ════════════════════════════════════════════════
@@ -957,86 +813,98 @@ function showSync(msg,state='syncing'){
   clearTimeout(syncTimer);
   if(state!=='syncing') syncTimer=setTimeout(()=>el.classList.remove('show'),3500);
 }
+function setHeroSync(state,msg){
+  const dot=document.getElementById('hero-sync-dot');
+  const tx=document.getElementById('hero-sync-text');
+  if(dot) dot.className='hero-sync-dot '+state;
+  if(tx)  tx.textContent=msg;
+}
 
 // ════════════════════════════════════════════════
 //  GAS API
 // ════════════════════════════════════════════════
 async function gasGet(action){
-  const url=getGasUrl(); if(!url) throw new Error('GAS URL belum diisi');
+  const url=getGasUrl();if(!url) throw new Error('GAS URL belum diisi');
   const r=await fetch(`${url}?action=${action}`);
-  const d=await r.json(); if(d.error) throw new Error(d.error);
+  const d=await r.json();if(d.error) throw new Error(d.error);
   return d;
 }
 async function gasPost(payload){
-  const url=getGasUrl(); if(!url) throw new Error('GAS URL belum diisi');
+  const url=getGasUrl();if(!url) throw new Error('GAS URL belum diisi');
   const r=await fetch(url,{method:'POST',body:JSON.stringify(payload)});
-  const d=await r.json(); if(d.error) throw new Error(d.error);
+  const d=await r.json();if(d.error) throw new Error(d.error);
   return d;
 }
 
 // ════════════════════════════════════════════════
-//  CLOUD ARSIP
+//  ★ CLOUD ARSIP — DIPANGGIL SAAT WEB DIBUKA ★
 // ════════════════════════════════════════════════
-function setCloudBanner(state, msg){
+function setCloudBanner(state,msg){
   const b=document.getElementById('cloud-status-banner');
   const sp=document.getElementById('cloud-spin');
   const tx=document.getElementById('cloud-status-text');
   if(!b) return;
-  b.style.display='flex'; b.className='cloud-banner '+state;
-  sp.style.display=(state==='loading')?'block':'none';
-  tx.textContent=msg;
+  b.style.display='flex';b.className='cloud-banner '+state;
+  if(sp) sp.style.display=(state==='loading')?'block':'none';
+  if(tx) tx.textContent=msg;
   if(state==='ok'||state==='err') setTimeout(()=>{b.style.display='none';},5000);
 }
 
 async function loadArsipFromCloud(){
   if(!getGasUrl()){
+    setHeroSync('err','GAS URL belum diisi');
     setCloudBanner('warn','URL GAS belum diisi — data hanya dari browser lokal. Isi di Pengaturan.');
     return;
   }
-  setCloudBanner('loading','Memuat arsip dari cloud...');
+  setHeroSync('syncing','Menyinkron data cloud...');
   showSync('Memuat dari cloud...','syncing');
   try{
-    const data = await gasGet('getArsip');
-    const cloudArsip = data.arsip || [];
-    const cloudIds = new Set(cloudArsip.map(r=>String(r.id)));
-    const localOnly = arsipList.filter(r=>!cloudIds.has(String(r.id)));
-    arsipList = [...cloudArsip, ...localOnly];
+    const data=await gasGet('getArsip');
+    // ★ SANITASI: bersihkan format ISO dari Sheets
+    const cloudArsip=sanitasiArsip(data.arsip||[]);
+    const cloudIds=new Set(cloudArsip.map(r=>String(r.id)));
+    const localOnly=arsipList.filter(r=>!cloudIds.has(String(r.id)));
+    arsipList=[...cloudArsip,...localOnly];
     arsipList.sort((a,b)=>String(b.id).localeCompare(String(a.id)));
     saveLocal();
     arsipList.forEach(r=>{
-      if(r.uploadedFiles && r.uploadedFiles.length && !(uploadFiles[r.id]||[]).length){
-        uploadFiles[r.id] = r.uploadedFiles.map(f=>({...f,file:null}));
+      if(r.uploadedFiles&&r.uploadedFiles.length&&!(uploadFiles[r.id]||[]).length){
+        uploadFiles[r.id]=r.uploadedFiles.map(f=>({...f,file:null}));
       }
     });
     if(localOnly.length){
       for(const item of localOnly) gasPost({action:'simpanArsip',...item}).catch(()=>{});
     }
-    setCloudBanner('ok',`✓ ${arsipList.length} arsip dimuat dari cloud`);
+    setHeroSync('ok',`✓ ${arsipList.length} arsip tersinkron`);
     showSync(`${arsipList.length} arsip tersinkron`,'ok');
-    renderArsip(); renderCalInline(); renderDashHome(); updateHeroStats();
+    setCloudBanner('ok',`✓ ${arsipList.length} arsip dimuat dari cloud`);
+    // Render ulang semua komponen yang bergantung pada arsipList
+    renderArsip();
+    renderCalInline();
+    renderDashHome();
+    updateHeroStats();
   }catch(e){
-    setCloudBanner('err','❌ Gagal memuat dari cloud: '+e.message+' — menampilkan data lokal');
+    setHeroSync('err','Gagal sync — menggunakan data lokal');
+    setCloudBanner('err','❌ Gagal memuat dari cloud: '+e.message);
     showSync('Gagal sync cloud','err');
   }
 }
 
-async function refreshArsipCloud(){ await loadArsipFromCloud(); }
+async function refreshArsipCloud(){await loadArsipFromCloud();}
 
 async function syncArsipToCloud(item){
   if(!getGasUrl()) return;
   showSync('Menyimpan ke cloud...','syncing');
   try{
-    const payload={...item,
-      uploadedFiles:(uploadFiles[item.id]||[]).map(f=>({name:f.name,size:f.size,status:f.status,url:f.url||null}))
-    };
+    const payload={...item,uploadedFiles:(uploadFiles[item.id]||[]).map(f=>({name:f.name,size:f.size,status:f.status,url:f.url||null}))};
     await gasPost({action:'simpanArsip',...payload});
     showSync('Tersimpan ke cloud','ok');
-  }catch(e){ showSync('Gagal sync cloud','err'); }
+  }catch(e){showSync('Gagal sync cloud','err');}
 }
 
 async function hapusArsipCloud(id){
   if(!getGasUrl()) return;
-  try{ await gasPost({action:'hapusArsip',id}); }catch(e){}
+  try{await gasPost({action:'hapusArsip',id});}catch(e){}
 }
 
 // ════════════════════════════════════════════════
@@ -1046,20 +914,20 @@ async function fetchNomor(){
   const dot=document.getElementById('nomor-dot');
   const prev=document.getElementById('nomor-preview');
   if(!getGasUrl()){dot.className='nomor-dot err';prev.textContent='— isi URL Apps Script di Pengaturan';return;}
-  dot.className='nomor-dot loading'; prev.textContent='Membaca dari Sheets...';
+  dot.className='nomor-dot loading';prev.textContent='Membaca dari Sheets...';
   try{
     const data=await gasGet('getLastNomor');
     settings.nomorLast=data.lastNomor;
     localStorage.setItem('sirapat_settings',JSON.stringify(settings));
     dot.className='nomor-dot ok';
-    updateNomorPreview(); updateHeroStats();
+    updateNomorPreview();updateHeroStats();
   }catch(e){
     dot.className='nomor-dot err';
-    prev.textContent='❌ Gagal baca Sheets — pakai nomor lokal: '+(settings.nomorLast+1);
+    prev.textContent='❌ Gagal — pakai nomor lokal: '+(settings.nomorLast+1);
   }
 }
 function updateNomorPreview(){
-  const tgl=document.getElementById('inp-tanggal').value; if(!tgl) return;
+  const tgl=document.getElementById('inp-tanggal').value;if(!tgl) return;
   const d=new Date(tgl+'T00:00:00');
   document.getElementById('nomor-preview').textContent=buildNomor(settings.nomorLast+1,d)+` (urut ke-${settings.nomorLast+1})`;
 }
@@ -1068,54 +936,28 @@ function updateNomorPreview(){
 //  TEMPLATE MODE
 // ════════════════════════════════════════════════
 function setTplMode(mode,btn){
-  tplMode=mode; settings.tplMode=mode;
+  tplMode=mode;settings.tplMode=mode;
   document.querySelectorAll('.tpl-mode-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   document.querySelectorAll('.tpl-mode-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('tpl-panel-'+mode).classList.add('active');
 }
-function getTemplateUrl(key){
-  if(tplMode==='auto') return AUTO_PATHS[key];
-  return (document.getElementById('url-'+key)||{value:''}).value.trim();
-}
+function getTemplateUrl(key){if(tplMode==='auto') return AUTO_PATHS[key];return(document.getElementById('url-'+key)||{value:''}).value.trim();}
 
 // ════════════════════════════════════════════════
 //  TEST URLs
 // ════════════════════════════════════════════════
-async function testUrl(url){
-  const r=await fetch(url); if(!r.ok) throw new Error('HTTP '+r.status);
-  const buf=await r.arrayBuffer(); if(buf.byteLength<200) throw new Error('Bukan docx');
-  return buf.byteLength;
-}
-async function testAutoUrl(key){
-  const b=document.getElementById('st-auto-'+key);
-  b.className='tpl-badge loading';b.textContent='Mengecek...';
-  try{const s=await testUrl(AUTO_PATHS[key]);b.className='tpl-badge ok';b.textContent=`✓ OK (${(s/1024).toFixed(1)}KB)`;}
-  catch(e){b.className='tpl-badge err';b.textContent='✗ '+e.message;}
-}
+async function testUrl(url){const r=await fetch(url);if(!r.ok) throw new Error('HTTP '+r.status);const buf=await r.arrayBuffer();if(buf.byteLength<200) throw new Error('Bukan docx');return buf.byteLength;}
+async function testAutoUrl(key){const b=document.getElementById('st-auto-'+key);b.className='tpl-badge loading';b.textContent='Mengecek...';try{const s=await testUrl(AUTO_PATHS[key]);b.className='tpl-badge ok';b.textContent=`✓ OK (${(s/1024).toFixed(1)}KB)`;}catch(e){b.className='tpl-badge err';b.textContent='✗ '+e.message;}}
 async function testSemuaAuto(){await Promise.all(['und','abs','ris'].map(k=>testAutoUrl(k)));}
-async function testManualUrl(key){
-  const b=document.getElementById('badge-'+key);
-  const url=(document.getElementById('url-'+key)||{value:''}).value.trim();
-  if(!url){showToast('Masukkan URL','error');return;}
-  b.className='tpl-badge loading';b.textContent='Mengecek...';
-  try{const s=await testUrl(url);b.className='tpl-badge ok';b.textContent=`✓ OK (${(s/1024).toFixed(1)}KB)`;showToast('✓ OK','success');}
-  catch(e){b.className='tpl-badge err';b.textContent='✗ '+e.message;showToast('Gagal: '+e.message,'error');}
-}
+async function testManualUrl(key){const b=document.getElementById('badge-'+key);const url=(document.getElementById('url-'+key)||{value:''}).value.trim();if(!url){showToast('Masukkan URL','error');return;}b.className='tpl-badge loading';b.textContent='Mengecek...';try{const s=await testUrl(url);b.className='tpl-badge ok';b.textContent=`✓ OK (${(s/1024).toFixed(1)}KB)`;showToast('✓ OK','success');}catch(e){b.className='tpl-badge err';b.textContent='✗ '+e.message;showToast('Gagal: '+e.message,'error');}}
 async function testGasUrl(){
   const url=(document.getElementById('set-gas-url')||{value:''}).value.trim();
   if(!url){showToast('Masukkan URL GAS','error');return;}
-  const st=document.getElementById('gas-status');
-  st.textContent='⏳ Menguji...';st.style.color='#8a6010';
-  settings.gasUrl=url; localStorage.setItem('sirapat_settings',JSON.stringify(settings));
-  try{
-    const d=await gasGet('getLastNomor');
-    st.textContent=`✅ Terhubung! Nomor terakhir: ${d.lastNomor}`;st.style.color='#2e7d32';
-    showToast('GAS terhubung!','success'); fetchNomor();
-  }catch(e){
-    st.textContent='❌ Gagal: '+e.message;st.style.color='#c62828';
-    showToast('GAS gagal: '+e.message,'error');
-  }
+  const st=document.getElementById('gas-status');st.textContent='⏳ Menguji...';st.style.color='#8a6010';
+  settings.gasUrl=url;localStorage.setItem('sirapat_settings',JSON.stringify(settings));
+  try{const d=await gasGet('getLastNomor');st.textContent=`✅ Terhubung! Nomor terakhir: ${d.lastNomor}`;st.style.color='#2e7d32';showToast('GAS terhubung!','success');fetchNomor();}
+  catch(e){st.textContent='❌ Gagal: '+e.message;st.style.color='#c62828';showToast('GAS gagal: '+e.message,'error');}
 }
 
 // ════════════════════════════════════════════════
@@ -1134,12 +976,12 @@ function pilihAgenda(el,text){
   document.querySelectorAll('.agenda-chip').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
   const ta=document.getElementById('inp-agenda');
-  ta.value=text; ta.disabled=!!text;
+  ta.value=text;ta.disabled=!!text;
   if(!text){ta.disabled=false;ta.focus();}
 }
 
 // ════════════════════════════════════════════════
-//  CALENDAR
+//  ★ KALENDER — TANDA RAPAT DARI ARSIP ★
 // ════════════════════════════════════════════════
 function initCalInline(){calYearInline=today.getFullYear();calMonthInline=today.getMonth();}
 function changeMonthInline(d){
@@ -1151,31 +993,58 @@ function changeMonthInline(d){
 function renderCalInline(){
   if(calYearInline===undefined) initCalInline();
   document.getElementById('cal-title-inline').textContent=`${BULAN_ID[calMonthInline]} ${calYearInline}`;
+
+  // ★ Buat map tanggal → daftar rapat (bisa >1 rapat per tanggal)
   const rapatMap={};
-  arsipList.forEach(r=>{if(!rapatMap[r.tanggal]) rapatMap[r.tanggal]={jam:r.jam,tempat:r.tempat};});
+  arsipList.forEach(r=>{
+    if(!rapatMap[r.tanggal]) rapatMap[r.tanggal]=[];
+    rapatMap[r.tanggal].push({jam:r.jam,tempat:r.tempat,agenda:r.agenda});
+  });
+
   const selectedTgl=document.getElementById('inp-tanggal').value;
   const selectedJam=document.getElementById('inp-jam').value;
   const selectedTempat=document.getElementById('inp-tempat').value.trim();
   const firstDay=new Date(calYearInline,calMonthInline,1).getDay();
   const days=new Date(calYearInline,calMonthInline+1,0).getDate();
   const todayStr=today.toISOString().split('T')[0];
+
   let html=HARI_ID.map((_,i)=>`<div class="cal-day-name">${['Min','Sen','Sel','Rab','Kam','Jum','Sab'][i]}</div>`).join('');
   for(let i=0;i<firstDay;i++) html+=`<div class="cal-day other-month"></div>`;
+
   for(let d=1;d<=days;d++){
     const ds=`${calYearInline}-${String(calMonthInline+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isToday=ds===todayStr, isSel=ds===selectedTgl, ev=rapatMap[ds];
-    const isBooked=ev&&ds===selectedTgl&&ev.jam===selectedJam&&ev.tempat===selectedTempat;
+    const isToday=ds===todayStr;
+    const isSel=ds===selectedTgl;
+    const events=rapatMap[ds]||[];
+    const hasEvent=events.length>0;
+
+    // Cek konflik: ada rapat lain di tanggal+jam+tempat yang sama
+    const isBooked=hasEvent && ds===selectedTgl && events.some(e=>e.jam===selectedJam && e.tempat===selectedTempat);
+
     let cls='cal-day';
     if(isToday) cls+=' today';
     if(isSel&&!isToday) cls+=' selected';
-    if(isBooked) cls+=' booked'; else if(ev) cls+=' has-event';
-    html+=`<div class="${cls}" onclick="calClickInline('${ds}')">${d}</div>`;
+    if(isBooked) cls+=' booked';
+    else if(hasEvent) cls+=' has-event';
+
+    // Tooltip: daftar agenda di tanggal tersebut
+    let tip='';
+    if(hasEvent){
+      tip=events.map(e=>`${e.jam} – ${(e.agenda||'').substring(0,30)}`).join(' | ');
+    }
+
+    html+=`<div class="${cls}" ${tip?`data-tip="${tip.replace(/"/g,'&quot;')}"`:''} onclick="calClickInline('${ds}')">${d}</div>`;
   }
   document.getElementById('cal-grid-inline').innerHTML=html;
 }
+
 function calClickInline(ds){
-  const found=arsipList.find(r=>r.tanggal===ds);
-  if(found){showArsipDetail(found.id);return;}
+  const events=arsipList.filter(r=>r.tanggal===ds);
+  if(events.length===1){showArsipDetail(events[0].id);return;}
+  if(events.length>1){
+    // Pilih event terbaru
+    showArsipDetail(events[0].id);return;
+  }
   document.getElementById('inp-tanggal').value=ds;
   renderCalInline();updateNomorPreview();checkBooking();
 }
@@ -1185,6 +1054,7 @@ function checkBooking(){
   const tempat=document.getElementById('inp-tempat').value.trim();
   const conflict=arsipList.find(r=>r.tanggal===tgl&&r.jam===jam&&r.tempat===tempat);
   document.getElementById('booking-warn').style.display=conflict?'block':'none';
+  renderCalInline();
 }
 
 // ════════════════════════════════════════════════
@@ -1192,7 +1062,7 @@ function checkBooking(){
 // ════════════════════════════════════════════════
 function setPS(id,state){const el=document.getElementById(id);if(el) el.className='prog-step'+(state?' '+state:'');}
 async function fetchAndInject(url,data){
-  const r=await fetch(url); if(!r.ok) throw new Error(`HTTP ${r.status} untuk "${url}"`);
+  const r=await fetch(url);if(!r.ok) throw new Error(`HTTP ${r.status} untuk "${url}"`);
   const buf=await r.arrayBuffer();
   const zip=new PizZip(buf);
   const doc=new window.docxtemplater(zip,{paragraphLoop:true,linebreaks:true,delimiters:{start:'[[',end:']]'},nullGetter:()=>''});
@@ -1215,7 +1085,7 @@ async function generateDokumen(){
   const pesertaHadir=getCheckedPeserta();
   if(!pesertaHadir.length){showToast('Pilih minimal 1 peserta!','error');return;}
 
-  document.getElementById('btn-awan').classList.remove('visible'); lastGenId=null;
+  document.getElementById('btn-awan').classList.remove('visible');lastGenId=null;
   const tgl=new Date(tanggalVal+'T00:00:00');
   const hariStr=HARI_ID[tgl.getDay()];
   const tglStr=tglFull(tgl);
@@ -1258,18 +1128,19 @@ async function generateDokumen(){
     const a=document.createElement('a');a.href=URL.createObjectURL(zipBlob);
     a.download=`${prefix}_DokumenRapat.zip`;a.click();URL.revokeObjectURL(a.href);
     setPS('ps-done','done');
+
     const arsipId=Date.now();
     const newItem={id:arsipId,tanggal:tanggalVal,hari:hariStr,jam:jamVal,tempat,agenda,nomorSurat,tglGeneret:tglGen,peserta:pesertaHadir.map(p=>p.nama),uploadedFiles:[]};
-    arsipList.unshift(newItem); saveLocal();
-    settings.nomorLast=nextNo; localStorage.setItem('sirapat_settings',JSON.stringify(settings));
+    arsipList.unshift(newItem);saveLocal();
+    settings.nomorLast=nextNo;localStorage.setItem('sirapat_settings',JSON.stringify(settings));
     if(getGasUrl()){
       gasPost({action:'simpanNomor',nomorUrut:nextNo,nomorSurat,tanggal:tglStr,agenda,tujuan:'',tglGeneret:tglGen,pesertaCount:pesertaHadir.length}).catch(()=>{});
       syncArsipToCloud(newItem);
     }
     lastGenId=arsipId;
     document.getElementById('btn-awan').classList.add('visible');
-    updateNomorPreview(); renderCalInline(); renderDashHome(); updateHeroStats();
-    showToast('✓ 3 dokumen berhasil diinject & diunduh!','success');
+    updateNomorPreview();renderCalInline();renderDashHome();updateHeroStats();
+    showToast('✓ 3 dokumen berhasil diunduh! Arsip disimpan ke cloud.','success');
   }catch(err){
     console.error(err);showToast('❌ '+err.message,'error');
   }finally{
@@ -1299,9 +1170,9 @@ function renderArsip(){
   const thn=document.getElementById('filter-tahun')?.value||'';
   const list=arsipList.filter(r=>{
     const d=new Date(r.tanggal);
-    if(bln && BULAN_ID[d.getMonth()]!==bln) return false;
-    if(thn && String(d.getFullYear())!==thn) return false;
-    if(q && !JSON.stringify(r).toLowerCase().includes(q)) return false;
+    if(bln&&BULAN_ID[d.getMonth()]!==bln) return false;
+    if(thn&&String(d.getFullYear())!==thn) return false;
+    if(q&&!JSON.stringify(r).toLowerCase().includes(q)) return false;
     return true;
   });
   const el=document.getElementById('arsip-list');
@@ -1322,7 +1193,7 @@ function renderArsip(){
           <span>🕐 ${r.jam} WIB</span>
           <span>👥 ${(r.peserta||[]).length} peserta</span>
           ${totalCloud?`<span style="color:var(--blue)">☁ ${totalCloud} file</span>`:''}
-          ${r.nomorSurat?`<span title="Nomor surat">${r.nomorSurat}</span>`:''}
+          ${r.nomorSurat?`<span>${r.nomorSurat}</span>`:''}
         </div>
       </div>
       <div class="arsip-actions" onclick="event.stopPropagation()">
@@ -1334,9 +1205,9 @@ function renderArsip(){
 
 function hapusArsip(id){
   if(!confirm('Hapus arsip ini dari lokal dan cloud?')) return;
-  arsipList=arsipList.filter(r=>r.id!==id); saveLocal();
-  delete uploadFiles[id]; hapusArsipCloud(id);
-  renderArsip(); renderDashHome(); updateHeroStats();
+  arsipList=arsipList.filter(r=>r.id!==id);saveLocal();
+  delete uploadFiles[id];hapusArsipCloud(id);
+  renderArsip();renderCalInline();renderDashHome();updateHeroStats();
   showToast('Arsip dihapus','info');
 }
 
@@ -1344,7 +1215,7 @@ function hapusArsip(id){
 //  MODAL DETAIL + UPLOAD
 // ════════════════════════════════════════════════
 function showArsipDetail(id){
-  const r=arsipList.find(x=>x.id===id); if(!r) return;
+  const r=arsipList.find(x=>x.id===id);if(!r) return;
   const d=new Date(r.tanggal);
   const folderName=`${String(d.getDate()).padStart(2,'0')} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;
   if(r.uploadedFiles&&r.uploadedFiles.length&&!(uploadFiles[id]||[]).length){
@@ -1382,7 +1253,7 @@ function showArsipDetail(id){
 
 function renderFileList(id){
   const files=uploadFiles[id]||[];
-  const el=document.getElementById(`file-list-${id}`); if(!el) return;
+  const el=document.getElementById(`file-list-${id}`);if(!el) return;
   const actEl=document.getElementById(`upload-actions-${id}`);if(actEl) actEl.style.display=files.length?'flex':'none';
   if(!files.length){el.innerHTML='';return;}
   el.innerHTML=files.map((f,i)=>`
@@ -1391,9 +1262,7 @@ function renderFileList(id){
       <div class="file-name">${f.name}</div>
       <div class="file-size">${fmtSize(f.size)}</div>
       ${f.status==='done'&&f.url?`<a class="file-link" href="${f.url}" target="_blank">Buka ↗</a>`:`<span class="file-status ${f.status}">${statusLbl(f.status)}</span>`}
-      <div class="file-actions">
-        ${f.status!=='uploading'?`<button onclick="hapusFile(${id},${i})" title="Hapus">✕</button>`:''}
-      </div>
+      <div class="file-actions">${f.status!=='uploading'?`<button onclick="hapusFile(${id},${i})" title="Hapus">✕</button>`:''}</div>
     </div>`).join('');
 }
 
@@ -1403,31 +1272,18 @@ function statusLbl(s){return{pending:'Menunggu',uploading:'Uploading...',done:'T
 
 function hapusFile(id,i){
   if(!uploadFiles[id]) return;
-  uploadFiles[id].splice(i,1);
-  renderFileList(id);
+  uploadFiles[id].splice(i,1);renderFileList(id);
   const r=arsipList.find(x=>x.id===id);
-  if(r){
-    r.uploadedFiles=uploadFiles[id].filter(f=>f.status==='done').map(f=>({name:f.name,size:f.size,status:f.status,url:f.url||null}));
-    saveLocal();
-    if(getGasUrl()) gasPost({action:'updateArsipFiles',id,uploadedFiles:r.uploadedFiles}).catch(()=>{});
-  }
+  if(r){r.uploadedFiles=uploadFiles[id].filter(f=>f.status==='done').map(f=>({name:f.name,size:f.size,status:f.status,url:f.url||null}));saveLocal();if(getGasUrl()) gasPost({action:'updateArsipFiles',id,uploadedFiles:r.uploadedFiles}).catch(()=>{});}
   renderArsip();
 }
 function handleFileInput(ev,id){addFiles(id,Array.from(ev.target.files));ev.target.value='';}
-function handleDrop(ev,id){
-  ev.preventDefault();
-  document.getElementById(`dropzone-${id}`)?.classList.remove('dragover');
-  addFiles(id,Array.from(ev.dataTransfer.files));
-}
+function handleDrop(ev,id){ev.preventDefault();document.getElementById(`dropzone-${id}`)?.classList.remove('dragover');addFiles(id,Array.from(ev.dataTransfer.files));}
 function addFiles(id,files){
   if(!uploadFiles[id]) uploadFiles[id]=[];
-  files.forEach(f=>{
-    if(f.size>10*1024*1024){showToast(`${f.name} terlalu besar (maks 10MB)`,'error');return;}
-    uploadFiles[id].push({file:f,name:f.name,size:f.size,status:'pending',url:null});
-  });
+  files.forEach(f=>{if(f.size>10*1024*1024){showToast(`${f.name} terlalu besar`,'error');return;}uploadFiles[id].push({file:f,name:f.name,size:f.size,status:'pending',url:null});});
   renderFileList(id);
 }
-
 async function uploadSemuaFile(id,folderName){
   if(!getGasUrl()){showToast('URL Apps Script belum diisi!','error');return;}
   const pending=(uploadFiles[id]||[]).filter(f=>f.status==='pending'||f.status==='err');
@@ -1445,17 +1301,13 @@ async function uploadSemuaFile(id,folderName){
       const res=await gasPost({action:'uploadFile',fileName:f.name,fileBase64:b64,mimeType:f.file.type||'application/octet-stream',folderName});
       if(!res.success) throw new Error(res.error||'Unknown error');
       uploadFiles[id][i].status='done';uploadFiles[id][i].url=res.fileUrl;ok++;
-    }catch(e){uploadFiles[id][i].status='err';fail++;console.error('Upload error',e);}
+    }catch(e){uploadFiles[id][i].status='err';fail++;console.error(e);}
     renderFileList(id);
   }
   if(btn){btn.disabled=false;btn.textContent='☁ Upload ke Drive';}
   showToast(`Upload: ${ok} berhasil${fail?`, ${fail} gagal`:''}`,ok?'success':'error');
   const r=arsipList.find(x=>x.id===id);
-  if(r){
-    r.uploadedFiles=uploadFiles[id].map(f=>({name:f.name,size:f.size,status:f.status,url:f.url||null}));
-    saveLocal();
-    if(getGasUrl()) gasPost({action:'updateArsipFiles',id,uploadedFiles:r.uploadedFiles}).catch(()=>{});
-  }
+  if(r){r.uploadedFiles=uploadFiles[id].map(f=>({name:f.name,size:f.size,status:f.status,url:f.url||null}));saveLocal();if(getGasUrl()) gasPost({action:'updateArsipFiles',id,uploadedFiles:r.uploadedFiles}).catch(()=>{});}
   renderArsip();
 }
 function toBase64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('Baca gagal'));r.readAsDataURL(file);});}
@@ -1516,15 +1368,15 @@ function simpanPengaturan(){
 function toggleFaq(el){el.classList.toggle('open');el.nextElementSibling.classList.toggle('open');}
 
 // ════════════════════════════════════════════════
-//  NAV
+//  NAV — ★ arsip TIDAK lagi memanggil cloud sync ★
 // ════════════════════════════════════════════════
 function showPage(id,btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   if(btn) btn.classList.add('active');
-  if(id==='peserta')   renderPesertaManage();
-  if(id==='arsip')     { renderArsip(); loadArsipFromCloud(); }
+  if(id==='peserta')    renderPesertaManage();
+  if(id==='arsip')      renderArsip();        // hanya render, sync sudah dilakukan di INIT
   if(id==='pengaturan') loadPengaturan();
 }
 
@@ -1539,20 +1391,26 @@ function showToast(msg,type='info'){
 }
 
 // ════════════════════════════════════════════════
-//  INIT
+//  ★ INIT — SYNC CLOUD SAAT WEB PERTAMA DIBUKA ★
 // ════════════════════════════════════════════════
 document.getElementById('inp-tanggal').value=today.toISOString().split('T')[0];
-initCalInline(); renderCalInline();
+initCalInline();renderCalInline();
 renderPesertaGen();
 renderDashHome();
 updateHeroStats();
 if(settings.tplMode==='manual'){tplMode='manual';document.querySelectorAll('.tpl-mode-tab')[1]?.click();}
-if(getGasUrl()){
-  fetchNomor();
-  loadArsipFromCloud().then(()=>{renderCalInline(); renderDashHome(); updateHeroStats();});
-} else {
-  updateNomorPreview(); renderArsip();
-}
+
+// ★ Sync cloud langsung saat halaman dibuka (bukan saat klik Arsip)
+// fetchNomor dan loadArsipFromCloud berjalan paralel
+Promise.all([
+  getGasUrl() ? fetchNomor() : Promise.resolve(),
+  loadArsipFromCloud()   // sudah handle kasus gasUrl kosong
+]).then(()=>{
+  renderCalInline();
+  renderDashHome();
+  updateHeroStats();
+  updateNomorPreview();
+});
 </script>
 </body>
 </html>
