@@ -7,7 +7,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
 <script src="https://unpkg.com/docxtemplater@3.44.0/build/docxtemplater.js"></script>
-<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
 <style>
 :root{
   --maroon:#7a1020;--maroon-dark:#5a0b18;--maroon-deep:#3d0710;
@@ -533,6 +532,14 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
   .faq-q{min-height:44px}
   .agenda-chip{min-height:36px;display:flex;align-items:center}
 }
+
+/* ══ FILE PREVIEW ══ */
+.file-preview-area{margin-top:10px;border-top:1px solid rgba(122,16,32,.08);padding-top:10px;animation:fade-up .25s ease}
+.file-preview-btn{background:rgba(122,16,32,.07);border:1.5px solid rgba(122,16,32,.15);border-radius:5px;cursor:pointer;font-size:13px;padding:2px 7px;color:var(--maroon);transition:all .15s;flex-shrink:0}
+.file-preview-btn:hover{background:rgba(122,16,32,.15)}
+.file-preview-btn.active{background:var(--maroon);color:white}
+/* item file jadi flex-col saat ada preview */
+.uploaded-file-item{flex-direction:column;align-items:stretch}
 </style>
 </head>
 <body>
@@ -655,7 +662,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
       <div class="progress-bar" id="progress-bar">
         <span class="prog-step" id="ps-fetch">⬇ Fetch</span><span class="prog-arrow">›</span>
         <span class="prog-step" id="ps-inject">⚙ Inject</span><span class="prog-arrow">›</span>
-        <span class="prog-step" id="ps-zip">📦 ZIP</span><span class="prog-arrow">›</span>
+        <span class="prog-step" id="ps-zip">⬇ Unduh</span><span class="prog-arrow">›</span>
         <span class="prog-step" id="ps-done">✓ Selesai</span>
       </div>
       <div class="generate-area">
@@ -1013,7 +1020,7 @@ async function loadArsipFromCloud(){
     arsipList=[...cloudArsip,...localOnly];
     arsipList.sort((a,b)=>String(b.id).localeCompare(String(a.id)));
     saveLocal();
-    arsipList.forEach(r=>{if(r.uploadedFiles&&r.uploadedFiles.length&&!(uploadFiles[r.id]||[]).length) uploadFiles[r.id]=r.uploadedFiles.map(f=>({...f,file:null}));});
+    arsipList.forEach(r=>{if(r.uploadedFiles&&r.uploadedFiles.length&&!(uploadFiles[r.id]||[]).length) uploadFiles[r.id]=r.uploadedFiles.map(f=>({...f,file:null,type:f.type||'',_showPreview:false}));});
     if(localOnly.length) for(const item of localOnly) gasPost({action:'simpanArsip',...item}).catch(()=>{});
     setHeroSync('ok',`✓ ${arsipList.length} arsip tersinkron`);
     showSync(`${arsipList.length} arsip tersinkron`,'ok');
@@ -1151,23 +1158,42 @@ async function generateDokumen(){
   const btn=document.getElementById('btn-gen'),sp=document.getElementById('spinner'),tx=document.getElementById('btn-gen-text');
   btn.disabled=true;sp.style.display='block';document.getElementById('progress-bar').style.display='flex';
   ['ps-fetch','ps-inject','ps-zip','ps-done'].forEach(id=>setPS(id,''));
+
+  // Helper: trigger download blob sebagai file
+  function dlBlob(blob, filename){
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+  }
+
   try{
     setPS('ps-fetch','active');tx.textContent='Mengambil template...';
-    let blobs;try{blobs=await Promise.all([fetchAndInject(urlUnd,data),fetchAndInject(urlAbs,data),fetchAndInject(urlRis,data)]);}catch(e){setPS('ps-fetch','err');throw e;}
-    setPS('ps-fetch','done');setPS('ps-inject','done');setPS('ps-zip','active');tx.textContent='Membuat ZIP...';
+    let blobs;
+    try{blobs=await Promise.all([fetchAndInject(urlUnd,data),fetchAndInject(urlAbs,data),fetchAndInject(urlRis,data)]);}
+    catch(e){setPS('ps-fetch','err');throw e;}
+    setPS('ps-fetch','done');setPS('ps-inject','done');
+
+    setPS('ps-zip','active');tx.textContent='Mengunduh 3 dokumen...';
     const prefix=`Rapat_${tanggalVal.replace(/-/g,'')}`;
-    const zipOut=new JSZip();
-    zipOut.file(`${prefix}_Undangan.docx`,blobs[0]);zipOut.file(`${prefix}_AbsenHadir.docx`,blobs[1]);zipOut.file(`${prefix}_Risalah.docx`,blobs[2]);
-    const zipBlob=await zipOut.generateAsync({type:'blob'});setPS('ps-zip','done');
-    const a=document.createElement('a');a.href=URL.createObjectURL(zipBlob);a.download=`${prefix}_DokumenRapat.zip`;a.click();URL.revokeObjectURL(a.href);
+    // Download 3 file terpisah dengan jeda kecil agar browser tidak blokir
+    dlBlob(blobs[0],`${prefix}_Undangan.docx`);
+    await new Promise(r=>setTimeout(r,300));
+    dlBlob(blobs[1],`${prefix}_AbsenHadir.docx`);
+    await new Promise(r=>setTimeout(r,300));
+    dlBlob(blobs[2],`${prefix}_Risalah.docx`);
+    setPS('ps-zip','done');
     setPS('ps-done','done');
+
     const arsipId=Date.now();
     const newItem={id:arsipId,tanggal:tanggalVal,hari:hariStr,jam:jamVal,tempat,agenda,nomorSurat,tglGeneret:tglGen,peserta:pesertaHadir.map(p=>p.nama),uploadedFiles:[]};
     arsipList.unshift(newItem);saveLocal();settings.nomorLast=nextNo;localStorage.setItem('sirapat_settings',JSON.stringify(settings));
     if(getGasUrl()){gasPost({action:'simpanNomor',nomorUrut:nextNo,nomorSurat,tanggal:tglStr,agenda,tujuan:'',tglGeneret:tglGen,pesertaCount:pesertaHadir.length}).catch(()=>{});syncArsipToCloud(newItem);}
     lastGenId=arsipId;document.getElementById('btn-awan').classList.add('visible');
     updateNomorPreview();renderCalInline();renderDashHome();updateHeroStats();
-    showToast('✓ 3 dokumen berhasil diunduh!','success');
+    showToast('✓ 3 dokumen berhasil diunduh (Undangan, Absen, Risalah)!','success');
   }catch(err){console.error(err);showToast('❌ '+err.message,'error');}
   finally{btn.disabled=false;sp.style.display='none';tx.textContent='Generate 3 Dokumen';}
 }
@@ -1217,7 +1243,7 @@ function showArsipDetail(id){
   const r=arsipList.find(x=>x.id===id);if(!r) return;
   const d=new Date(r.tanggal);
   const folderName=`${String(d.getDate()).padStart(2,'0')} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;
-  if(r.uploadedFiles&&r.uploadedFiles.length&&!(uploadFiles[id]||[]).length) uploadFiles[id]=r.uploadedFiles.map(f=>({...f,file:null}));
+  if(r.uploadedFiles&&r.uploadedFiles.length&&!(uploadFiles[id]||[]).length) uploadFiles[id]=r.uploadedFiles.map(f=>({...f,file:null,type:f.type||'',_showPreview:false}));
   document.getElementById('modal-title').textContent='Detail Rapat';
   document.getElementById('modal-body').innerHTML=`
     <div class="detail-row"><div class="detail-label">Tanggal</div><div class="detail-val">${r.hari}, ${tglFull(d)}</div></div>
@@ -1234,8 +1260,8 @@ function showArsipDetail(id){
       ${!getGasUrl()?'<div class="no-gas-warning">⚠ URL Apps Script belum diisi di Pengaturan.</div>':''}
       <div class="upload-zone" id="dropzone-${id}" ondrop="handleDrop(event,${id})" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" onclick="document.getElementById('fi-${id}').click()">
         <div class="upload-zone-icon">📂</div>
-        <div class="upload-zone-text"><strong>Drag & drop file</strong><br>atau klik untuk pilih<br><span style="font-size:10px">.docx .pdf .zip — maks 10MB</span></div>
-        <input type="file" id="fi-${id}" multiple onchange="handleFileInput(event,${id})">
+        <div class="upload-zone-text"><strong>Drag & drop file</strong><br>atau klik untuk pilih<br><span style="font-size:10px">.docx .pdf .zip .jpg .png .webp — maks 10MB</span></div>
+        <input type="file" id="fi-${id}" multiple accept=".docx,.doc,.pdf,.zip,.jpg,.jpeg,.png,.webp,.gif" onchange="handleFileInput(event,${id})">
       </div>
       <div class="uploaded-files" id="file-list-${id}"></div>
       <div class="upload-actions" id="upload-actions-${id}" style="display:none">
@@ -1248,16 +1274,62 @@ function renderFileList(id){
   const files=uploadFiles[id]||[];const el=document.getElementById(`file-list-${id}`);if(!el) return;
   const actEl=document.getElementById(`upload-actions-${id}`);if(actEl) actEl.style.display=files.length?'flex':'none';
   if(!files.length){el.innerHTML='';return;}
-  el.innerHTML=files.map((f,i)=>`
-    <div class="uploaded-file-item">
-      <div class="file-icon">${getFileIcon(f.name)}</div>
-      <div class="file-name">${f.name}</div>
-      <div class="file-size">${fmtSize(f.size)}</div>
-      ${f.status==='done'&&f.url?`<a class="file-link" href="${f.url}" target="_blank">Buka ↗</a>`:`<span class="file-status ${f.status}">${statusLbl(f.status)}</span>`}
-      <div class="file-actions">${f.status!=='uploading'?`<button onclick="hapusFile(${id},${i})" title="Hapus">✕</button>`:''}</div>
-    </div>`).join('');
+  el.innerHTML=files.map((f,i)=>{
+    const isDone=f.status==='done'&&f.url;
+    const imgFile=isImage(f.name);
+    const pdfFile=isPdf(f.name);
+    // Tombol aksi: buka link (jika done), preview inline (jika gambar/pdf done)
+    let actionBtns='';
+    if(isDone){
+      actionBtns+=`<a class="file-link" href="${f.url}" target="_blank">Buka ↗</a>`;
+      if(imgFile||pdfFile){
+        actionBtns+=`<button class="file-preview-btn ${f._showPreview?'active ':''}" onclick="togglePreview(${id},${i})" title="${f._showPreview?'Tutup preview':'Lihat preview'}">👁</button>`;
+      }
+    } else {
+      actionBtns+=`<span class="file-status ${f.status}">${statusLbl(f.status)}</span>`;
+    }
+    // Preview area (collapse by default)
+    let previewArea='';
+    if(f._showPreview && isDone){
+      if(imgFile){
+        previewArea=`<div class="file-preview-area"><img src="${f.url}" alt="${f.name}" style="max-width:100%;max-height:320px;border-radius:8px;object-fit:contain;display:block;margin:0 auto"></div>`;
+      } else if(pdfFile){
+        // Coba gunakan Google Drive viewer untuk PDF dari Drive, fallback ke iframe langsung
+        const pdfSrc=f.url.includes('drive.google.com')?
+          `https://drive.google.com/file/d/${extractDriveId(f.url)}/preview`:
+          f.url;
+        previewArea=`<div class="file-preview-area"><iframe src="${pdfSrc}" style="width:100%;height:420px;border:none;border-radius:8px" allowfullscreen loading="lazy"></iframe></div>`;
+      }
+    }
+    return `<div class="uploaded-file-item" id="fitem-${id}-${i}" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;align-items:center;gap:9px">
+        <div class="file-icon">${getFileIcon(f.name)}</div>
+        <div class="file-name">${f.name}</div>
+        <div class="file-size">${fmtSize(f.size)}</div>
+        <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;margin-left:auto">
+          ${actionBtns}
+          ${f.status!=='uploading'?`<button class="file-actions-del" onclick="hapusFile(${id},${i})" title="Hapus" style="background:none;border:none;cursor:pointer;font-size:12px;padding:2px 5px;border-radius:3px;color:var(--text-muted)">✕</button>`:''}
+        </div>
+      </div>
+      ${previewArea}
+    </div>`;
+  }).join('');
 }
-function getFileIcon(n){const e=(n||'').split('.').pop().toLowerCase();return{pdf:'📕',doc:'📝',docx:'📝',zip:'📦',jpg:'🖼️',jpeg:'🖼️',png:'🖼️'}[e]||'📄';}
+
+// Toggle preview area untuk item file
+function togglePreview(arsipId, fileIdx){
+  const files=uploadFiles[arsipId];if(!files||!files[fileIdx]) return;
+  files[fileIdx]._showPreview=!files[fileIdx]._showPreview;
+  renderFileList(arsipId);
+}
+
+// Ekstrak Drive file ID dari URL
+function extractDriveId(url){
+  const m=url.match(/\/d\/([a-zA-Z0-9_-]+)/);return m?m[1]:'';
+}
+function getFileIcon(n){const e=(n||'').split('.').pop().toLowerCase();return{pdf:'📕',doc:'📝',docx:'📝',zip:'📦',jpg:'🖼️',jpeg:'🖼️',png:'🖼️',webp:'🖼️',gif:'🖼️',bmp:'🖼️'}[e]||'📄';}
+function isImage(n){return/\.(jpe?g|png|webp|gif|bmp|svg)$/i.test(n||'');}
+function isPdf(n){return/\.pdf$/i.test(n||'');}
 function fmtSize(b){if(!b) return '';if(b<1024) return b+'B';if(b<1048576) return (b/1024).toFixed(1)+'KB';return (b/1048576).toFixed(1)+'MB';}
 function statusLbl(s){return{pending:'Menunggu',uploading:'Uploading...',done:'Tersimpan',err:'Gagal'}[s]||s;}
 function hapusFile(id,i){
@@ -1270,7 +1342,7 @@ function handleFileInput(ev,id){addFiles(id,Array.from(ev.target.files));ev.targ
 function handleDrop(ev,id){ev.preventDefault();document.getElementById(`dropzone-${id}`)?.classList.remove('dragover');addFiles(id,Array.from(ev.dataTransfer.files));}
 function addFiles(id,files){
   if(!uploadFiles[id]) uploadFiles[id]=[];
-  files.forEach(f=>{if(f.size>10*1024*1024){showToast(`${f.name} terlalu besar`,'error');return;}uploadFiles[id].push({file:f,name:f.name,size:f.size,status:'pending',url:null});});
+  files.forEach(f=>{const maxMB=f.type.startsWith('image/')?20:10;if(f.size>maxMB*1024*1024){showToast(`${f.name} terlalu besar (maks ${maxMB}MB)`,'error');return;}uploadFiles[id].push({file:f,name:f.name,size:f.size,status:'pending',url:null,type:f.type||''});});
   renderFileList(id);
 }
 async function uploadSemuaFile(id,folderName){
@@ -1283,7 +1355,7 @@ async function uploadSemuaFile(id,folderName){
     const f=uploadFiles[id][i];if(f.status!=='pending'&&f.status!=='err') continue;
     if(!f.file){uploadFiles[id][i].status='err';fail++;renderFileList(id);continue;}
     uploadFiles[id][i].status='uploading';renderFileList(id);
-    try{const b64=await toBase64(f.file);const res=await gasPost({action:'uploadFile',fileName:f.name,fileBase64:b64,mimeType:f.file.type||'application/octet-stream',folderName});if(!res.success) throw new Error(res.error||'Unknown');uploadFiles[id][i].status='done';uploadFiles[id][i].url=res.fileUrl;ok++;}
+    try{const b64=await toBase64(f.file);const res=await gasPost({action:'uploadFile',fileName:f.name,fileBase64:b64,mimeType:f.file.type||'application/octet-stream',folderName});if(!res.success) throw new Error(res.error||'Unknown');uploadFiles[id][i].status='done';uploadFiles[id][i].url=res.fileUrl;uploadFiles[id][i].type=uploadFiles[id][i].type||f.file?.type||'';ok++;}
     catch(e){uploadFiles[id][i].status='err';fail++;console.error(e);}
     renderFileList(id);
   }
