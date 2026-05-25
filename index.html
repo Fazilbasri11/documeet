@@ -841,8 +841,8 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
     <div class="modal-header">
       <h3 id="modal-title">Detail Rapat</h3>
       <div class="modal-header-actions">
-        <button class="modal-action-btn" id="modal-print-btn" onclick="printDetail()" title="Print detail rapat">🖨️ <span class="label-text">Print</span></button>
-        <button class="modal-action-btn share-btn" id="modal-share-btn" onclick="shareFiles()" title="Bagikan link file">🔗 <span class="label-text">Share</span></button>
+        <!-- <button class="modal-action-btn" id="modal-print-btn" onclick="printDetail()" title="Print detail rapat">🖨️ <span class="label-text">Print</span></button>
+        <button class="modal-action-btn share-btn" id="modal-share-btn" onclick="shareFiles()" title="Bagikan link file">🔗 <span class="label-text">Share</span></button> -->
         <button class="modal-close" onclick="closeModal()">✕</button>
       </div>
     </div>
@@ -874,9 +874,9 @@ let settings=JSON.parse(localStorage.getItem('sirapat_settings')||'null')||{
   nomorFmt:'[NO]/PK.01-Und/1118/1/[TAHUN]',nomorLast:0,
   gasUrl:'',urlUnd:'',urlAbs:'',urlRis:'',tplMode:'auto'
 };
-// Patch format lama yang masih pakai /5/
-if(settings.nomorFmt && settings.nomorFmt.includes('/5/') && !settings.nomorFmt.includes('[BULAN]')){
-  settings.nomorFmt = settings.nomorFmt.replace('/5/', '/1/');
+// Patch untuk memaksa ganti format [BULAN] menjadi angka 1
+if(settings.nomorFmt && settings.nomorFmt.includes('[BULAN]')){
+  settings.nomorFmt = settings.nomorFmt.replace('[BULAN]', '1');
   localStorage.setItem('sirapat_settings', JSON.stringify(settings));
 }
 const AUTO_PATHS={und:'./templates/UND_template.docx',abs:'./templates/ABSEN_template.docx',ris:'./templates/RISALAH_template.docx'};
@@ -1470,10 +1470,24 @@ function isPdf(n){return/\.pdf$/i.test(n||'');}
 function fmtSize(b){if(!b) return '';if(b<1024) return b+'B';if(b<1048576) return (b/1024).toFixed(1)+'KB';return (b/1048576).toFixed(1)+'MB';}
 function statusLbl(s){return{pending:'Menunggu',uploading:'Uploading...',done:'Tersimpan',draft:'Draft',err:'Gagal'}[s]||s;}
 function hapusFile(id,i){
-  if(!uploadFiles[id]) return;revokeBlobUrl(id,i);uploadFiles[id].splice(i,1);renderFileList(id);
+  // Tambahkan pop-up konfirmasi
+  if(!confirm('Apakah Anda yakin ingin menghapus file ini?')) return;
+  
+  if(!uploadFiles[id]) return;
+  revokeBlobUrl(id,i);
+  uploadFiles[id].splice(i,1);
+  renderFileList(id);
+  
   const r=arsipList.find(x=>x.id===id);
-  if(r){r.uploadedFiles=uploadFiles[id].filter(f=>f.status==='done').map(f=>({name:f.name,size:f.size,status:f.status,url:f.url||null}));saveLocal();if(getGasUrl()) gasPost({action:'updateArsipFiles',id,uploadedFiles:r.uploadedFiles}).catch(()=>{});}
+  if(r){
+    r.uploadedFiles=uploadFiles[id].filter(f=>f.status==='done').map(f=>({name:f.name,size:f.size,status:f.status,url:f.url||null}));
+    saveLocal();
+    if(getGasUrl()) gasPost({action:'updateArsipFiles',id,uploadedFiles:r.uploadedFiles}).catch(()=>{});
+  }
   renderArsip();
+  
+  // Memunculkan toast sukses
+  showToast('File berhasil dihapus', 'info');
 }
 function handleFileInput(ev,id){addFiles(id,Array.from(ev.target.files));ev.target.value='';}
 function handleDrop(ev,id){ev.preventDefault();document.getElementById(`dropzone-${id}`)?.classList.remove('dragover');addFiles(id,Array.from(ev.dataTransfer.files));}
@@ -1539,7 +1553,14 @@ function renderPesertaManage(){
     </div>`).join('');
 }
 function tambahPeserta(){pesertaList.push({nama:'',jabatan:''});renderPesertaManage();}
-function hapusPesertaRow(i){pesertaList.splice(i,1);renderPesertaManage();}
+function hapusPesertaRow(i){
+  // Tambahkan pop-up konfirmasi
+  if(!confirm('Hapus peserta ini dari daftar?')) return;
+  pesertaList.splice(i,1);
+  renderPesertaManage();
+  // Memunculkan toast sukses
+  showToast('Peserta dihapus dari daftar', 'info');
+}
 function simpanPeserta(){
   pesertaList=pesertaList.map((_,i)=>({nama:document.getElementById('pm-nama-'+i)?.value||'',jabatan:document.getElementById('pm-jab-'+i)?.value||''})).filter(p=>p.nama.trim());
   localStorage.setItem('sirapat_peserta',JSON.stringify(pesertaList));renderPesertaGen();showToast('Daftar peserta disimpan!','success');
