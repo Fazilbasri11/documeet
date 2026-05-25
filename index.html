@@ -1895,20 +1895,57 @@ async function loginAdmin() {
 }
 
 // Fungsi Pusat Pemicu Sinkronisasi
+// Fungsi Pusat Pemicu Sinkronisasi
 function mulaiAutoSync() {
   Promise.all([
     fetchNomor(),
-    loadArsipFromCloud()
+    loadArsipFromCloud(),
+    loadPesertaFromCloud() // Memuat data peserta terbaru dari Google Sheets
   ]).then(() => {
     // Refresh semua tampilan grafik dan dasbor setelah data masuk
     renderCalInline();
     renderDashHome();
     updateHeroStats();
     updateNomorPreview();
+    
+    // KUNCI PERBAIKAN: Paksa render ulang daftar peserta di halaman Generate
+    renderPesertaGen(); 
+    
+    // Jika sedang berada di halaman manajemen peserta, update juga tampilannya
+    if (document.getElementById('page-peserta').classList.contains('active')) {
+      renderPesertaManage();
+    }
   });
+}
+
+// Fungsi baru untuk menarik daftar peserta dari Spreadsheet
+async function loadPesertaFromCloud() {
+  if (!getGasUrl()) return;
+  try {
+    const data = await gasGet('getPeserta');
+    if (data.peserta && data.peserta.length > 0) {
+      pesertaList = data.peserta;
+      // Simpan ke memori lokal agar saat offline tetap ada
+      localStorage.setItem('sirapat_peserta', JSON.stringify(pesertaList));
+    }
+  } catch (e) {
+    console.error('Gagal memuat peserta dari cloud:', e);
+  }
 }
   
 // INIT
+  // INIT
+document.getElementById('inp-tanggal').value = today.toISOString().split('T')[0];
+initCalInline();
+renderCalInline();
+renderPesertaGen(); // <-- Pastikan baris ini ada
+renderDashHome();
+updateHeroStats();
+
+if (settings.tplMode === 'manual') {
+  tplMode = 'manual';
+  document.querySelectorAll('.tpl-mode-tab')[1]?.click();
+}
 Promise.all([
   getGasUrl()?fetchNomor():Promise.resolve(),
   loadArsipFromCloud()
