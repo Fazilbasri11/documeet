@@ -19,6 +19,37 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--text-dark);min-height:100vh;overflow-x:hidden}
 
+  /* ════ LAYAR LOGIN ADMIN ════ */
+.login-screen {
+  position: fixed; inset: 0; background: var(--cream);
+  display: flex; align-items: center; justify-content: center; z-index: 99999;
+}
+.login-card {
+  background: var(--white); padding: 2.5rem 2rem; border-radius: var(--r);
+  box-shadow: var(--shadow-lg); border: 1px solid rgba(122,16,32,.1);
+  text-align: center; max-width: 360px; width: calc(100% - 2rem);
+}
+.login-logo {
+  width: 65px; height: 65px; background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700;
+  color: var(--maroon-deep); margin: 0 auto 1rem;
+}
+.login-card h2 { font-family: 'Playfair Display', serif; color: var(--maroon); font-size: 1.25rem; margin-bottom: 0.35rem; }
+.login-card p { font-size: 12px; color: var(--text-muted); margin-bottom: 1.75rem; line-height: 1.5; }
+.pin-group { display: flex; flex-direction: column; gap: 10px; }
+.pin-group input { 
+  font-family: 'Inter', sans-serif; font-size: 14px; padding: 11px 14px; 
+  border: 1.5px solid #e8ddd5; border-radius: 7px; text-align: center; 
+  outline: none; transition: border-color 0.2s; letter-spacing: 0.1em;
+}
+.pin-group input:focus { border-color: var(--maroon); box-shadow: 0 0 0 3px rgba(122,16,32,.07); }
+.pin-group button { 
+  background: var(--maroon); color: white; border: none; padding: 11px; 
+  border-radius: 7px; font-weight: 600; cursor: pointer; transition: background 0.2s; 
+}
+.pin-group button:hover { background: var(--maroon-dark); }
+.pin-group button:disabled { opacity: 0.7; cursor: not-allowed; }
 /* NAV */
 nav{background:var(--maroon-deep);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:60px;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.3)}
 .nav-brand{display:flex;align-items:center;gap:10px;flex-shrink:0}
@@ -546,6 +577,19 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 </head>
 <body>
 
+  <div id="login-screen" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">KIP</div>
+    <h2>DocuMeet Admin</h2>
+    <p>Sistem Pengelolaan Rapat Digital.<br>Masukkan PIN rahasia untuk mengakses data.</p>
+    <div class="pin-group">
+      <input type="password" id="admin-pin" placeholder="Masukkan PIN..." onkeypress="if(event.key==='Enter') loginAdmin()">
+      <button id="btn-login" onclick="loginAdmin()">Masuk Kelola Arsip</button>
+    </div>
+    <div id="login-error" style="color:#e53935; font-size:11px; margin-top:10px; display:none; font-weight:500;"></div>
+  </div>
+</div>
+  
 <nav>
   <div class="nav-brand">
     <div class="nav-logo">
@@ -1790,6 +1834,68 @@ function printSingleFile(arsipId, fileIdx) {
   }
 }
 
+  // ════ SISTEM LOGIN DINAMIS (DARI GOOGLE SHEETS) ════
+window.addEventListener('DOMContentLoaded', () => {
+  // Mengecek apakah sebelumnya sudah login di tab/sesi ini
+  if (sessionStorage.getItem('documeet_auth') === 'true') {
+    const screen = document.getElementById('login-screen');
+    if (screen) screen.style.display = 'none';
+  }
+});
+
+async function loginAdmin() {
+  const inp = document.getElementById('admin-pin').value;
+  const err = document.getElementById('login-error');
+  const btn = document.getElementById('btn-login');
+  
+  if (!inp) return;
+
+  const url = getGasUrl();
+  
+  // LOGIKA DARURAT: Jika URL GAS belum disetel di pengaturan
+  if (!url) {
+    if (inp === "KIP2026") {
+      berhasilLogin();
+      showToast('⚠️ Peringatan: Anda masuk dengan PIN Darurat. Segera isi URL GAS di Pengaturan.', 'info');
+    } else {
+      tampilError("❌ URL GAS belum diatur. Gunakan PIN darurat.");
+    }
+    return;
+  }
+
+  // Jika URL GAS sudah ada, cek PIN ke Google Sheets
+  btn.textContent = 'Memeriksa PIN...';
+  btn.disabled = true;
+
+  try {
+    const data = await gasGet('getPin');
+    const realPin = String(data.pin);
+
+    if (inp === realPin) {
+      berhasilLogin();
+    } else {
+      tampilError("❌ PIN salah! Silakan coba lagi.");
+    }
+  } catch (e) {
+    console.error(e);
+    tampilError("❌ Gagal mengecek PIN. Pastikan URL GAS sudah di-deploy dengan benar.");
+  }
+
+  function berhasilLogin() {
+    sessionStorage.setItem('documeet_auth', 'true');
+    document.getElementById('login-screen').style.display = 'none';
+    showToast('✓ Berhasil masuk sebagai Admin', 'success');
+  }
+
+  function tampilError(pesan) {
+    err.textContent = pesan;
+    err.style.display = 'block';
+    setTimeout(() => { err.style.display = 'none'; }, 3500);
+    btn.textContent = 'Masuk Kelola Arsip';
+    btn.disabled = false;
+  }
+}
+  
 // INIT
 document.getElementById('inp-tanggal').value=today.toISOString().split('T')[0];
 initCalInline();renderCalInline();renderPesertaGen();renderDashHome();updateHeroStats();
