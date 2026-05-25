@@ -999,7 +999,7 @@ document.addEventListener('click',function(e){
 
 function getGasUrl(){
   // URL GAS sudah ditanam permanen di sini
-  return "https://script.google.com/macros/s/AKfycbxAagcb1qeGjdvP7JI9Vzpk14d_pC0EScGju-uEI-b0BZnysahASivCciaxTtb8OzY/exec";
+  return "https://script.google.com/macros/s/AKfycbz2CWZbBPaBBfXL1jtSQDhd65FnUAWZogzA-yl51cjxIQMFznhmgneI2G71xN593w/exec";
 }
 function buildNomor(no,tgl){return settings.nomorFmt.replace('[NO]',String(no)).replace('[BULAN]',tgl instanceof Date?tgl.getMonth()+1:no).replace('[TAHUN]',tgl instanceof Date?tgl.getFullYear():today.getFullYear());}
 function tglGeneret(){return`${today.getDate()} ${BULAN_ID[today.getMonth()]} ${today.getFullYear()}`;}
@@ -1112,7 +1112,15 @@ async function fetchNomor(){
   catch(e){dot.className='nomor-dot err';prev.textContent='❌ Gagal — pakai nomor lokal: '+(settings.nomorLast+1);}
 }
 function updateNomorPreview(){
-  const tgl=document.getElementById('inp-tanggal').value;if(!tgl) return;
+  const tgl=document.getElementById('inp-tanggal').value;
+  
+  // JIKA TANGGAL BELUM DIPILIH: Tetap tampilkan nomor berdasarkan tahun berjalan saat ini agar teks tidak stuck "Membaca..."
+  if(!tgl) {
+    document.getElementById('nomor-preview').textContent = buildNomor(settings.nomorLast+1, new Date()) + " (Silakan tentukan tanggal rapat)";
+    return;
+  }
+  
+  // JIKA TANGGAL SUDAH DIPILIH: Jalankan format normal
   const d=new Date(tgl+'T00:00:00');
   document.getElementById('nomor-preview').textContent=buildNomor(settings.nomorLast+1,d)+` (urut ke-${settings.nomorLast+1})`;
 }
