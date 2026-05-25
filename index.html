@@ -1178,17 +1178,30 @@ async function generateDokumen(){
     lastGenBlobs=blobs;
     lastGenPrefix=prefix;
 
-    const arsipId=Date.now();
-    // Buat entry draft file di uploadFiles
-    uploadFiles[arsipId]=[
-      {file:null,name:`Draft_${prefix}_Undangan.docx`,size:blobs[0].size,status:'draft',url:null,type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',_blobUrl:null,_showPreview:false,_blob:blobs[0],_isDraft:true},
-      {file:null,name:`Draft_${prefix}_AbsenHadir.docx`,size:blobs[1].size,status:'draft',url:null,type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',_blobUrl:null,_showPreview:false,_blob:blobs[1],_isDraft:true},
-      {file:null,name:`Draft_${prefix}_Risalah.docx`,size:blobs[2].size,status:'draft',url:null,type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',_blobUrl:null,_showPreview:false,_blob:blobs[2],_isDraft:true},
+    const arsipId = Date.now();
+    
+    // Nama file tetap menggunakan awalan 'Draft_', tetapi langsung siap di-upload (status: 'pending')
+    uploadFiles[arsipId] = [
+      {file:blobs[0], name:`Draft_${prefix}_Undangan.docx`, size:blobs[0].size, status:'pending', url:null, type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document', _blobUrl:null, _showPreview:false, _blob:blobs[0], _isDraft:false},
+      {file:blobs[1], name:`Draft_${prefix}_AbsenHadir.docx`, size:blobs[1].size, status:'pending', url:null, type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document', _blobUrl:null, _showPreview:false, _blob:blobs[1], _isDraft:false},
+      {file:blobs[2], name:`Draft_${prefix}_Risalah.docx`, size:blobs[2].size, status:'pending', url:null, type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document', _blobUrl:null, _showPreview:false, _blob:blobs[2], _isDraft:false},
     ];
 
-    const newItem={id:arsipId,tanggal:tanggalVal,hari:hariStr,jam:jamVal,tempat,agenda,nomorSurat,tglGeneret:tglGen,peserta:pesertaHadir.map(p=>p.nama),uploadedFiles:[]};
-    arsipList.unshift(newItem);saveLocal();settings.nomorLast=nextNo;localStorage.setItem('sirapat_settings',JSON.stringify(settings));
-    if(getGasUrl()){gasPost({action:'simpanNomor',nomorUrut:nextNo,nomorSurat,tanggal:tglStr,agenda,tujuan:'',tglGeneret:tglGen,pesertaCount:pesertaHadir.length}).catch(()=>{});syncArsipToCloud(newItem);}
+    const newItem = {id:arsipId, tanggal:tanggalVal, hari:hariStr, jam:jamVal, tempat, agenda, nomorSurat, tglGeneret:tglGen, peserta:pesertaHadir.map(p=>p.nama), uploadedFiles:[]};
+    arsipList.unshift(newItem);
+    saveLocal();
+    
+    settings.nomorLast = nextNo;
+    localStorage.setItem('sirapat_settings', JSON.stringify(settings));
+    
+    if(getGasUrl()){
+      gasPost({action:'simpanNomor', nomorUrut:nextNo, nomorSurat, tanggal:tglStr, agenda, tujuan:'', tglGeneret:tglGen, pesertaCount:pesertaHadir.length}).catch(()=>{});
+      syncArsipToCloud(newItem);
+      
+      // TRIGGER AUTO UPLOAD: Langsung unggah file berawalan 'Draft_' ke Google Drive
+      const folderName = `${String(tgl.getDate()).padStart(2,'0')} ${BULAN_ID[tgl.getMonth()]} ${tgl.getFullYear()}`;
+      setTimeout(() => uploadSemuaFile(arsipId, folderName), 500); 
+    }
     lastGenId=arsipId;document.getElementById('btn-awan').classList.add('visible');
     updateNomorPreview();renderCalInline();renderDashHome();updateHeroStats();
     showToast('✓ 3 dokumen berhasil diunduh (Undangan, Absen, Risalah)!','success');
