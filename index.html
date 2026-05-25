@@ -1240,30 +1240,92 @@ function hapusArsip(id){
 }
 
 // ════ PRINT DETAIL ════
-function printDetail(){
-  window.print();
+function printDetail() {
+  if (!currentModalId) return;
+  const r = arsipList.find(x => x.id === currentModalId);
+  if (!r) return;
+  const d = new Date(r.tanggal);
+  
+  // Membuat window baru khusus untuk print agar background web tidak ikut tercetak
+  const printContents = `
+    <div style="font-family: 'Inter', Arial, sans-serif; max-width: 800px; margin: 0 auto; color: #1a0a0d;">
+      <h2 style="text-align: center; border-bottom: 2px solid #7a1020; padding-bottom: 10px; color: #7a1020; font-family: 'Playfair Display', serif;">
+        Detail Arsip Rapat
+      </h2>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px;">
+        <tr><td style="padding: 8px 0; font-weight: 600; width: 150px; color: #5a3040;">Agenda</td><td style="padding: 8px 0;">${r.agenda}</td></tr>
+        <tr><td style="padding: 8px 0; font-weight: 600; color: #5a3040;">Tanggal</td><td style="padding: 8px 0;">${r.hari}, ${tglFull(d)}</td></tr>
+        <tr><td style="padding: 8px 0; font-weight: 600; color: #5a3040;">Pukul</td><td style="padding: 8px 0;">${r.jam} WIB</td></tr>
+        <tr><td style="padding: 8px 0; font-weight: 600; color: #5a3040;">Tempat</td><td style="padding: 8px 0;">${r.tempat}</td></tr>
+        <tr><td style="padding: 8px 0; font-weight: 600; color: #5a3040;">Nomor Surat</td><td style="padding: 8px 0;">${r.nomorSurat || '-'}</td></tr>
+        <tr><td style="padding: 8px 0; font-weight: 600; color: #5a3040;">Tgl Generate</td><td style="padding: 8px 0;">${r.tglGeneret || '-'}</td></tr>
+      </table>
+      <h3 style="margin-top: 30px; border-bottom: 1px solid #e8ddd5; padding-bottom: 5px; font-size: 16px; color: #7a1020;">
+        Daftar Peserta (${(r.peserta||[]).length} Orang)
+      </h3>
+      <ol style="padding-left: 20px; font-size: 14px; line-height: 1.6;">
+        ${(r.peserta||[]).map(n => `<li>${n}</li>`).join('')}
+      </ol>
+    </div>
+  `;
+  
+  const printWindow = window.open('', '_blank', 'width=800,height=600');
+  printWindow.document.write('<html><head><title>Print Detail Rapat - DocuMeet</title>');
+  printWindow.document.write('<style>@media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }</style>');
+  printWindow.document.write('</head><body>');
+  printWindow.document.write(printContents);
+  printWindow.document.write('</body></html>');
+  printWindow.document.close();
+  printWindow.focus();
+  
+  // Memberikan jeda singkat agar DOM di window baru selesai di-render sebelum memanggil print
+  setTimeout(() => {
+    printWindow.print();
+    printWindow.close();
+  }, 250);
 }
 
 // ════ SHARE FILES ════
-function shareFiles(){
-  if(!currentModalId) return;
-  const files=(uploadFiles[currentModalId]||[]).filter(f=>f.status==='done'&&f.url);
-  const r=arsipList.find(x=>x.id===currentModalId);
-  const cloudFiles=(r&&r.uploadedFiles||[]).filter(f=>f.status==='done'&&f.url);
-  // Gabung, deduplikasi berdasarkan nama
-  const allDone=[...files,...cloudFiles].reduce((acc,f)=>{if(!acc.find(x=>x.name===f.name)) acc.push(f);return acc;},[]);
-  if(!allDone.length){showToast('Belum ada file yang tersimpan di Drive untuk dibagikan.','info');return;}
-  // Buat teks ringkasan link
-  const lines=allDone.map(f=>`📄 ${f.name}\n${f.url}`).join('\n\n');
-  const shareText=`🗂 Dokumen Rapat — DocuMeet\n\n${lines}`;
-  if(navigator.share){
-    navigator.share({title:'Dokumen Rapat DocuMeet',text:shareText}).catch(()=>{});
+function shareFiles() {
+  if (!currentModalId) return;
+  const r = arsipList.find(x => x.id === currentModalId);
+  if (!r) return;
+  
+  // Ambil file yang statusnya sudah ter-upload ('done') dan memiliki URL
+  const files = (uploadFiles[currentModalId] || []).filter(f => f.status === 'done' && f.url);
+  const cloudFiles = (r.uploadedFiles || []).filter(f => f.status === 'done' && f.url);
+  
+  // Gabung file dari cache lokal dan data tersimpan, lalu hapus duplikasi
+  const allDone = [...files, ...cloudFiles].reduce((acc, f) => {
+    if (!acc.find(x => x.name === f.name)) acc.push(f);
+    return acc;
+  }, []);
+  
+  if (!allDone.length) {
+    showToast('Belum ada dokumen rapat yang tersimpan di Drive.', 'error');
+    return;
+  }
+  
+  const d = new Date(r.tanggal);
+  const lines = allDone.map(f => `📄 ${f.name}\n${f.url}`).join('\n\n');
+  
+  // Format pesan yang rapi beserta konteks rapatnya
+  const shareText = `🗂 Dokumen Rapat: ${r.agenda}\n📅 ${r.hari}, ${tglFull(d)}\n\n${lines}`;
+  
+  if (navigator.share) {
+    // Membuka UI Share bawaan HP/Sistem Operasi
+    navigator.share({
+      title: 'Dokumen Rapat DocuMeet',
+      text: shareText
+    }).catch((err) => {
+      console.log('Share dibatalkan atau gagal', err);
+    });
   } else {
-    navigator.clipboard.writeText(shareText).then(()=>{
-      showToast('✓ Link file disalin ke clipboard!','success');
-    }).catch(()=>{
-      // fallback: buka prompt
-      prompt('Salin link berikut:',shareText);
+    // Fallback untuk desktop: copy otomatis ke clipboard
+    navigator.clipboard.writeText(shareText).then(() => {
+      showToast('✓ Link Drive beserta info rapat disalin ke clipboard!', 'success');
+    }).catch(() => {
+      prompt('Browser tidak mendukung copy otomatis, silakan salin teks berikut:', shareText);
     });
   }
 }
