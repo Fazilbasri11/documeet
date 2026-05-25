@@ -1282,23 +1282,36 @@ function renderFileList(id){
     let actionBtns='';
     if(isDone){
       actionBtns+=`<a class="file-link" href="${f.url}" target="_blank">Buka ↗</a>`;
-      if(imgFile||pdfFile){
-        actionBtns+=`<button class="file-preview-btn ${f._showPreview?'active ':''}" onclick="togglePreview(${id},${i})" title="${f._showPreview?'Tutup preview':'Lihat preview'}">👁</button>`;
-      }
     } else {
       actionBtns+=`<span class="file-status ${f.status}">${statusLbl(f.status)}</span>`;
     }
+    // Tombol preview: gambar bisa preview kapan saja (ada blobUrl), PDF hanya jika sudah done
+    if((imgFile && (f._blobUrl||isDone)) || (pdfFile && isDone)){
+      actionBtns+=` <button class="file-preview-btn${f._showPreview?' active':''}" onclick="togglePreview(${id},${i})" title="${f._showPreview?'Tutup preview':'Lihat preview'}">👁</button>`;
+    }
     // Preview area (collapse by default)
     let previewArea='';
-    if(f._showPreview && isDone){
+    if(f._showPreview){
       if(imgFile){
-        previewArea=`<div class="file-preview-area"><img src="${f.url}" alt="${f.name}" style="max-width:100%;max-height:320px;border-radius:8px;object-fit:contain;display:block;margin:0 auto"></div>`;
-      } else if(pdfFile){
-        // Coba gunakan Google Drive viewer untuk PDF dari Drive, fallback ke iframe langsung
-        const pdfSrc=f.url.includes('drive.google.com')?
-          `https://drive.google.com/file/d/${extractDriveId(f.url)}/preview`:
-          f.url;
-        previewArea=`<div class="file-preview-area"><iframe src="${pdfSrc}" style="width:100%;height:420px;border:none;border-radius:8px" allowfullscreen loading="lazy"></iframe></div>`;
+        // Prioritas: blob lokal (file baru dipilih), fallback thumbnail Drive
+        let imgSrc='';
+        if(f._blobUrl){
+          imgSrc=f._blobUrl;
+        } else if(isDone && f.url){
+          const driveId=extractDriveId(f.url);
+          imgSrc=driveId
+            ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w800`
+            : f.url;
+        }
+        if(imgSrc){
+          previewArea=`<div class="file-preview-area"><img src="${imgSrc}" alt="${f.name}" style="max-width:100%;max-height:360px;border-radius:8px;object-fit:contain;display:block;margin:0 auto" onerror="this.style.display='none';this.nextSibling.style.display='block'"><span style="display:none;color:var(--text-muted);font-size:12px">Gagal memuat gambar — coba Buka ↗</span></div>`;
+        }
+      } else if(pdfFile && isDone){
+        const driveId=extractDriveId(f.url);
+        const pdfSrc=driveId
+          ? `https://drive.google.com/file/d/${driveId}/preview`
+          : f.url;
+        previewArea=`<div class="file-preview-area"><iframe src="${pdfSrc}" style="width:100%;height:440px;border:none;border-radius:8px" allowfullscreen loading="lazy"></iframe></div>`;
       }
     }
     return `<div class="uploaded-file-item" id="fitem-${id}-${i}" style="flex-direction:column;align-items:stretch">
@@ -1323,6 +1336,12 @@ function togglePreview(arsipId, fileIdx){
   renderFileList(arsipId);
 }
 
+// Bebaskan blob URL saat file dihapus dari list
+function revokeBlobUrl(arsipId, fileIdx){
+  const f=(uploadFiles[arsipId]||[])[fileIdx];
+  if(f&&f._blobUrl) URL.revokeObjectURL(f._blobUrl);
+}
+
 // Ekstrak Drive file ID dari URL
 function extractDriveId(url){
   const m=url.match(/\/d\/([a-zA-Z0-9_-]+)/);return m?m[1]:'';
@@ -1333,7 +1352,7 @@ function isPdf(n){return/\.pdf$/i.test(n||'');}
 function fmtSize(b){if(!b) return '';if(b<1024) return b+'B';if(b<1048576) return (b/1024).toFixed(1)+'KB';return (b/1048576).toFixed(1)+'MB';}
 function statusLbl(s){return{pending:'Menunggu',uploading:'Uploading...',done:'Tersimpan',err:'Gagal'}[s]||s;}
 function hapusFile(id,i){
-  if(!uploadFiles[id]) return;uploadFiles[id].splice(i,1);renderFileList(id);
+  if(!uploadFiles[id]) return;revokeBlobUrl(id,i);uploadFiles[id].splice(i,1);renderFileList(id);
   const r=arsipList.find(x=>x.id===id);
   if(r){r.uploadedFiles=uploadFiles[id].filter(f=>f.status==='done').map(f=>({name:f.name,size:f.size,status:f.status,url:f.url||null}));saveLocal();if(getGasUrl()) gasPost({action:'updateArsipFiles',id,uploadedFiles:r.uploadedFiles}).catch(()=>{});}
   renderArsip();
@@ -1342,7 +1361,13 @@ function handleFileInput(ev,id){addFiles(id,Array.from(ev.target.files));ev.targ
 function handleDrop(ev,id){ev.preventDefault();document.getElementById(`dropzone-${id}`)?.classList.remove('dragover');addFiles(id,Array.from(ev.dataTransfer.files));}
 function addFiles(id,files){
   if(!uploadFiles[id]) uploadFiles[id]=[];
-  files.forEach(f=>{const maxMB=f.type.startsWith('image/')?20:10;if(f.size>maxMB*1024*1024){showToast(`${f.name} terlalu besar (maks ${maxMB}MB)`,'error');return;}uploadFiles[id].push({file:f,name:f.name,size:f.size,status:'pending',url:null,type:f.type||''});});
+  files.forEach(f=>{
+    const maxMB=f.type.startsWith('image/')?20:10;
+    if(f.size>maxMB*1024*1024){showToast(`${f.name} terlalu besar (maks ${maxMB}MB)`,'error');return;}
+    // Buat blob URL lokal untuk preview gambar sebelum/sesudah upload
+    const blobUrl=f.type.startsWith('image/')?URL.createObjectURL(f):null;
+    uploadFiles[id].push({file:f,name:f.name,size:f.size,status:'pending',url:null,type:f.type||'',_blobUrl:blobUrl,_showPreview:false});
+  });
   renderFileList(id);
 }
 async function uploadSemuaFile(id,folderName){
