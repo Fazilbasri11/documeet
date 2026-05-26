@@ -504,12 +504,18 @@ function checkBooking() {
   if (!jam) return;
   const menitBaru = getMenitDariJam(jam);
 
-  // Cari rapat yang bentrok (tanggal & tempat sama, selisih waktu < 60 menit)
-  const konflik = arsipList.find(r => {
-    if (r.tanggal !== tgl || r.tempat !== tempat) return false;
+if (!jam || jam.length < 5) {
+    warn.style.display = 'none';
+    if (btnGen) { btnGen.disabled = false; btnGen.style.opacity = ''; }
+    return;
+}
+const konflik = arsipList.find(r => {
+    if (r.tanggal !== tgl) return false;
+    if (tempat && r.tempat !== tempat) return false;
     const menitLama = getMenitDariJam(r.jam);
-    return Math.abs(menitBaru - menitLama) < 60; // Mengecek apakah selisih kurang dari 60 menit
-  });
+    const selisih = Math.abs(menitBaru - menitLama);
+    return selisih < 60; // selisih 0–59 menit = konflik; 60+ menit = boleh
+});
 
   if (konflik) {
     warn.style.display = 'block';
@@ -546,11 +552,12 @@ async function generateDokumen() {
 
   // ★ OPTIMASI: satu kali cek konflik (duplikasi dihapus)
   const menitBaru = getMenitDariJam(jamVal);
-  const konflik = arsipList.find(r => {
-    if (r.tanggal !== tanggalVal || r.tempat !== tempat) return false;
+const konflik = arsipList.find(r => {
+    if (r.tanggal !== tanggalVal) return false;
+    if (r.tempat !== tempat) return false;
     const menitLama = getMenitDariJam(r.jam);
-    return Math.abs(menitBaru - menitLama) < 60;
-  });
+    return Math.abs(menitBaru - menitLama) < 60; // 0–59 = konflik
+});
   if (konflik) {
     showToast(`❌ Konflik jadwal! "${konflik.agenda.substring(0,45)}..." sudah terjadwal di waktu & tempat yang sama.`,'error');
     const w = document.getElementById('booking-warn');
