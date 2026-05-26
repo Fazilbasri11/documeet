@@ -417,11 +417,24 @@ function renderCalInline() {
     const events  = rapatMap[ds] || [];
     const hasEv   = events.length > 0;
     const isBooked= hasEv && ds === selTgl && events.some(e => e.jam === selJam && e.tempat === selTempat);
+    
     let cls = 'cal-day';
     if (ds === todayStr) cls += ' today'; else if (ds === selTgl) cls += ' selected';
     cls += isBooked ? ' booked' : hasEv ? ' has-event' : '';
+    
     const tip = hasEv ? events.map(e => `${e.jam} – ${(e.agenda||'').substring(0,25)}`).join(' | ') : '';
-    html += `<div class="${cls}" ${tip ? `data-tip="${tip.replace(/"/g,'&quot;')}"` : ''} onclick="calClickInline('${ds}')">${d}</div>`;
+    
+    // -- LOGIKA BADGE "X RAPAT" --
+    let badgeHtml = '';
+    if (hasEv) {
+      const isKonflik = (ds === selTgl && events.some(e => e.jam === selJam && e.tempat === selTempat));
+      badgeHtml = `<div class="cal-badge ${isKonflik ? 'konflik' : ''}">${events.length} Rapat</div>`;
+    }
+
+    html += `<div class="${cls}" ${tip ? `data-tip="${tip.replace(/"/g,'&quot;')}"` : ''} onclick="calClickInline('${ds}')">
+      <span style="margin-bottom:2px">${d}</span>
+      ${badgeHtml}
+    </div>`;
   }
   document.getElementById('cal-grid-inline').innerHTML = html;
 }
@@ -429,11 +442,47 @@ function renderCalInline() {
 // Klik kalender: ada rapat → buka detail; kosong → isi form
 function calClickInline(ds) {
   const events = arsipList.filter(r => r.tanggal === ds);
-  if (events.length) { showArsipDetail(events[0].id); return; }
+  
+  if (events.length > 0) {
+    showModalMultiple(ds, events); 
+    return;
+  }
+  
+  // Jika hari kosong, masukkan ke input form
   document.getElementById('inp-tanggal').value = ds;
   renderCalInline(); updateNomorPreview(); checkBooking();
 }
-
+// Render list rapat jika dalam 1 hari ada banyak agenda
+function showModalMultiple(ds, events) {
+  const d = new Date(ds);
+  document.getElementById('modal-title').textContent = `Jadwal: ${d.getDate()} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;
+  
+  // Sembunyikan tombol share jika ada di header (karena ini mode list)
+  const shareBtn = document.getElementById('modal-share-btn');
+  if (shareBtn) shareBtn.style.display = 'none';
+  
+  let html = '<div class="meeting-list-container">';
+  
+  events.forEach(r => {
+    html += `
+      <div class="meeting-card">
+        <div class="mc-header">
+          <div class="mc-time">🕒 ${r.jam} WIB</div>
+          <div class="mc-participants">👥 ${(r.peserta||[]).length} Peserta</div>
+        </div>
+        <div class="mc-agenda">${r.agenda}</div>
+        <div class="mc-location">📍 ${r.tempat}</div>
+        <button class="mc-action" onclick="showArsipDetail(${r.id})">
+          Kelola Dokumen Rapat <span>➔</span>
+        </button>
+      </div>`;
+  });
+  
+  html += '</div>';
+  
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('open');
+}
 // ★ OPTIMASI: renderCalInline() dihapus dari sini (caller sudah panggil)
 function checkBooking() {
   const tgl    = document.getElementById('inp-tanggal').value;
