@@ -483,8 +483,12 @@ function renderCalInline() {
 function calClickInline(ds) {
   const events = arsipList.filter(r => r.tanggal === ds);
   if (events.length > 0) { showModalMultiple(ds, events); return; }
+  
   document.getElementById('inp-tanggal').value = ds;
-  renderCalInline(); updateNomorPreview(); checkBooking();
+  updateNomorPreview(); checkBooking();
+  
+  // Index 1 adalah tombol "Buat Rapat"
+  showPage('generate', document.querySelectorAll('.nav-btn')[1]);
 }
 
 // Render list rapat jika dalam 1 hari ada banyak agenda
@@ -673,7 +677,8 @@ async function generateDokumen() {
 
 function simpanKeAwan() {
   if (!lastGenId) return;
-  showPage('arsip', document.querySelectorAll('.nav-btn')[1]);
+  // Index 0 adalah tombol "Beranda"
+  showPage('beranda', document.querySelectorAll('.nav-btn')[0]); 
   setTimeout(() => {
     const el = document.getElementById('arsip-item-' + lastGenId);
     if (el) { el.classList.add('highlight'); el.scrollIntoView({behavior:'smooth', block:'center'}); }
@@ -1089,8 +1094,9 @@ function showPage(id, btn) {
   document.querySelectorAll('.nav-btn, .nav-drawer .nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   if (btn) btn.classList.add('active');
+  
   if (id==='peserta')    renderPesertaManage();
-  if (id==='arsip')      renderArsip();
+  if (id==='beranda')    renderArsip(); // PENTING: Render list riwayat arsip saat buka beranda
   if (id==='pengaturan') loadPengaturan();
 }
 let toastT;
