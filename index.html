@@ -122,15 +122,130 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 .cal-day:hover{background:rgba(122,16,32,.08)}
 .cal-day.today{background:var(--maroon);color:var(--white);font-weight:600}
 .cal-day.selected{outline:2px solid var(--gold);outline-offset:1px}
-.cal-day.has-event::after{content:'';width:4px;height:4px;border-radius:50%;background:var(--gold);display:block}
-.cal-day.today.has-event::after{background:var(--gold-light)}
+
+
 .cal-day.booked{background:rgba(229,57,53,.1);color:#c62828}
-.cal-day.booked::after{content:'';width:4px;height:4px;border-radius:50%;background:#e53935;display:block}
+
 .cal-day.other-month{color:#ccc;pointer-events:none}
-.cal-day.has-event:hover::before{content:attr(data-tip);position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--maroon-deep);color:white;font-size:9px;padding:3px 6px;border-radius:4px;white-space:nowrap;z-index:10;pointer-events:none;max-width:180px;overflow:hidden;text-overflow:ellipsis}
 .cal-legend{display:flex;gap:10px;padding:.4rem .9rem .65rem;flex-wrap:wrap}
 .cal-legend-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-muted)}
 .cal-legend-dot{width:7px;height:7px;border-radius:50%}
+
+  /* --- BADGE JUMLAH RAPAT DI KALENDER --- */
+.cal-badge {
+  background: rgba(201, 147, 42, 0.15);
+  color: #a87a1d;
+  border: 1px solid rgba(201, 147, 42, 0.3);
+  font-size: 8px;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 8px;
+  margin-top: 2px;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+}
+.cal-day.today .cal-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: var(--white);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.cal-badge.konflik {
+  background: rgba(229, 57, 53, 0.1);
+  color: #c62828;
+  border-color: rgba(229, 57, 53, 0.3);
+}
+
+/* --- DESAIN CARD POPUP YANG KEREN --- */
+.meeting-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.meeting-card {
+  background: var(--white);
+  border: 1px solid rgba(122, 16, 32, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(90, 10, 24, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.meeting-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(90, 10, 24, 0.12);
+  border-color: rgba(201, 147, 42, 0.4);
+}
+.meeting-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--maroon-light) 0%, var(--maroon) 100%);
+}
+.mc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.mc-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(122, 16, 32, 0.06);
+  color: var(--maroon);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+.mc-participants {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--cream-dark);
+  padding: 4px 8px;
+  border-radius: 20px;
+}
+.mc-agenda {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+.mc-location {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.mc-action {
+  width: 100%;
+  background: linear-gradient(135deg, #fdfaf7 0%, var(--white) 100%);
+  border: 1px solid #e8ddd5;
+  color: var(--maroon);
+  font-weight: 600;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+.mc-action:hover {
+  background: var(--maroon);
+  color: var(--white);
+  border-color: var(--maroon);
+}
 
 /* STATS PANEL */
 .stats-panel{display:flex;flex-direction:column;gap:10px}
@@ -659,8 +774,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
       <div class="cal-grid" id="cal-grid-inline"></div>
       <div class="cal-legend">
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--maroon)"></div>Hari ini</div>
-        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--gold)"></div>Ada rapat</div>
-        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#e53935"></div>Konflik</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--gold)"></div>Jumlah rapat</div>
       </div>
     </div>
     <div class="stats-panel">
