@@ -109,7 +109,66 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 
 /* HOME PANEL */
 .home-panel{max-width:860px;margin:0 auto;padding:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;align-items:start}
+/* AGENDA TERDEKAT */
+.upnext-card{background:var(--white);border-radius:var(--r);border:1px solid rgba(122,16,32,.08);overflow:hidden;box-shadow:var(--shadow)}
+.upnext-header{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1rem;background:var(--maroon)}
+.upnext-header-left{display:flex;align-items:center;gap:6px}
+.upnext-header-title{font-size:11px;font-weight:500;color:rgba(255,255,255,.9);letter-spacing:.06em;text-transform:uppercase}
+.upnext-list{padding:10px 12px;display:flex;flex-direction:column;gap:7px}
+.upnext-item{display:flex;gap:9px;align-items:flex-start;padding:9px 10px;border:1px solid #e8ddd5;border-radius:10px;background:#fdfaf7;cursor:pointer;transition:all .15s}
+.upnext-item:hover{border-color:rgba(122,16,32,.25);box-shadow:0 2px 8px rgba(90,10,24,.07)}
+.upnext-item.next{border-left:3px solid var(--maroon)}
+.upnext-datebox{width:38px;height:38px;border-radius:8px;background:var(--maroon);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.upnext-datebox .ud{font-size:14px;font-weight:700;color:var(--white);line-height:1}
+.upnext-datebox .um{font-size:8px;color:var(--gold-light);letter-spacing:.04em}
+.upnext-datebox.future{background:#e8ddd5}
+.upnext-datebox.future .ud{color:var(--maroon)}
+.upnext-datebox.future .um{color:var(--text-muted)}
+.upnext-info{flex:1;min-width:0}
+.upnext-agenda{font-size:12px;font-weight:600;color:var(--text-dark);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.upnext-meta{display:flex;gap:7px;flex-wrap:wrap}
+.upnext-meta span{font-size:10px;color:var(--text-muted)}
+.upnext-badge{font-size:9px;font-weight:600;padding:3px 7px;border-radius:9px;flex-shrink:0;align-self:flex-start}
+.upnext-badge.soon{background:rgba(201,147,42,.12);color:#8a6010}
+.upnext-badge.far{background:rgba(122,16,32,.06);color:var(--text-muted)}
+.upnext-empty{text-align:center;padding:1.25rem 1rem;color:var(--text-muted);font-size:11px}
 
+/* RISALAH TERAKHIR BUTTON */
+.risalah-quick{background:var(--white);border-radius:12px;border:1px solid rgba(122,16,32,.08);padding:11px 13px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .15s;box-shadow:0 1px 4px rgba(90,10,24,.05)}
+.risalah-quick:hover{border-color:rgba(122,16,32,.25);box-shadow:0 2px 10px rgba(90,10,24,.1)}
+.risalah-quick-icon{width:34px;height:34px;border-radius:8px;background:rgba(201,147,42,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px}
+.risalah-quick-info{flex:1;min-width:0}
+.risalah-quick-title{font-size:11px;font-weight:600;color:var(--text-dark);margin-bottom:2px}
+.risalah-quick-sub{font-size:10px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.risalah-quick-status{font-size:9px;font-weight:600;padding:3px 7px;border-radius:9px;flex-shrink:0}
+.risalah-quick-status.ok{background:rgba(76,175,80,.1);color:#2e7d32}
+.risalah-quick-status.pending{background:rgba(201,147,42,.12);color:#8a6010}
+.risalah-quick-status.none{background:rgba(122,16,32,.06);color:var(--text-muted)}
+
+/* HEALTH METER */
+.health-card{background:var(--white);border-radius:12px;border:1px solid rgba(122,16,32,.08);padding:11px 13px;box-shadow:var(--shadow)}
+.health-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.health-title{font-size:11px;font-weight:600;color:var(--text-dark)}
+.health-score{font-size:12px;font-weight:700}
+.health-score.high{color:var(--green)}
+.health-score.mid{color:var(--gold)}
+.health-score.low{color:#e53935}
+.health-row{margin-bottom:6px}
+.health-row-top{display:flex;justify-content:space-between;margin-bottom:3px}
+.health-row-label{font-size:10px;color:var(--text-muted)}
+.health-row-val{font-size:10px;font-weight:600}
+.health-row-val.ok{color:var(--green)}
+.health-row-val.warn{color:var(--gold)}
+.health-row-val.err{color:#e53935}
+.health-bar-bg{height:5px;border-radius:3px;background:#e8ddd5;overflow:hidden}
+.health-bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.health-bar-fill.ok{background:var(--green)}
+.health-bar-fill.warn{background:var(--gold)}
+.health-bar-fill.err{background:#e53935}
+.health-footer{margin-top:8px;padding-top:7px;border-top:1px solid #f0e8e0;display:flex;align-items:center;justify-content:space-between}
+.health-footer span{font-size:10px;color:var(--text-muted)}
+.health-footer button{font-size:10px;font-weight:600;color:var(--maroon);background:none;border:none;cursor:pointer;padding:0}
+.health-footer button:hover{text-decoration:underline}
 /* KALENDER */
 .cal-wrapper{background:var(--white);border-radius:var(--r);border:1px solid rgba(122,16,32,.08);overflow:hidden;box-shadow:var(--shadow)}
 .cal-header{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.1rem;background:var(--maroon)}
@@ -658,34 +717,78 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
   </div>
 
   <div class="home-panel">
-    <div class="cal-wrapper">
-      <div class="cal-header">
-        <div class="cal-title" id="cal-title-inline"></div>
-        <div class="cal-nav">
-          <button onclick="changeMonthInline(-1)">‹</button>
-          <button onclick="changeMonthInline(1)">›</button>
-        </div>
-      </div>
-      <div class="cal-grid" id="cal-grid-inline"></div>
-      <div class="cal-legend">
-        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--maroon)"></div>Hari ini</div>
-        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--gold)"></div>Jumlah rapat</div>
-        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#e53935"></div>Konflik</div>
+  <!-- KOLOM KIRI: Kalender -->
+  <div class="cal-wrapper">
+    <div class="cal-header">
+      <div class="cal-title" id="cal-title-inline"></div>
+      <div class="cal-nav">
+        <button onclick="changeMonthInline(-1)">‹</button>
+        <button onclick="changeMonthInline(1)">›</button>
       </div>
     </div>
-    <div class="stats-panel">
-      <div class="stat-row">
-        <div class="stat-card"><div class="stat-label">Total Rapat</div><div class="stat-value" id="dash-total">0</div><div class="stat-sub">Sepanjang waktu</div></div>
-        <div class="stat-card"><div class="stat-label">Tahun Ini</div><div class="stat-value" id="dash-tahun">0</div><div class="stat-sub" id="dash-tahun-lbl">Rapat 2026</div></div>
-        <div class="stat-card"><div class="stat-label">Avg Peserta</div><div class="stat-value" id="dash-avg">0</div><div class="stat-sub">Per rapat</div></div>
-        <div class="stat-card"><div class="stat-label">Dokumen</div><div class="stat-value" id="dash-dok">0</div><div class="stat-sub">Und+Absen+Risalah</div></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">Rapat per Bulan — <span id="chart-tahun-lbl"></span></div>
-        <div class="bar-chart" id="bar-chart-home"></div>
-      </div>
+    <div class="cal-grid" id="cal-grid-inline"></div>
+    <div class="cal-legend">
+      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--maroon)"></div>Hari ini</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--gold)"></div>Jumlah rapat</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#e53935"></div>Konflik</div>
     </div>
   </div>
+
+  <!-- KOLOM KANAN: Agenda Terdekat + Risalah + Stats + Health -->
+  <div class="stats-panel">
+    <!-- PANEL AGENDA TERDEKAT -->
+    <div class="upnext-card">
+      <div class="upnext-header">
+        <div class="upnext-header-left">
+          <span style="font-size:14px">🕒</span>
+          <span class="upnext-header-title">Agenda Terdekat</span>
+        </div>
+        <button class="nomor-refresh-btn" style="font-size:10px;padding:3px 9px" onclick="showPage('beranda',document.querySelectorAll('.nav-btn')[0])">Lihat Semua</button>
+      </div>
+      <div class="upnext-list" id="upnext-list">
+        <div class="upnext-empty">Memuat jadwal...</div>
+      </div>
+    </div>
+
+    <!-- TOMBOL AKSES CEPAT RISALAH TERAKHIR -->
+    <div class="risalah-quick" id="risalah-quick-btn" onclick="bukaRisalahTerakhir()">
+      <div class="risalah-quick-icon">📝</div>
+      <div class="risalah-quick-info">
+        <div class="risalah-quick-title">Risalah Terakhir</div>
+        <div class="risalah-quick-sub" id="risalah-quick-sub">Memuat...</div>
+      </div>
+      <span class="risalah-quick-status none" id="risalah-quick-status">—</span>
+      <span style="font-size:13px;color:var(--text-muted)">›</span>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-label">Total Rapat</div><div class="stat-value" id="dash-total">0</div><div class="stat-sub">Sepanjang waktu</div></div>
+      <div class="stat-card"><div class="stat-label">Tahun Ini</div><div class="stat-value" id="dash-tahun">0</div><div class="stat-sub" id="dash-tahun-lbl">Rapat 2026</div></div>
+      <div class="stat-card"><div class="stat-label">Avg Peserta</div><div class="stat-value" id="dash-avg">0</div><div class="stat-sub">Per rapat</div></div>
+      <div class="stat-card"><div class="stat-label">Dokumen</div><div class="stat-value" id="dash-dok">0</div><div class="stat-sub">Und+Absen+Risalah</div></div>
+    </div>
+
+    <!-- HEALTH METER -->
+    <div class="health-card">
+      <div class="health-header">
+        <span class="health-title">📊 Kelengkapan Arsip Drive</span>
+        <span class="health-score" id="health-score">—</span>
+      </div>
+      <div id="health-rows"></div>
+      <div class="health-footer">
+        <span id="health-footer-text">Menghitung...</span>
+        <button onclick="scrollToArsipBelum()">Lihat ›</button>
+      </div>
+    </div>
+
+    <!-- BAR CHART -->
+    <div class="chart-card">
+      <div class="chart-title">Rapat per Bulan — <span id="chart-tahun-lbl"></span></div>
+      <div class="bar-chart" id="bar-chart-home"></div>
+    </div>
+  </div>
+</div>
 
   <div class="content-section" style="padding-top:0;">
     <div class="section-divider" style="margin-top:0; margin-bottom:1.25rem;"><span>Riwayat & Arsip Rapat</span></div>
