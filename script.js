@@ -52,6 +52,15 @@ let uploadFiles    = {};
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbz2CWZbBPaBBfXL1jtSQDhd65FnUAWZogzA-yl51cjxIQMFznhmgneI2G71xN593w/exec';
 function getGasUrl() { return GAS_URL; }
 
+// ★ FIX TIMEZONE: parse tanggal string "YYYY-MM-DD" sebagai local time, bukan UTC
+function parseTanggal(str) {
+  if (!str) return new Date(NaN);
+  // Jika sudah ada suffix waktu, pakai langsung
+  if (str.includes('T')) return new Date(str);
+  // Tambah T00:00:00 agar diparsing sebagai local time (bukan UTC midnight)
+  return new Date(str + 'T00:00:00');
+}
+
 // Mengubah string jam "09:00" menjadi total menit (540 menit)
 function getMenitDariJam(jamStr) {
   if (!jamStr || !jamStr.includes(':')) return 0;
@@ -108,7 +117,6 @@ function toBase64(file) {
 }
 
 // ════ GAS API — satu fungsi untuk GET & POST ══════════════════
-// ★ OPTIMASI: gasGet + gasPost digabung jadi gasCall()
 async function gasCall(action, payload = null) {
   const url = getGasUrl();
   if (!url) throw new Error('GAS URL belum diisi');
@@ -122,12 +130,10 @@ async function gasCall(action, payload = null) {
   if (d.error) throw new Error(d.error);
   return d;
 }
-// Alias agar kode lama yang memanggil gasGet/gasPost tetap jalan tanpa ubah
-const gasGet  = (action)          => gasCall(action);
-const gasPost = (payload)         => gasCall(payload.action, payload);
+const gasGet  = (action)  => gasCall(action);
+const gasPost = (payload) => gasCall(payload.action, payload);
 
 // ════ SANITASI ARSIP ══════════════════════════════════════════
-// ★ OPTIMASI: helper sanitasiField mengurangi duplikasi logika
 function sanitasiField(val, type) {
   const s = String(val || '');
   if (type === 'tanggal') return s.includes('T') ? s.split('T')[0] : s;
@@ -139,6 +145,8 @@ function sanitasiField(val, type) {
     }
     if (v.length > 5 && v.includes(':')) v = v.substring(0, 5);
     if (v.includes(' ')) v = v.split(' ')[0];
+    // Pastikan format HH:MM (tambah leading zero jika perlu)
+    if (/^\d:\d{2}$/.test(v)) v = '0' + v;
     return v;
   }
   if (type === 'tglGeneret') {
@@ -162,7 +170,6 @@ function sanitasiArsip(list) {
 }
 
 // ════ STATS ═══════════════════════════════════════════════════
-// ★ OPTIMASI: updateHeroStats + renderDashHome share kalkulasi via refreshStats()
 function animCount(el, target) {
   let cur = 0;
   const step = Math.max(1, Math.floor(target / 20));
@@ -170,18 +177,17 @@ function animCount(el, target) {
 }
 
 function refreshStats() {
-  const yr     = today.getFullYear();
-  const total  = arsipList.length;
-  const tiArsip= arsipList.filter(r => new Date(r.tanggal).getFullYear() === yr);
-  const ti     = tiArsip.length;
-  const avg    = total ? Math.round(arsipList.reduce((a, r) => a + (r.peserta||[]).length, 0) / total) : 0;
+  const yr      = today.getFullYear();
+  const total   = arsipList.length;
+  // ★ FIX TIMEZONE: pakai parseTanggal() bukan new Date()
+  const tiArsip = arsipList.filter(r => parseTanggal(r.tanggal).getFullYear() === yr);
+  const ti      = tiArsip.length;
+  const avg     = total ? Math.round(arsipList.reduce((a, r) => a + (r.peserta||[]).length, 0) / total) : 0;
 
-  // Hero stats
   const ht = document.getElementById('hs-total');  if (ht) animCount(ht, total);
   const hy = document.getElementById('hs-tahun');  if (hy) animCount(hy, ti);
   const hn = document.getElementById('hs-nomor');  if (hn) hn.textContent = '#' + (settings.nomorLast + 1);
 
-  // Dashboard panel
   const dt = document.getElementById('dash-total'); if (dt) animCount(dt, total);
   const dy = document.getElementById('dash-tahun'); if (dy) animCount(dy, ti);
   const da = document.getElementById('dash-avg');   if (da) animCount(da, avg);
@@ -189,9 +195,9 @@ function refreshStats() {
   const dl = document.getElementById('dash-tahun-lbl'); if (dl) dl.textContent = 'Rapat ' + yr;
   const cl = document.getElementById('chart-tahun-lbl'); if (cl) cl.textContent = yr;
 
-  // Bar chart
+  // Bar chart — ★ FIX TIMEZONE
   const months = Array(12).fill(0);
-  tiArsip.forEach(r => months[new Date(r.tanggal).getMonth()]++);
+  tiArsip.forEach(r => months[parseTanggal(r.tanggal).getMonth()]++);
   const max = Math.max(...months, 1);
   const bc = document.getElementById('bar-chart-home');
   if (bc) bc.innerHTML = months.map((n, i) =>
@@ -200,7 +206,6 @@ function refreshStats() {
     `<div class="bar-label">${SH_ID[i]}</div></div>`
   ).join('');
 }
-// Alias lama tetap berfungsi
 const updateHeroStats = refreshStats;
 const renderDashHome  = refreshStats;
 
@@ -327,7 +332,8 @@ async function fetchNomor() {
 }
 function updateNomorPreview() {
   const tgl  = document.getElementById('inp-tanggal').value;
-  const d    = tgl ? new Date(tgl + 'T00:00:00') : new Date();
+  // ★ FIX TIMEZONE
+  const d    = tgl ? parseTanggal(tgl) : new Date();
   const hint = tgl ? ` (urut ke-${settings.nomorLast+1})` : ' (Silakan tentukan tanggal rapat)';
   document.getElementById('nomor-preview').textContent = buildNomor(settings.nomorLast + 1, d) + hint;
 }
@@ -419,25 +425,24 @@ function renderCalInline() {
   for (let i = 0; i < firstDay; i++) html += `<div class="cal-day other-month"></div>`;
 
   for (let d = 1; d <= days; d++) {
-    const ds      = `${calYearInline}-${String(calMonthInline+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const events  = rapatMap[ds] || [];
-    const hasEv   = events.length > 0;
-   const isBooked = hasEv && ds === selTgl && events.some(e => {
-        return e.tempat === selTempat && Math.abs(getMenitDariJam(selJam) - getMenitDariJam(e.jam)) < 60;
-    });
-    
+    const ds     = `${calYearInline}-${String(calMonthInline+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const events = rapatMap[ds] || [];
+    const hasEv  = events.length > 0;
+    const isBooked = hasEv && ds === selTgl && events.some(e =>
+      e.tempat === selTempat && Math.abs(getMenitDariJam(selJam) - getMenitDariJam(e.jam)) < 60
+    );
+
     let cls = 'cal-day';
     if (ds === todayStr) cls += ' today'; else if (ds === selTgl) cls += ' selected';
     cls += isBooked ? ' booked' : hasEv ? ' has-event' : '';
-    
+
     const tip = hasEv ? events.map(e => `${e.jam} – ${(e.agenda||'').substring(0,25)}`).join(' | ') : '';
-    
-    // -- LOGIKA BADGE "X RAPAT" --
+
     let badgeHtml = '';
     if (hasEv) {
-    const isKonflik = (ds === selTgl && events.some(e => {
-        return e.tempat === selTempat && Math.abs(getMenitDariJam(selJam) - getMenitDariJam(e.jam)) < 60;
-    }));
+      const isKonflik = ds === selTgl && events.some(e =>
+        e.tempat === selTempat && Math.abs(getMenitDariJam(selJam) - getMenitDariJam(e.jam)) < 60
+      );
       badgeHtml = `<div class="cal-badge ${isKonflik ? 'konflik' : ''}">${events.length} Rapat</div>`;
     }
 
@@ -452,27 +457,20 @@ function renderCalInline() {
 // Klik kalender: ada rapat → buka detail; kosong → isi form
 function calClickInline(ds) {
   const events = arsipList.filter(r => r.tanggal === ds);
-  
-  if (events.length > 0) {
-    showModalMultiple(ds, events); 
-    return;
-  }
-  
-  // Jika hari kosong, masukkan ke input form
+  if (events.length > 0) { showModalMultiple(ds, events); return; }
   document.getElementById('inp-tanggal').value = ds;
   renderCalInline(); updateNomorPreview(); checkBooking();
 }
+
 // Render list rapat jika dalam 1 hari ada banyak agenda
 function showModalMultiple(ds, events) {
-  const d = new Date(ds);
+  // ★ FIX TIMEZONE
+  const d = parseTanggal(ds);
   document.getElementById('modal-title').textContent = `Jadwal: ${d.getDate()} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;
-  
-  // Sembunyikan tombol share jika ada di header (karena ini mode list)
   const shareBtn = document.getElementById('modal-share-btn');
   if (shareBtn) shareBtn.style.display = 'none';
-  
+
   let html = '<div class="meeting-list-container">';
-  
   events.forEach(r => {
     html += `
       <div class="meeting-card">
@@ -487,35 +485,33 @@ function showModalMultiple(ds, events) {
         </button>
       </div>`;
   });
-  
   html += '</div>';
-  
   document.getElementById('modal-body').innerHTML = html;
   document.getElementById('modal-overlay').classList.add('open');
 }
-// ★ OPTIMASI: renderCalInline() dihapus dari sini (caller sudah panggil)
+
 function checkBooking() {
   const tgl    = document.getElementById('inp-tanggal').value;
   const jam    = document.getElementById('inp-jam').value;
   const tempat = document.getElementById('inp-tempat').value.trim();
   const warn   = document.getElementById('booking-warn');
   const btnGen = document.getElementById('btn-gen');
-  
-  if (!jam) return;
+
+  // Guard: jam belum diisi atau belum lengkap format HH:MM
+  if (!jam || jam.length < 5) {
+    warn.style.display = 'none'; warn.innerHTML = '';
+    if (btnGen) { btnGen.disabled = false; btnGen.style.opacity = ''; btnGen.title = ''; }
+    return;
+  }
+
   const menitBaru = getMenitDariJam(jam);
 
-if (!jam || jam.length < 5) {
-    warn.style.display = 'none';
-    if (btnGen) { btnGen.disabled = false; btnGen.style.opacity = ''; }
-    return;
-}
-const konflik = arsipList.find(r => {
+  const konflik = arsipList.find(r => {
     if (r.tanggal !== tgl) return false;
     if (tempat && r.tempat !== tempat) return false;
     const menitLama = getMenitDariJam(r.jam);
-    const selisih = Math.abs(menitBaru - menitLama);
-    return selisih < 60; // selisih 0–59 menit = konflik; 60+ menit = boleh
-});
+    return Math.abs(menitBaru - menitLama) < 60; // 0–59 menit = konflik; 60+ = boleh
+  });
 
   if (konflik) {
     warn.style.display = 'block';
@@ -547,17 +543,14 @@ async function generateDokumen() {
   const tempat     = document.getElementById('inp-tempat').value.trim();
   const agenda     = document.getElementById('inp-agenda').value.trim();
 
-  if (!tanggalVal)  { showToast('Pilih tanggal rapat!','error'); return; }
-  if (!agenda)      { showToast('Isi agenda rapat!','error'); return; }
+  if (!tanggalVal) { showToast('Pilih tanggal rapat!','error'); return; }
+  if (!agenda)     { showToast('Isi agenda rapat!','error'); return; }
 
-  // ★ OPTIMASI: satu kali cek konflik (duplikasi dihapus)
   const menitBaru = getMenitDariJam(jamVal);
-const konflik = arsipList.find(r => {
-    if (r.tanggal !== tanggalVal) return false;
-    if (r.tempat !== tempat) return false;
-    const menitLama = getMenitDariJam(r.jam);
-    return Math.abs(menitBaru - menitLama) < 60; // 0–59 = konflik
-});
+  const konflik = arsipList.find(r => {
+    if (r.tanggal !== tanggalVal || r.tempat !== tempat) return false;
+    return Math.abs(menitBaru - getMenitDariJam(r.jam)) < 60;
+  });
   if (konflik) {
     showToast(`❌ Konflik jadwal! "${konflik.agenda.substring(0,45)}..." sudah terjadwal di waktu & tempat yang sama.`,'error');
     const w = document.getElementById('booking-warn');
@@ -573,11 +566,12 @@ const konflik = arsipList.find(r => {
   document.getElementById('btn-awan').classList.remove('visible');
   lastGenId = lastGenBlobs = lastGenPrefix = null;
 
-  const tgl      = new Date(tanggalVal + 'T00:00:00');
-  const hariStr  = HARI_ID[tgl.getDay()];
-  const tglStr   = tglFull(tgl);
-  const tglGen   = tglGeneret();
-  const jamFmt   = jamVal + ' WIB s/d Selesai';
+  // ★ FIX TIMEZONE: pakai parseTanggal()
+  const tgl     = parseTanggal(tanggalVal);
+  const hariStr = HARI_ID[tgl.getDay()];
+  const tglStr  = tglFull(tgl);
+  const tglGen  = tglGeneret();
+  const jamFmt  = jamVal + ' WIB s/d Selesai';
 
   let nextNo = settings.nomorLast + 1;
   if (getGasUrl()) { try { const d = await gasCall('getLastNomor'); nextNo = d.nextNomor; } catch {} }
@@ -668,7 +662,8 @@ function renderArsip() {
   const bln = document.getElementById('filter-bulan')?.value || '';
   const thn = document.getElementById('filter-tahun')?.value || '';
   const list = arsipList.filter(r => {
-    const d = new Date(r.tanggal);
+    // ★ FIX TIMEZONE
+    const d = parseTanggal(r.tanggal);
     if (bln && BULAN_ID[d.getMonth()] !== bln) return false;
     if (thn && String(d.getFullYear()) !== thn) return false;
     if (q && !JSON.stringify(r).toLowerCase().includes(q)) return false;
@@ -680,7 +675,8 @@ function renderArsip() {
     return;
   }
   el.innerHTML = list.map(r => {
-    const d          = new Date(r.tanggal);
+    // ★ FIX TIMEZONE
+    const d          = parseTanggal(r.tanggal);
     const files      = uploadFiles[r.id] || [];
     const allFiles   = [...files, ...(r.uploadedFiles||[])];
     const totalCloud = new Set(allFiles.filter(f => f?.status==='done').map(f => f.name)).size;
@@ -717,7 +713,8 @@ function hapusArsip(id) {
 function printDetail() {
   if (!currentModalId) return;
   const r = arsipList.find(x => x.id === currentModalId); if (!r) return;
-  const d = new Date(r.tanggal);
+  // ★ FIX TIMEZONE
+  const d = parseTanggal(r.tanggal);
   const w = window.open('','_blank','width=800,height=600');
   w.document.write(`<html><head><title>Print Detail Rapat</title>
     <style>@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>
@@ -745,7 +742,8 @@ function shareFiles() {
     .filter(f => f?.status === 'done' && f.url)
     .reduce((acc, f) => { if (!acc.find(x => x.name === f.name)) acc.push(f); return acc; }, []);
   if (!allDone.length) { showToast('Belum ada dokumen tersimpan di Drive.','error'); return; }
-  const d = new Date(r.tanggal);
+  // ★ FIX TIMEZONE
+  const d = parseTanggal(r.tanggal);
   const text = `🗂 Dokumen Rapat: ${r.agenda}\n📅 ${r.hari}, ${tglFull(d)}\n\n` +
     allDone.map(f => `📄 ${f.name}\n${f.url}`).join('\n\n');
   if (navigator.share) navigator.share({title:'Dokumen Rapat',text}).catch(()=>{});
@@ -756,7 +754,8 @@ function shareFiles() {
 function showArsipDetail(id) {
   currentModalId = id;
   const r = arsipList.find(x => x.id === id); if (!r) return;
-  const d = new Date(r.tanggal);
+  // ★ FIX TIMEZONE
+  const d = parseTanggal(r.tanggal);
   const folderName = `${String(d.getDate()).padStart(2,'0')} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;
   if (r.uploadedFiles?.length && !uploadFiles[id]?.length)
     uploadFiles[id] = r.uploadedFiles.map(f => ({...f, file:null, type:f.type||'', _showPreview:false}));
