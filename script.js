@@ -676,14 +676,37 @@ async function generateDokumen() {
 }
 
 function simpanKeAwan() {
-  if (!lastGenId) return;
-  // Index 0 adalah tombol "Beranda"
-  showPage('beranda', document.querySelectorAll('.nav-btn')[0]); 
+  if (!lastGenId) {
+    showToast('Tidak ada rapat yang baru di-generate', 'error');
+    return;
+  }
+  
+  // 1. Ambil tombol menu Beranda dan pindah ke halaman Beranda
+  const btnBeranda = document.querySelector('.nav-menu .nav-btn') || document.querySelectorAll('.nav-btn')[0];
+  showPage('beranda', btnBeranda);
+  
+  // 2. Beri jeda 300ms agar halaman selesai berganti, lalu eksekusi pembukaan modal
   setTimeout(() => {
-    const el = document.getElementById('arsip-item-' + lastGenId);
-    if (el) { el.classList.add('highlight'); el.scrollIntoView({behavior:'smooth', block:'center'}); }
-    showArsipDetail(lastGenId);
-  }, 200);
+    try {
+      // Cari elemen rapat di list dan scroll perlahan ke arahnya
+      const el = document.getElementById('arsip-item-' + lastGenId);
+      if (el) { 
+        el.classList.add('highlight'); 
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
+      }
+      
+      // Panggil fungsi pengisian data ke modal
+      showArsipDetail(lastGenId);
+      
+      // Paksa modal agar tampil di atas layar
+      const modalOverlay = document.getElementById('modal-overlay');
+      if (modalOverlay) modalOverlay.classList.add('open');
+      
+    } catch (err) {
+      console.error("Gagal membuka popup detail:", err);
+      showToast('Terjadi kesalahan saat membuka detail rapat', 'error');
+    }
+  }, 300); // Waktu tunggu dinaikkan ke 300 milidetik agar lebih aman
 }
 
 // ════ ARSIP LIST ══════════════════════════════════════════════
@@ -1092,12 +1115,17 @@ function toggleFaq(el) { el.classList.toggle('open'); el.nextElementSibling.clas
 function showPage(id, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn, .nav-drawer .nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
+  
+  const targetPage = document.getElementById('page-' + id);
+  if (targetPage) targetPage.classList.add('active');
   if (btn) btn.classList.add('active');
   
-  if (id==='peserta')    renderPesertaManage();
-  if (id==='beranda')    renderArsip(); // PENTING: Render list riwayat arsip saat buka beranda
-  if (id==='pengaturan') loadPengaturan();
+  if (id === 'peserta')    renderPesertaManage();
+  if (id === 'beranda') {
+    renderCalInline();
+    renderArsip(); // PENTING: Me-render ulang daftar arsip
+  }
+  if (id === 'pengaturan') loadPengaturan();
 }
 let toastT;
 function showToast(msg, type='info') {
