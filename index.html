@@ -738,47 +738,6 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
   .risalah-quick { min-height: 48px; }
 }
 
-  /* --- PINDAH STATS KE BAWAH KALENDER (DESKTOP ONLY) --- */
-@media (min-width: 901px) {
-  .home-panel {
-    /* Sesuaikan jarak vertikal antar card agar tetap rapi */
-    row-gap: 10px;
-    column-gap: 1.25rem;
-  }
-  
-  /* Hilangkan pembungkus panel kanan agar isi dalamnya (anak-anaknya) bisa dikontrol langsung oleh grid .home-panel */
-  .stats-panel {
-    display: contents; 
-  }
-
-  /* --- MENGATUR POSISI KOLOM KIRI --- */
-  .cal-wrapper {
-    grid-column: 1;
-    grid-row: 1 / span 3; /* Kalender membentang sepanjang 3 baris pertama di kiri */
-  }
-  .stat-row {
-    grid-column: 1;
-    grid-row: 4; /* Pindah ke kolom kiri, diletakkan persis di bawah kalender (baris ke-4) */
-  }
-
-  /* --- MENGATUR POSISI KOLOM KANAN --- */
-  .upnext-card {
-    grid-column: 2;
-    grid-row: 1;
-  }
-  .risalah-quick {
-    grid-column: 2;
-    grid-row: 2;
-  }
-  .health-card {
-    grid-column: 2;
-    grid-row: 3;
-  }
-  .chart-card {
-    grid-column: 2;
-    grid-row: 4; /* Letaknya akan sejajar di kanan dengan stat-row */
-  }
-}
 </style>
 </head>
 <body>
@@ -850,27 +809,35 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
     </div>
   </div>
 
-  <div class="home-panel">
-  <!-- KOLOM KIRI: Kalender -->
-  <div class="cal-wrapper">
-    <div class="cal-header">
-      <div class="cal-title" id="cal-title-inline"></div>
-      <div class="cal-nav">
-        <button onclick="changeMonthInline(-1)">‹</button>
-        <button onclick="changeMonthInline(1)">›</button>
+ <div class="home-panel">
+  <div style="display: flex; flex-direction: column; gap: 1.25rem; min-width: 0;">
+    
+    <div class="cal-wrapper">
+      <div class="cal-header">
+        <div class="cal-title" id="cal-title-inline"></div>
+        <div class="cal-nav">
+          <button onclick="changeMonthInline(-1)">‹</button>
+          <button onclick="changeMonthInline(1)">›</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="cal-grid-inline"></div>
+      <div class="cal-legend">
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--maroon)"></div>Hari ini</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--gold)"></div>Jumlah rapat</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#e53935"></div>Konflik</div>
       </div>
     </div>
-    <div class="cal-grid" id="cal-grid-inline"></div>
-    <div class="cal-legend">
-      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--maroon)"></div>Hari ini</div>
-      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--gold)"></div>Jumlah rapat</div>
-      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#e53935"></div>Konflik</div>
+
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-label">Total Rapat</div><div class="stat-value" id="dash-total">0</div><div class="stat-sub">Sepanjang waktu</div></div>
+      <div class="stat-card"><div class="stat-label">Tahun Ini</div><div class="stat-value" id="dash-tahun">0</div><div class="stat-sub" id="dash-tahun-lbl">Rapat 2026</div></div>
+      <div class="stat-card"><div class="stat-label">Avg Peserta</div><div class="stat-value" id="dash-avg">0</div><div class="stat-sub">Per rapat</div></div>
+      <div class="stat-card"><div class="stat-label">Dokumen</div><div class="stat-value" id="dash-dok">0</div><div class="stat-sub">Und+Absen+Risalah</div></div>
     </div>
+
   </div>
 
-  <!-- KOLOM KANAN: Agenda Terdekat + Risalah + Stats + Health -->
   <div class="stats-panel">
-    <!-- PANEL AGENDA TERDEKAT -->
     <div class="upnext-card">
       <div class="upnext-header">
         <div class="upnext-header-left">
@@ -884,7 +851,6 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
       </div>
     </div>
 
-    <!-- TOMBOL AKSES CEPAT RISALAH TERAKHIR -->
     <div class="risalah-quick" id="risalah-quick-btn" onclick="bukaRisalahTerakhir()">
       <div class="risalah-quick-icon">📝</div>
       <div class="risalah-quick-info">
@@ -895,15 +861,6 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
       <span style="font-size:13px;color:var(--text-muted)">›</span>
     </div>
 
-    <!-- STAT CARDS -->
-    <div class="stat-row">
-      <div class="stat-card"><div class="stat-label">Total Rapat</div><div class="stat-value" id="dash-total">0</div><div class="stat-sub">Sepanjang waktu</div></div>
-      <div class="stat-card"><div class="stat-label">Tahun Ini</div><div class="stat-value" id="dash-tahun">0</div><div class="stat-sub" id="dash-tahun-lbl">Rapat 2026</div></div>
-      <div class="stat-card"><div class="stat-label">Avg Peserta</div><div class="stat-value" id="dash-avg">0</div><div class="stat-sub">Per rapat</div></div>
-      <div class="stat-card"><div class="stat-label">Dokumen</div><div class="stat-value" id="dash-dok">0</div><div class="stat-sub">Und+Absen+Risalah</div></div>
-    </div>
-
-    <!-- HEALTH METER -->
     <div class="health-card">
       <div class="health-header">
         <span class="health-title">📊 Kelengkapan Arsip Drive</span>
@@ -916,7 +873,6 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
       </div>
     </div>
 
-    <!-- BAR CHART -->
     <div class="chart-card">
       <div class="chart-title">Rapat per Bulan — <span id="chart-tahun-lbl"></span></div>
       <div class="bar-chart" id="bar-chart-home"></div>
