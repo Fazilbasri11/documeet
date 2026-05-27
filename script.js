@@ -1194,23 +1194,46 @@ async function loadPesertaFromCloud() {
 // ════ AGENDA TERDEKAT (UP NEXT) ══════════════════════════════
 function renderUpNext() {
   const el = document.getElementById('upnext-list'); if (!el) return;
-  const todayMs  = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  
+  // todayMs digunakan HANYA untuk menghitung selisih hari (label "Hari ini" / "Besok")
+  const todayMs = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  // nowMs adalah waktu detil saat ini (termasuk jam dan menit)
+  const nowMs = new Date().getTime();
+
   const upcoming = arsipList
-    .filter(r => { const d = parseTanggal(r.tanggal); return d.getTime() >= todayMs; })
-    .sort((a, b) => parseTanggal(a.tanggal) - parseTanggal(b.tanggal))
+    .filter(r => {
+      const d = parseTanggal(r.tanggal);
+      // Sisipkan jam dan menit ke dalam objek tanggal
+      if (r.jam) {
+        const parts = r.jam.split(':');
+        d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+      }
+      // Bandingkan dengan jam riil sekarang
+      return d.getTime() >= nowMs;
+    })
+    .sort((a, b) => {
+      // Sortir berdasarkan tanggal sekaligus jam agar lebih presisi
+      const dA = parseTanggal(a.tanggal);
+      if (a.jam) dA.setHours(...a.jam.split(':').map(Number));
+      const dB = parseTanggal(b.tanggal);
+      if (b.jam) dB.setHours(...b.jam.split(':').map(Number));
+      return dA.getTime() - dB.getTime();
+    })
     .slice(0, 3);
 
   if (!upcoming.length) {
     el.innerHTML = '<div class="upnext-empty">📭 Tidak ada rapat mendatang.</div>';
     return;
   }
+  
   el.innerHTML = upcoming.map((r, i) => {
-    const d       = parseTanggal(r.tanggal);
-    const diffMs  = d.getTime() - todayMs;
+    const d = parseTanggal(r.tanggal);
+    const diffMs = d.getTime() - todayMs;
     const diffDay = Math.round(diffMs / 86400000);
     const labelHari = diffDay === 0 ? 'Hari ini' : diffDay === 1 ? 'Besok' : diffDay + ' hari';
-    const isSoon  = diffDay <= 3;
+    const isSoon = diffDay <= 3;
     const isFirst = i === 0;
+    
     return `<div class="upnext-item${isFirst ? ' next' : ''}" onclick="showArsipDetail(${r.id})">
       <div class="upnext-datebox${isFirst ? '' : ' future'}">
         <span class="ud">${String(d.getDate()).padStart(2,'0')}</span>
