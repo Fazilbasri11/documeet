@@ -622,7 +622,7 @@ async function generateDokumen() {
           .split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '),
         jabatan: p.jabatan,
         ttd: '',
-        ttdNo: (i % 2 === 0) ? String(i+1) : '\t' + String(i+1), // ganjil=kiri, genap=tab→tengah
+       ttdNo: (i % 2 === 0) ? String(i+1) : '          ' + String(i+1),// ganjil=kiri, genap=tab→tengah
 }))
   };
 
