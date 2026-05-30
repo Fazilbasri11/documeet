@@ -56,12 +56,9 @@ function getGasUrl() { return GAS_URL; }
 function parseTanggal(str) {
   if (!str) return new Date(NaN);
   if (str.includes('T')) return new Date(str);
-  // Ubah format "YYYY-MM-DD" menjadi "YYYY/MM/DD 00:00:00" 
-  // agar cross-browser selalu membacanya sebagai Waktu Lokal (WIB), bukan UTC.
   return new Date(str.replace(/-/g, '/') + ' 00:00:00');
 }
 
-// Mengubah string jam "09:00" menjadi total menit (540 menit)
 function getMenitDariJam(jamStr) {
   if (!jamStr || !jamStr.includes(':')) return 0;
   const parts = jamStr.split(':');
@@ -77,7 +74,6 @@ function tglGeneret() { return `${today.getDate()} ${BULAN_ID[today.getMonth()]}
 function tglFull(d)   { return `${d.getDate()} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`; }
 function saveLocal()  { localStorage.setItem('sirapat_arsip', JSON.stringify(arsipList)); }
 
-// Download blob sebagai file
 function dlBlob(blob, filename) {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -87,7 +83,6 @@ function dlBlob(blob, filename) {
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
 
-// File-type helpers
 function isImage(n) { return /\.(jpe?g|png|webp|gif|bmp|svg)$/i.test(n || ''); }
 function isPdf(n)   { return /\.pdf$/i.test(n || ''); }
 function fmtSize(b) {
@@ -116,7 +111,7 @@ function toBase64(file) {
   });
 }
 
-// ════ GAS API — satu fungsi untuk GET & POST ══════════════════
+// ════ GAS API ══════════════════════════════════════════════════
 async function gasCall(action, payload = null) {
   const url = getGasUrl();
   if (!url) throw new Error('GAS URL belum diisi');
@@ -134,13 +129,11 @@ const gasGet  = (action)  => gasCall(action);
 const gasPost = (payload) => gasCall(payload.action, payload);
 
 // ════ SANITASI ARSIP ══════════════════════════════════════════
-// ════ SANITASI ARSIP ══════════════════════════════════════════
 function sanitasiField(val, type) {
   const s = String(val || '');
   if (!s) return s;
 
   if (type === 'tanggal') {
-    // Jika dari cloud formatnya ISO (ada huruf T), konversi ke Date lalu ambil tanggal LOKAL-nya
     if (s.includes('T')) {
       const d = new Date(s);
       if (!isNaN(d)) {
@@ -149,10 +142,9 @@ function sanitasiField(val, type) {
     }
     return s;
   }
-  
+
   if (type === 'jam') {
     let v = s;
-    // Jika dari cloud, ambil jam LOKAL (getHours/getMinutes), bukan getUTCHours
     if (v.includes('T')) {
       try {
         const d = new Date(v);
@@ -166,9 +158,8 @@ function sanitasiField(val, type) {
     if (/^\d:\d{2}$/.test(v)) v = '0' + v;
     return v;
   }
-  
+
   if (type === 'tglGeneret') {
-    // Sama seperti tanggal, ambil nilai menggunakan metode LOKAL
     if (s.includes('T')) {
       try {
         const d = new Date(s);
@@ -182,7 +173,7 @@ function sanitasiField(val, type) {
     }
     return s;
   }
-  
+
   return s;
 }
 function sanitasiArsip(list) {
@@ -204,7 +195,6 @@ function animCount(el, target) {
 function refreshStats() {
   const yr      = today.getFullYear();
   const total   = arsipList.length;
-  // ★ FIX TIMEZONE: pakai parseTanggal() bukan new Date()
   const tiArsip = arsipList.filter(r => parseTanggal(r.tanggal).getFullYear() === yr);
   const ti      = tiArsip.length;
   const avg     = total ? Math.round(arsipList.reduce((a, r) => a + (r.peserta||[]).length, 0) / total) : 0;
@@ -220,7 +210,6 @@ function refreshStats() {
   const dl = document.getElementById('dash-tahun-lbl'); if (dl) dl.textContent = 'Rapat ' + yr;
   const cl = document.getElementById('chart-tahun-lbl'); if (cl) cl.textContent = yr;
 
-  // Bar chart — ★ FIX TIMEZONE
   const months = Array(12).fill(0);
   tiArsip.forEach(r => months[parseTanggal(r.tanggal).getMonth()]++);
   const max = Math.max(...months, 1);
@@ -230,6 +219,7 @@ function refreshStats() {
     `<div class="bar" style="height:${Math.round(n/max*80)}px"><div class="bar-inner" style="height:100%"></div></div>` +
     `<div class="bar-label">${SH_ID[i]}</div></div>`
   ).join('');
+
   renderUpNext();
   renderRisalahQuick();
   renderHealthMeter();
@@ -300,8 +290,13 @@ function setCloudBanner(state, msg) {
 }
 
 // ════ CLOUD — ARSIP ═══════════════════════════════════════════
+// ★ loadArsipFromCloud TIDAK memanggil render apapun — diserahkan ke mulaiAutoSync
 async function loadArsipFromCloud() {
-  if (!getGasUrl()) { setHeroSync('err','GAS URL belum diisi'); setCloudBanner('warn','URL GAS belum diisi — data hanya dari browser lokal.'); return; }
+  if (!getGasUrl()) {
+    setHeroSync('err','GAS URL belum diisi');
+    setCloudBanner('warn','URL GAS belum diisi — data hanya dari browser lokal.');
+    return;
+  }
   setHeroSync('syncing','Menyinkron data cloud...'); showSync('Memuat dari cloud...','syncing');
   try {
     const data       = await gasCall('getArsip');
@@ -319,14 +314,21 @@ async function loadArsipFromCloud() {
     setHeroSync('ok', `✓ ${arsipList.length} arsip tersinkron`);
     showSync(`${arsipList.length} arsip tersinkron`, 'ok');
     setCloudBanner('ok', `✓ ${arsipList.length} arsip dimuat dari cloud`);
-    renderArsip(); renderCalInline(); refreshStats();
+    // ★ TIDAK memanggil renderArsip / renderCalInline / refreshStats di sini
   } catch (e) {
     setHeroSync('err','Gagal sync — menggunakan data lokal');
     setCloudBanner('err','❌ Gagal memuat dari cloud: ' + e.message);
     showSync('Gagal sync cloud','err');
   }
 }
-async function refreshArsipCloud() { await loadArsipFromCloud(); }
+
+// Tombol sync manual dari UI — perlu render ulang setelah selesai
+async function refreshArsipCloud() {
+  await loadArsipFromCloud();
+  renderCalInline();
+  renderArsip();
+  refreshStats();
+}
 
 async function syncArsipToCloud(item) {
   if (!getGasUrl()) return;
@@ -345,6 +347,7 @@ async function hapusArsipCloud(id) {
 }
 
 // ════ NOMOR SURAT ═════════════════════════════════════════════
+// ★ fetchNomor TIDAK memanggil refreshStats — diserahkan ke mulaiAutoSync
 async function fetchNomor() {
   const dot  = document.getElementById('nomor-dot');
   const prev = document.getElementById('nomor-preview');
@@ -355,12 +358,15 @@ async function fetchNomor() {
     settings.nomorLast = data.lastNomor;
     localStorage.setItem('sirapat_settings', JSON.stringify(settings));
     dot.className = 'nomor-dot ok';
-    updateNomorPreview(); refreshStats();
-  } catch { dot.className = 'nomor-dot err'; prev.textContent = '❌ Gagal — pakai nomor lokal: ' + (settings.nomorLast + 1); }
+    updateNomorPreview();
+    // ★ TIDAK memanggil refreshStats() di sini
+  } catch {
+    dot.className = 'nomor-dot err';
+    prev.textContent = '❌ Gagal — pakai nomor lokal: ' + (settings.nomorLast + 1);
+  }
 }
 function updateNomorPreview() {
   const tgl  = document.getElementById('inp-tanggal').value;
-  // ★ FIX TIMEZONE
   const d    = tgl ? parseTanggal(tgl) : new Date();
   const hint = tgl ? ` (urut ke-${settings.nomorLast+1})` : ' (Silakan tentukan tanggal rapat)';
   document.getElementById('nomor-preview').textContent = buildNomor(settings.nomorLast + 1, d) + hint;
@@ -408,6 +414,23 @@ async function testGasUrl() {
     st.textContent = `✅ Terhubung! Nomor terakhir: ${d.lastNomor}`; st.style.color = '#2e7d32';
     showToast('GAS terhubung!','success'); fetchNomor();
   } catch (e) { st.textContent = '❌ Gagal: ' + e.message; st.style.color = '#c62828'; showToast('GAS gagal: ' + e.message,'error'); }
+}
+
+// ════ CEK STATUS CACHE TEMPLATE ═══════════════════════════════
+async function cekStatusCacheTemplate() {
+  await initTplIDB();
+  const keys   = ['und', 'abs', 'ris'];
+  const labels = { und: 'Undangan', abs: 'Absen', ris: 'Risalah' };
+  const hasil  = {};
+  for (const key of keys) {
+    const data = await tplCacheGet(key);
+    hasil[key] = !!data;
+  }
+  const semuaAda = Object.values(hasil).every(Boolean);
+  const msg = semuaAda
+    ? '✅ Semua template ter-cache — generate bisa offline'
+    : `⚠ Cache: ${keys.map(k => `${labels[k]}: ${hasil[k] ? '✓' : '✗'}`).join(' · ')}`;
+  showToast(msg, semuaAda ? 'success' : 'info');
 }
 
 // ════ PESERTA — GENERATE PAGE ═════════════════════════════════
@@ -482,21 +505,15 @@ function renderCalInline() {
   document.getElementById('cal-grid-inline').innerHTML = html;
 }
 
-// Klik kalender: ada rapat → buka detail; kosong → isi form
 function calClickInline(ds) {
   const events = arsipList.filter(r => r.tanggal === ds);
   if (events.length > 0) { showModalMultiple(ds, events); return; }
-  
   document.getElementById('inp-tanggal').value = ds;
   updateNomorPreview(); checkBooking();
-  
-  // Index 1 adalah tombol "Buat Rapat"
   showPage('generate', document.querySelectorAll('.nav-btn')[1]);
 }
 
-// Render list rapat jika dalam 1 hari ada banyak agenda
 function showModalMultiple(ds, events) {
-  // ★ FIX TIMEZONE
   const d = parseTanggal(ds);
   document.getElementById('modal-title').textContent = `Jadwal: ${d.getDate()} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;
   const shareBtn = document.getElementById('modal-share-btn');
@@ -529,7 +546,6 @@ function checkBooking() {
   const warn   = document.getElementById('booking-warn');
   const btnGen = document.getElementById('btn-gen');
 
-  // Guard: jam belum diisi atau belum lengkap format HH:MM
   if (!jam || jam.length < 5) {
     warn.style.display = 'none'; warn.innerHTML = '';
     if (btnGen) { btnGen.disabled = false; btnGen.style.opacity = ''; btnGen.title = ''; }
@@ -537,12 +553,11 @@ function checkBooking() {
   }
 
   const menitBaru = getMenitDariJam(jam);
-
   const konflik = arsipList.find(r => {
     if (r.tanggal !== tgl) return false;
     if (tempat && r.tempat !== tempat) return false;
     const menitLama = getMenitDariJam(r.jam);
-    return Math.abs(menitBaru - menitLama) < 60; // 0–59 menit = konflik; 60+ = boleh
+    return Math.abs(menitBaru - menitLama) < 60;
   });
 
   if (konflik) {
@@ -558,16 +573,100 @@ function checkBooking() {
   }
 }
 
+// ════ TEMPLATE CACHE (IndexedDB) ══════════════════════════════
+const TPL_IDB_NAME = 'documeet_templates_v1';
+let tplIdb = null;
+
+async function initTplIDB() {
+  if (tplIdb) return tplIdb;
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(TPL_IDB_NAME, 1);
+    req.onupgradeneeded = e => {
+      e.target.result.createObjectStore('templates', { keyPath: 'key' });
+    };
+    req.onsuccess = e => { tplIdb = e.target.result; res(tplIdb); };
+    req.onerror = () => rej(req.error);
+  });
+}
+
+async function tplCacheSave(key, arrayBuffer) {
+  if (!tplIdb) return;
+  return new Promise((res, rej) => {
+    const tx = tplIdb.transaction('templates', 'readwrite');
+    tx.objectStore('templates').put({ key, data: arrayBuffer, ts: Date.now() });
+    tx.oncomplete = res;
+    tx.onerror = rej;
+  });
+}
+
+async function tplCacheGet(key) {
+  if (!tplIdb) return null;
+  return new Promise((res, rej) => {
+    const tx = tplIdb.transaction('templates', 'readonly');
+    const req = tx.objectStore('templates').get(key);
+    req.onsuccess = () => res(req.result ? req.result.data : null);
+    req.onerror = rej;
+  });
+}
+
+async function preloadTemplates() {
+  if (!navigator.onLine) return;
+  try {
+    const keys = ['und', 'abs', 'ris'];
+    const urls = { und: getTemplateUrl('und'), abs: getTemplateUrl('abs'), ris: getTemplateUrl('ris') };
+    let cached = 0;
+    for (const key of keys) {
+      const url = urls[key];
+      if (!url) continue;
+      try {
+        const r = await fetch(url);
+        if (!r.ok) continue;
+        const buf = await r.arrayBuffer();
+        await tplCacheSave(key, buf);
+        cached++;
+      } catch {}
+    }
+    if (cached > 0) console.log(`[DocuMeet] ${cached} template ter-cache offline.`);
+  } catch {}
+}
+
+// ════ FETCH & INJECT — dengan fallback cache ══════════════════
+async function fetchAndInject(url, data, cacheKey) {
+  let arrayBuffer = null;
+
+  if (navigator.onLine) {
+    try {
+      const r = await fetch(url);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      arrayBuffer = await r.arrayBuffer();
+      if (cacheKey) await tplCacheSave(cacheKey, arrayBuffer);
+    } catch (e) {
+      if (cacheKey) arrayBuffer = await tplCacheGet(cacheKey);
+      if (!arrayBuffer) throw new Error(`Gagal fetch "${url}": ${e.message}`);
+    }
+  } else {
+    if (cacheKey) arrayBuffer = await tplCacheGet(cacheKey);
+    if (!arrayBuffer) throw new Error(
+      `Offline & template "${cacheKey}" belum ter-cache. Buka aplikasi dulu saat online.`
+    );
+  }
+
+  const zip = new PizZip(arrayBuffer);
+  const doc = new window.docxtemplater(zip, {
+    paragraphLoop: true, linebreaks: true,
+    delimiters: { start: '[[', end: ']]' },
+    nullGetter: () => ''
+  });
+  doc.render(data);
+  return doc.getZip().generate({
+    type: 'blob',
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    compression: 'DEFLATE'
+  });
+}
+
 // ════ GENERATE DOKUMEN ════════════════════════════════════════
 function setPS(id, state) { const el = document.getElementById(id); if (el) el.className = 'prog-step' + (state ? ' '+state : ''); }
-
-async function fetchAndInject(url, data) {
-  const r = await fetch(url); if (!r.ok) throw new Error(`HTTP ${r.status} untuk "${url}"`);
-  const zip = new PizZip(await r.arrayBuffer());
-  const doc = new window.docxtemplater(zip, {paragraphLoop:true, linebreaks:true, delimiters:{start:'[[',end:']]'}, nullGetter:()=>''});
-  doc.render(data);
-  return doc.getZip().generate({type:'blob', mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document', compression:'DEFLATE'});
-}
 
 async function generateDokumen() {
   const tanggalVal = document.getElementById('inp-tanggal').value;
@@ -598,7 +697,6 @@ async function generateDokumen() {
   document.getElementById('btn-awan').classList.remove('visible');
   lastGenId = lastGenBlobs = lastGenPrefix = null;
 
-  // ★ FIX TIMEZONE: pakai parseTanggal()
   const tgl     = parseTanggal(tanggalVal);
   const hariStr = HARI_ID[tgl.getDay()];
   const tglStr  = tglFull(tgl);
@@ -615,15 +713,15 @@ async function generateDokumen() {
     kotaTanggal: `${settings.kota}, ${tglStr}`, tahun: String(tgl.getFullYear()),
     bulan: BULAN_ID[tgl.getMonth()], instansi: settings.instansi,
     jumlahPeserta: String(pesertaHadir.length), tgl_generet: tglGen,
-   peserta: pesertaHadir.map((p, i) => ({
-        no: String(i+1),
-        nama: p.nama,
-        namaRingkas: p.nama.split(',')[0].trim()
-          .split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '),
-        jabatan: p.jabatan,
-        ttd: '',
-       ttdNo: (i % 2 === 0) ? String(i+1) : '          ' + String(i+1),// ganjil=kiri, genap=tab→tengah
-}))
+    peserta: pesertaHadir.map((p, i) => ({
+      no: String(i+1),
+      nama: p.nama,
+      namaRingkas: p.nama.split(',')[0].trim()
+        .split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '),
+      jabatan: p.jabatan,
+      ttd: '',
+      ttdNo: (i % 2 === 0) ? String(i+1) : '          ' + String(i+1),
+    }))
   };
 
   const btn = document.getElementById('btn-gen');
@@ -636,12 +734,12 @@ async function generateDokumen() {
   try {
     setPS('ps-fetch','active'); tx.textContent = 'Mengambil template...';
     let blobs;
-    try { 
-     blobs = await Promise.all([
-  fetchAndInject(urlUnd, data, 'und'),
-  fetchAndInject(urlAbs, data, 'abs'),
-  fetchAndInject(urlRis, data, 'ris')
-]);
+    try {
+      blobs = await Promise.all([
+        fetchAndInject(urlUnd, data, 'und'),
+        fetchAndInject(urlAbs, data, 'abs'),
+        fetchAndInject(urlRis, data, 'ris')
+      ]);
     }
     catch (e) { setPS('ps-fetch','err'); throw e; }
     setPS('ps-fetch','done'); setPS('ps-inject','done');
@@ -693,37 +791,21 @@ async function generateDokumen() {
 }
 
 function simpanKeAwan() {
-  if (!lastGenId) {
-    showToast('Tidak ada rapat yang baru di-generate', 'error');
-    return;
-  }
-  
-  // 1. Ambil tombol menu Beranda dan pindah ke halaman Beranda
+  if (!lastGenId) { showToast('Tidak ada rapat yang baru di-generate', 'error'); return; }
   const btnBeranda = document.querySelector('.nav-menu .nav-btn') || document.querySelectorAll('.nav-btn')[0];
   showPage('beranda', btnBeranda);
-  
-  // 2. Beri jeda 300ms agar halaman selesai berganti, lalu eksekusi pembukaan modal
   setTimeout(() => {
     try {
-      // Cari elemen rapat di list dan scroll perlahan ke arahnya
       const el = document.getElementById('arsip-item-' + lastGenId);
-      if (el) { 
-        el.classList.add('highlight'); 
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
-      }
-      
-      // Panggil fungsi pengisian data ke modal
+      if (el) { el.classList.add('highlight'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
       showArsipDetail(lastGenId);
-      
-      // Paksa modal agar tampil di atas layar
       const modalOverlay = document.getElementById('modal-overlay');
       if (modalOverlay) modalOverlay.classList.add('open');
-      
     } catch (err) {
       console.error("Gagal membuka popup detail:", err);
       showToast('Terjadi kesalahan saat membuka detail rapat', 'error');
     }
-  }, 300); // Waktu tunggu dinaikkan ke 300 milidetik agar lebih aman
+  }, 300);
 }
 
 // ════ ARSIP LIST ══════════════════════════════════════════════
@@ -740,20 +822,20 @@ function renderArsip() {
       return true;
     })
     .sort((a, b) => {
-      // ★ Urutkan berdasarkan tanggal+jam rapat (terbaru di atas)
+      // Urutkan berdasarkan tanggal+jam rapat (terbaru di atas)
       const dA = parseTanggal(a.tanggal);
       if (a.jam) dA.setHours(...a.jam.split(':').map(Number));
       const dB = parseTanggal(b.tanggal);
       if (b.jam) dB.setHours(...b.jam.split(':').map(Number));
       return dB.getTime() - dA.getTime();
     });
+
   const el = document.getElementById('arsip-list');
   if (!list.length) {
     el.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3>Belum ada arsip</h3><p>${getGasUrl()?'Data cloud kosong.':'Arsip muncul setelah generate pertama.'}</p></div>`;
     return;
   }
   el.innerHTML = list.map(r => {
-    // ★ FIX TIMEZONE
     const d          = parseTanggal(r.tanggal);
     const files      = uploadFiles[r.id] || [];
     const allFiles   = [...files, ...(r.uploadedFiles||[])];
@@ -791,7 +873,6 @@ function hapusArsip(id) {
 function printDetail() {
   if (!currentModalId) return;
   const r = arsipList.find(x => x.id === currentModalId); if (!r) return;
-  // ★ FIX TIMEZONE
   const d = parseTanggal(r.tanggal);
   const w = window.open('','_blank','width=800,height=600');
   w.document.write(`<html><head><title>Print Detail Rapat</title>
@@ -820,7 +901,6 @@ function shareFiles() {
     .filter(f => f?.status === 'done' && f.url)
     .reduce((acc, f) => { if (!acc.find(x => x.name === f.name)) acc.push(f); return acc; }, []);
   if (!allDone.length) { showToast('Belum ada dokumen tersimpan di Drive.','error'); return; }
-  // ★ FIX TIMEZONE
   const d = parseTanggal(r.tanggal);
   const text = `🗂 Dokumen Rapat: ${r.agenda}\n📅 ${r.hari}, ${tglFull(d)}\n\n` +
     allDone.map(f => `📄 ${f.name}\n${f.url}`).join('\n\n');
@@ -832,7 +912,6 @@ function shareFiles() {
 function showArsipDetail(id) {
   currentModalId = id;
   const r = arsipList.find(x => x.id === id); if (!r) return;
-  // ★ FIX TIMEZONE
   const d = parseTanggal(r.tanggal);
   const folderName = `${String(d.getDate()).padStart(2,'0')} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;
   if (r.uploadedFiles?.length && !uploadFiles[id]?.length)
@@ -974,8 +1053,6 @@ function addFiles(id, files) {
     const blobUrl = f.type.startsWith('image/') ? URL.createObjectURL(f) : null;
     const entry = { file:f, name:f.name, size:f.size, status:'pending', url:null, type:f.type||'', _blobUrl:blobUrl, _showPreview:false };
     uploadFiles[id].push(entry);
-
-    // ★ Simpan ke IDB jika offline
     if (!navigator.onLine) {
       const r = arsipList.find(x => x.id === id);
       const folder = r ? getFolderName(r) : String(id);
@@ -1149,18 +1226,16 @@ function toggleFaq(el) { el.classList.toggle('open'); el.nextElementSibling.clas
 function showPage(id, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn, .nav-drawer .nav-btn').forEach(b => b.classList.remove('active'));
-  
   const targetPage = document.getElementById('page-' + id);
   if (targetPage) targetPage.classList.add('active');
   if (btn) btn.classList.add('active');
-  
   if (id === 'peserta')    renderPesertaManage();
   if (id === 'beranda') {
     renderCalInline();
     renderArsip();
-    renderUpNext();        // ← tambah
-    renderRisalahQuick();  // ← tambah
-    renderHealthMeter();   // ← tambah
+    renderUpNext();
+    renderRisalahQuick();
+    renderHealthMeter();
   }
   if (id === 'pengaturan') loadPengaturan();
 }
@@ -1203,9 +1278,19 @@ async function loginAdmin() {
   }
 }
 
+// ★ SATU-SATUNYA tempat yang memanggil semua render setelah data siap
 function mulaiAutoSync() {
-  Promise.all([fetchNomor(), loadArsipFromCloud(), loadPesertaFromCloud()]).then(() => {
-    renderCalInline(); refreshStats(); updateNomorPreview(); renderPesertaGen();
+  Promise.all([
+    fetchNomor(),
+    loadArsipFromCloud(),
+    loadPesertaFromCloud()
+  ]).then(() => {
+    // Render semua hanya 1x di sini setelah semua data cloud selesai
+    renderCalInline();
+    renderArsip();
+    refreshStats();       // sudah include renderUpNext + renderRisalahQuick + renderHealthMeter
+    updateNomorPreview();
+    renderPesertaGen();
     if (document.getElementById('page-peserta')?.classList.contains('active')) renderPesertaManage();
     checkBooking();
   });
@@ -1225,29 +1310,18 @@ async function loadPesertaFromCloud() {
 // ════ AGENDA TERDEKAT (UP NEXT) ══════════════════════════════
 function renderUpNext() {
   const el = document.getElementById('upnext-list'); if (!el) return;
-  
-  // todayMs digunakan HANYA untuk menghitung selisih hari (label "Hari ini" / "Besok")
   const todayMs = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-  // nowMs adalah waktu detil saat ini (termasuk jam dan menit)
-  const nowMs = new Date().getTime();
+  const nowMs   = new Date().getTime();
 
   const upcoming = arsipList
     .filter(r => {
       const d = parseTanggal(r.tanggal);
-      // Sisipkan jam dan menit ke dalam objek tanggal
-      if (r.jam) {
-        const parts = r.jam.split(':');
-        d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
-      }
-      // Bandingkan dengan jam riil sekarang
+      if (r.jam) { const p = r.jam.split(':'); d.setHours(parseInt(p[0],10), parseInt(p[1],10), 0, 0); }
       return d.getTime() >= nowMs;
     })
     .sort((a, b) => {
-      // Sortir berdasarkan tanggal sekaligus jam agar lebih presisi
-      const dA = parseTanggal(a.tanggal);
-      if (a.jam) dA.setHours(...a.jam.split(':').map(Number));
-      const dB = parseTanggal(b.tanggal);
-      if (b.jam) dB.setHours(...b.jam.split(':').map(Number));
+      const dA = parseTanggal(a.tanggal); if (a.jam) dA.setHours(...a.jam.split(':').map(Number));
+      const dB = parseTanggal(b.tanggal); if (b.jam) dB.setHours(...b.jam.split(':').map(Number));
       return dA.getTime() - dB.getTime();
     })
     .slice(0, 3);
@@ -1256,15 +1330,13 @@ function renderUpNext() {
     el.innerHTML = '<div class="upnext-empty">📭 Tidak ada rapat mendatang.</div>';
     return;
   }
-  
+
   el.innerHTML = upcoming.map((r, i) => {
     const d = parseTanggal(r.tanggal);
-    const diffMs = d.getTime() - todayMs;
-    const diffDay = Math.round(diffMs / 86400000);
+    const diffDay = Math.round((d.getTime() - todayMs) / 86400000);
     const labelHari = diffDay === 0 ? 'Hari ini' : diffDay === 1 ? 'Besok' : diffDay + ' hari';
     const isSoon = diffDay <= 3;
     const isFirst = i === 0;
-    
     return `<div class="upnext-item${isFirst ? ' next' : ''}" onclick="showArsipDetail(${r.id})">
       <div class="upnext-datebox${isFirst ? '' : ' future'}">
         <span class="ud">${String(d.getDate()).padStart(2,'0')}</span>
@@ -1293,23 +1365,16 @@ function renderRisalahQuick() {
   }
 
   const nowMs = new Date().getTime();
-
-  // ★ PERBAIKAN: ambil arsip yang tanggal+jamnya sudah lewat, urutkan descending, ambil [0]
   const sudahLewat = arsipList
     .filter(r => {
       const d = parseTanggal(r.tanggal);
-      if (r.jam) {
-        const parts = r.jam.split(':');
-        d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
-      }
+      if (r.jam) { const p = r.jam.split(':'); d.setHours(parseInt(p[0],10), parseInt(p[1],10), 0, 0); }
       return d.getTime() <= nowMs;
     })
     .sort((a, b) => {
-      const dA = parseTanggal(a.tanggal);
-      if (a.jam) dA.setHours(...a.jam.split(':').map(Number));
-      const dB = parseTanggal(b.tanggal);
-      if (b.jam) dB.setHours(...b.jam.split(':').map(Number));
-      return dB.getTime() - dA.getTime(); // descending
+      const dA = parseTanggal(a.tanggal); if (a.jam) dA.setHours(...a.jam.split(':').map(Number));
+      const dB = parseTanggal(b.tanggal); if (b.jam) dB.setHours(...b.jam.split(':').map(Number));
+      return dB.getTime() - dA.getTime();
     });
 
   if (!sudahLewat.length) {
@@ -1321,8 +1386,7 @@ function renderRisalahQuick() {
   const d      = parseTanggal(latest.tanggal);
   sub.textContent = `${(latest.agenda||'').substring(0,45)}${(latest.agenda||'').length>45?'...':''} — ${d.getDate()} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;
 
-  // Cek apakah risalah sudah ada di Drive (sisa kode tidak berubah)
-  const allFiles = [...(uploadFiles[latest.id]||[]), ...(latest.uploadedFiles||[])];
+  const allFiles    = [...(uploadFiles[latest.id]||[]), ...(latest.uploadedFiles||[])];
   const risalahFile = allFiles.find(f => f?.name && /risalah/i.test(f.name) && f.status === 'done');
   if (risalahFile) {
     st.className = 'risalah-quick-status ok'; st.textContent = '☁ Drive';
@@ -1335,30 +1399,22 @@ function renderRisalahQuick() {
 
 function bukaRisalahTerakhir() {
   if (!arsipList.length) { showToast('Belum ada arsip rapat.','error'); return; }
-  
   const nowMs = new Date().getTime();
-  
-  // Cari arsip yang sudah lewat, urutkan descending, ambil yang paling baru
   const sudahLewat = arsipList
     .filter(r => {
       const d = parseTanggal(r.tanggal);
-      if (r.jam) {
-        const parts = r.jam.split(':');
-        d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
-      }
+      if (r.jam) { const p = r.jam.split(':'); d.setHours(parseInt(p[0],10), parseInt(p[1],10), 0, 0); }
       return d.getTime() <= nowMs;
     })
     .sort((a, b) => {
-      const dA = parseTanggal(a.tanggal);
-      if (a.jam) dA.setHours(...a.jam.split(':').map(Number));
-      const dB = parseTanggal(b.tanggal);
-      if (b.jam) dB.setHours(...b.jam.split(':').map(Number));
+      const dA = parseTanggal(a.tanggal); if (a.jam) dA.setHours(...a.jam.split(':').map(Number));
+      const dB = parseTanggal(b.tanggal); if (b.jam) dB.setHours(...b.jam.split(':').map(Number));
       return dB.getTime() - dA.getTime();
     });
-
   if (!sudahLewat.length) { showToast('Belum ada rapat yang sudah berlangsung.','error'); return; }
   showArsipDetail(sudahLewat[0].id);
 }
+
 // ════ HEALTH METER ════════════════════════════════════════════
 function renderHealthMeter() {
   const rowsEl  = document.getElementById('health-rows');
@@ -1366,10 +1422,9 @@ function renderHealthMeter() {
   const footEl  = document.getElementById('health-footer-text');
   if (!rowsEl) return;
 
-  const yr      = today.getFullYear();
-  // Gunakan arsip tahun ini saja agar relevan
-  const list    = arsipList.filter(r => parseTanggal(r.tanggal).getFullYear() === yr);
-  const total   = list.length;
+  const yr   = today.getFullYear();
+  const list = arsipList.filter(r => parseTanggal(r.tanggal).getFullYear() === yr);
+  const total = list.length;
 
   if (!total) {
     rowsEl.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:6px 0">Belum ada arsip tahun ini.</div>';
@@ -1378,46 +1433,39 @@ function renderHealthMeter() {
     return;
   }
 
-  // 1. Hitung dokumen dengan keyword tertentu yang berstatus 'done' DAN berformat .pdf
   const countDonePdf = (keyword) => list.filter(r => {
     const allFiles = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
-    return allFiles.some(f => 
-      f?.name && 
-      new RegExp(keyword, 'i').test(f.name) && 
-      f.name.toLowerCase().endsWith('.pdf') && // Wajib PDF
+    return allFiles.some(f =>
+      f?.name &&
+      new RegExp(keyword, 'i').test(f.name) &&
+      f.name.toLowerCase().endsWith('.pdf') &&
       f.status === 'done'
     );
   }).length;
 
-  const undOk = countDonePdf('undangan');
-  const absOk = countDonePdf('absen');
-  const risOk = countDonePdf('risalah');
-
-  // 2. Hitung arsip yang punya minimal 1 foto/gambar (menggunakan fungsi isImage bawaan kodemu)
+  const undOk  = countDonePdf('undangan');
+  const absOk  = countDonePdf('absen');
+  const risOk  = countDonePdf('risalah');
   const fotoOk = list.filter(r => {
     const allFiles = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
     return allFiles.some(f => f?.name && isImage(f.name) && f.status === 'done');
   }).length;
 
-  // Persentase sekarang dibagi 4 komponen
-  const pct = u => Math.round(u / total * 100);
+  const pct  = u => Math.round(u / total * 100);
   const pUnd = pct(undOk), pAbs = pct(absOk), pRis = pct(risOk), pFoto = pct(fotoOk);
   const overall = Math.round((pUnd + pAbs + pRis + pFoto) / 4);
-
   const cls  = v => v >= 90 ? 'ok' : v >= 60 ? 'warn' : 'err';
-  const vcls = v => v >= 90 ? 'ok' : v >= 60 ? 'warn' : 'err';
 
-  // Render elemen baris
   rowsEl.innerHTML = [
-    {icon:'📨', label:'Undangan (PDF)', ok:undOk, pct:pUnd},
-    {icon:'✅', label:'Absen Hadir (PDF)', ok:absOk, pct:pAbs},
-    {icon:'📝', label:'Risalah (PDF)', ok:risOk, pct:pRis},
-    {icon:'📸', label:'Dokumentasi (Foto)', ok:fotoOk, pct:pFoto},
+    {icon:'📨', label:'Undangan (PDF)',      ok:undOk,  pct:pUnd},
+    {icon:'✅', label:'Absen Hadir (PDF)',   ok:absOk,  pct:pAbs},
+    {icon:'📝', label:'Risalah (PDF)',        ok:risOk,  pct:pRis},
+    {icon:'📸', label:'Dokumentasi (Foto)',  ok:fotoOk, pct:pFoto},
   ].map(row => `
     <div class="health-row">
       <div class="health-row-top">
         <span class="health-row-label">${row.icon} ${row.label}</span>
-        <span class="health-row-val ${vcls(row.pct)}">${row.ok}/${total}</span>
+        <span class="health-row-val ${cls(row.pct)}">${row.ok}/${total}</span>
       </div>
       <div class="health-bar-bg"><div class="health-bar-fill ${cls(row.pct)}" style="width:${row.pct}%"></div></div>
     </div>`).join('');
@@ -1427,17 +1475,14 @@ function renderHealthMeter() {
     scoreEl.className = 'health-score ' + (overall >= 90 ? 'high' : overall >= 60 ? 'mid' : 'low');
   }
 
-  // Cek arsip mana saja yang BELUM LENGKAP ke-4 syaratnya
   const belum = list.filter(r => {
-    const allFiles = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
+    const allFiles  = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
     const doneFiles = allFiles.filter(f => f?.status === 'done' && f?.name);
-    
     const hasUnd  = doneFiles.some(f => /undangan/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
-    const hasAbs  = doneFiles.some(f => /absen/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
-    const hasRis  = doneFiles.some(f => /risalah/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
+    const hasAbs  = doneFiles.some(f => /absen/i.test(f.name)    && f.name.toLowerCase().endsWith('.pdf'));
+    const hasRis  = doneFiles.some(f => /risalah/i.test(f.name)  && f.name.toLowerCase().endsWith('.pdf'));
     const hasFoto = doneFiles.some(f => isImage(f.name));
-
-    return !(hasUnd && hasAbs && hasRis && hasFoto); // Jika salah satu tidak ada, berarti belum lengkap
+    return !(hasUnd && hasAbs && hasRis && hasFoto);
   }).length;
 
   if (footEl) footEl.textContent = belum > 0 ? `${belum} arsip belum lengkap dokumen Drive` : '✓ Semua arsip tahun ini lengkap';
@@ -1447,26 +1492,20 @@ function scrollToArsipBelum() {
   const yr    = today.getFullYear();
   const belum = arsipList.find(r => {
     if (parseTanggal(r.tanggal).getFullYear() !== yr) return false;
-    
-    const allFiles = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
+    const allFiles  = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
     const doneFiles = allFiles.filter(f => f?.status === 'done' && f?.name);
-    
     const hasUnd  = doneFiles.some(f => /undangan/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
-    const hasAbs  = doneFiles.some(f => /absen/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
-    const hasRis  = doneFiles.some(f => /risalah/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
+    const hasAbs  = doneFiles.some(f => /absen/i.test(f.name)    && f.name.toLowerCase().endsWith('.pdf'));
+    const hasRis  = doneFiles.some(f => /risalah/i.test(f.name)  && f.name.toLowerCase().endsWith('.pdf'));
     const hasFoto = doneFiles.some(f => isImage(f.name));
-
-    // Kembalikan true jika ada dokumen yang KURANG LENGKAP
     return !(hasUnd && hasAbs && hasRis && hasFoto);
   });
-  
   if (!belum) { showToast('Semua arsip tahun ini sudah lengkap!','success'); return; }
-  
   const el = document.getElementById('arsip-item-' + belum.id);
-  if (el) { 
-    el.classList.add('highlight'); 
-    el.scrollIntoView({behavior:'smooth',block:'center'}); 
-    setTimeout(()=>el.classList.remove('highlight'),2500); 
+  if (el) {
+    el.classList.add('highlight');
+    el.scrollIntoView({behavior:'smooth',block:'center'});
+    setTimeout(()=>el.classList.remove('highlight'),2500);
   }
   showArsipDetail(belum.id);
 }
@@ -1499,7 +1538,7 @@ async function idbSave(arsipId, folderName, fileEntry) {
 async function idbGetAll() {
   if (!idb) return [];
   return new Promise((res, rej) => {
-    const tx = idb.transaction('pending', 'readonly');
+    const tx  = idb.transaction('pending', 'readonly');
     const req = tx.objectStore('pending').getAll();
     req.onsuccess = () => res(req.result);
     req.onerror = rej;
@@ -1531,7 +1570,6 @@ function setOfflineUI(isOffline) {
   if (badge) badge.style.display = isOffline ? 'flex' : 'none';
 }
 
-// Auto-upload saat kembali online
 window.addEventListener('online', async () => {
   preloadTemplates();
   setOfflineUI(false);
@@ -1561,126 +1599,31 @@ window.addEventListener('online', async () => {
   showToast(`✓ ${ok}/${items.length} file berhasil diupload`, 'success');
 });
 
-// ════ TEMPLATE CACHE (IndexedDB) ════════════════════════════
-const TPL_IDB_NAME = 'documeet_templates_v1';
-let tplIdb = null;
-
-async function initTplIDB() {
-  return new Promise((res, rej) => {
-    const req = indexedDB.open(TPL_IDB_NAME, 1);
-    req.onupgradeneeded = e => {
-      e.target.result.createObjectStore('templates', { keyPath: 'key' });
-    };
-    req.onsuccess = e => { tplIdb = e.target.result; res(tplIdb); };
-    req.onerror = () => rej(req.error);
-  });
-}
-
-async function tplCacheSave(key, arrayBuffer) {
-  if (!tplIdb) return;
-  return new Promise((res, rej) => {
-    const tx = tplIdb.transaction('templates', 'readwrite');
-    tx.objectStore('templates').put({ key, data: arrayBuffer, ts: Date.now() });
-    tx.oncomplete = res;
-    tx.onerror = rej;
-  });
-}
-
-async function tplCacheGet(key) {
-  if (!tplIdb) return null;
-  return new Promise((res, rej) => {
-    const tx = tplIdb.transaction('templates', 'readonly');
-    const req = tx.objectStore('templates').get(key);
-    req.onsuccess = () => res(req.result ? req.result.data : null);
-    req.onerror = rej;
-  });
-}
-
-// Preload semua template ke cache (dipanggil saat online)
-async function preloadTemplates() {
-  if (!navigator.onLine) return;
-  try {
-    const keys = ['und', 'abs', 'ris'];
-    const urls = {
-      und: getTemplateUrl('und'),
-      abs: getTemplateUrl('abs'),
-      ris: getTemplateUrl('ris'),
-    };
-    let cached = 0;
-    for (const key of keys) {
-      const url = urls[key];
-      if (!url) continue;
-      try {
-        const r = await fetch(url);
-        if (!r.ok) continue;
-        const buf = await r.arrayBuffer();
-        await tplCacheSave(key, buf);
-        cached++;
-      } catch {}
-    }
-    if (cached > 0) console.log(`[DocuMeet] ${cached} template ter-cache offline.`);
-  } catch {}
-}
-
-// ════ FETCH & INJECT — dengan fallback cache ════════════════
-async function fetchAndInject(url, data, cacheKey) {
-  let arrayBuffer = null;
-
-  if (navigator.onLine) {
-    try {
-      const r = await fetch(url);
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      arrayBuffer = await r.arrayBuffer();
-      // Simpan ke cache setiap kali berhasil fetch online
-      if (cacheKey) await tplCacheSave(cacheKey, arrayBuffer);
-    } catch (e) {
-      // Fetch gagal walau online, coba cache
-      if (cacheKey) arrayBuffer = await tplCacheGet(cacheKey);
-      if (!arrayBuffer) throw new Error(`Gagal fetch "${url}": ${e.message}`);
-    }
-  } else {
-    // Offline — ambil dari cache
-    if (cacheKey) arrayBuffer = await tplCacheGet(cacheKey);
-    if (!arrayBuffer) throw new Error(
-      `Offline & template "${cacheKey}" belum ter-cache. Buka aplikasi dulu saat online.`
-    );
-  }
-
-  const zip = new PizZip(arrayBuffer);
-  const doc = new window.docxtemplater(zip, {
-    paragraphLoop: true, linebreaks: true,
-    delimiters: { start: '[[', end: ']]' },
-    nullGetter: () => ''
-  });
-  doc.render(data);
-  return doc.getZip().generate({
-    type: 'blob',
-    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    compression: 'DEFLATE'
-  });
-}
-
 window.addEventListener('offline', () => {
   setOfflineUI(true);
   updateOfflinePendingCount();
   showToast('📶 Offline — file akan auto-upload saat online', 'info');
 });
 
-// Init
+// ════ INIT ════════════════════════════════════════════════════
+// Init IDB untuk file offline
 initIDB().then(() => {
   setOfflineUI(!navigator.onLine);
   updateOfflinePendingCount();
 });
+
+// Init IDB untuk cache template, lalu preload jika online
 initTplIDB().then(() => {
-  // Preload template saat pertama online
   if (navigator.onLine) preloadTemplates();
 });
 
-// ════ INIT ════════════════════════════════════════════════════
+// Render awal dari data lokal (sebelum cloud selesai)
 document.getElementById('inp-tanggal').value = today.toISOString().split('T')[0];
-initCalInline(); renderCalInline(); renderPesertaGen(); refreshStats();
+initCalInline();
+renderCalInline();
+renderPesertaGen();
+refreshStats();
 if (settings.tplMode === 'manual') { tplMode='manual'; document.querySelectorAll('.tpl-mode-tab')[1]?.click(); }
-Promise.all([
-  getGasUrl() ? fetchNomor() : Promise.resolve(),
-  loadArsipFromCloud()
-]).then(() => { renderCalInline(); refreshStats(); updateNomorPreview(); checkBooking(); });
+
+// ★ mulaiAutoSync dipanggil via DOMContentLoaded jika sudah login
+// Jika belum login (login-screen tampil), mulaiAutoSync dipanggil setelah loginAdmin() berhasil
