@@ -1277,12 +1277,37 @@ function renderRisalahQuick() {
     sub.textContent = 'Belum ada arsip rapat';
     st.className = 'risalah-quick-status none'; st.textContent = '—'; return;
   }
-  // Cari arsip terbaru (arsipList sudah urut descending)
-  const latest = arsipList[0];
+
+  const nowMs = new Date().getTime();
+
+  // ★ PERBAIKAN: ambil arsip yang tanggal+jamnya sudah lewat, urutkan descending, ambil [0]
+  const sudahLewat = arsipList
+    .filter(r => {
+      const d = parseTanggal(r.tanggal);
+      if (r.jam) {
+        const parts = r.jam.split(':');
+        d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+      }
+      return d.getTime() <= nowMs;
+    })
+    .sort((a, b) => {
+      const dA = parseTanggal(a.tanggal);
+      if (a.jam) dA.setHours(...a.jam.split(':').map(Number));
+      const dB = parseTanggal(b.tanggal);
+      if (b.jam) dB.setHours(...b.jam.split(':').map(Number));
+      return dB.getTime() - dA.getTime(); // descending
+    });
+
+  if (!sudahLewat.length) {
+    sub.textContent = 'Belum ada rapat yang sudah berlangsung';
+    st.className = 'risalah-quick-status none'; st.textContent = '—'; return;
+  }
+
+  const latest = sudahLewat[0];
   const d      = parseTanggal(latest.tanggal);
   sub.textContent = `${(latest.agenda||'').substring(0,45)}${(latest.agenda||'').length>45?'...':''} — ${d.getDate()} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;
 
-  // Cek apakah risalah sudah ada di Drive
+  // Cek apakah risalah sudah ada di Drive (sisa kode tidak berubah)
   const allFiles = [...(uploadFiles[latest.id]||[]), ...(latest.uploadedFiles||[])];
   const risalahFile = allFiles.find(f => f?.name && /risalah/i.test(f.name) && f.status === 'done');
   if (risalahFile) {
