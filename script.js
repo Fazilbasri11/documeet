@@ -1,4 +1,4 @@
-// ════ STATE & CONSTANTS ════════════════════════════════════════
+// ════ STATE & CONSTANTS ═════════
 const DEFAULT_PESERTA = [
   {nama:'ISKANDAR, S.Sos.',        jabatan:'Ketua'},
   {nama:'DARKASYI ABDUL HAMID, S.Pd.', jabatan:'Anggota'},
