@@ -725,14 +725,22 @@ function renderArsip() {
   const q   = (document.getElementById('search-inp')?.value || '').toLowerCase();
   const bln = document.getElementById('filter-bulan')?.value || '';
   const thn = document.getElementById('filter-tahun')?.value || '';
-  const list = arsipList.filter(r => {
-    // ★ FIX TIMEZONE
-    const d = parseTanggal(r.tanggal);
-    if (bln && BULAN_ID[d.getMonth()] !== bln) return false;
-    if (thn && String(d.getFullYear()) !== thn) return false;
-    if (q && !JSON.stringify(r).toLowerCase().includes(q)) return false;
-    return true;
-  });
+  const list = arsipList
+    .filter(r => {
+      const d = parseTanggal(r.tanggal);
+      if (bln && BULAN_ID[d.getMonth()] !== bln) return false;
+      if (thn && String(d.getFullYear()) !== thn) return false;
+      if (q && !JSON.stringify(r).toLowerCase().includes(q)) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      // ★ Urutkan berdasarkan tanggal+jam rapat (terbaru di atas)
+      const dA = parseTanggal(a.tanggal);
+      if (a.jam) dA.setHours(...a.jam.split(':').map(Number));
+      const dB = parseTanggal(b.tanggal);
+      if (b.jam) dB.setHours(...b.jam.split(':').map(Number));
+      return dB.getTime() - dA.getTime();
+    });
   const el = document.getElementById('arsip-list');
   if (!list.length) {
     el.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3>Belum ada arsip</h3><p>${getGasUrl()?'Data cloud kosong.':'Arsip muncul setelah generate pertama.'}</p></div>`;
