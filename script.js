@@ -449,6 +449,25 @@ function renderPesertaGen() {
     </div>`
   ).join('');
 }
+function renderYthGen() {
+  const el = document.getElementById('yth-gen-grid');
+  if (!el) return;
+  el.innerHTML = ythList.map((y, i) =>
+    `<div class="peserta-item checked" id="ygen-${i}" onclick="toggleYth(${i})">
+      <div class="peserta-check"></div>
+      <div class="peserta-info">
+        <div class="peserta-nama">${y}</div>
+        <div class="peserta-jabatan">Penerima Undangan</div>
+      </div>
+    </div>`
+  ).join('');
+}
+function toggleYth(i) { document.getElementById('ygen-' + i)?.classList.toggle('checked'); }
+function getCheckedYth() {
+  return ythList
+    .filter((_, i) => document.getElementById('ygen-' + i)?.classList.contains('checked'))
+    .map((y, i) => ({ no: String(i + 1), namaYth: y }));
+}
 function togglePeserta(i)   { document.getElementById('pgen-'+i).classList.toggle('checked'); }
 function getCheckedPeserta(){ return pesertaList.filter((_, i) => document.getElementById('pgen-'+i)?.classList.contains('checked')); }
 function pilihAgenda(el, text) {
@@ -720,7 +739,7 @@ async function generateDokumen() {
     kotaTanggal: `${settings.kota}, ${tglStr}`, tahun: String(tgl.getFullYear()),
     bulan: BULAN_ID[tgl.getMonth()], instansi: settings.instansi,
     jumlahPeserta: String(pesertaHadir.length), tgl_generet: tglGen,
-    yth: ythList.map((y, i) => ({ no: String(i+1), namaYth: y })),
+    yth: getCheckedYth().map((y, i) => ({ ...y, no: String(i + 1) })),
     peserta: pesertaHadir.map((p, i) => ({
       no: String(i+1),
       nama: p.nama,
@@ -1230,6 +1249,7 @@ function simpanYth() {
   ythList = ythList.map((_,i) => document.getElementById('yth-item-'+i)?.value.trim() || '').filter(Boolean);
   localStorage.setItem('sirapat_yth', JSON.stringify(ythList));
   showToast('Daftar Yth. disimpan!','success');
+  renderYthGen();
   if (getGasUrl()) gasCall('simpanYth', {
   yth: ythList.map((y, i) => ({ no: String(i + 1), namaYth: y }))
 }).catch(() => {});
@@ -1239,6 +1259,7 @@ function resetYth() {
   ythList = [...DEFAULT_YTH];
   localStorage.setItem('sirapat_yth', JSON.stringify(ythList));
   renderYthManage();
+  renderYthGen();
   showToast('Direset ke default.','info');
 }
 
@@ -1334,6 +1355,7 @@ function mulaiAutoSync() {
     refreshStats();       // sudah include renderUpNext + renderRisalahQuick + renderHealthMeter
     updateNomorPreview();
     renderPesertaGen();
+    renderYthGen();
     renderYthManage();
     if (document.getElementById('page-peserta')?.classList.contains('active')) renderPesertaManage();
     checkBooking();
@@ -1360,6 +1382,7 @@ async function loadYthFromCloud() {
       ythList = data.yth.map(y => y.namaYth);
       localStorage.setItem('sirapat_yth', JSON.stringify(ythList));
       renderYthManage();
+      renderYthGen();
     }
   } catch (e) { console.error('Gagal memuat Yth dari cloud:', e); }
 }
