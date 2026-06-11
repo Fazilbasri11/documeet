@@ -808,7 +808,17 @@ async function generateDokumen() {
     localStorage.setItem('sirapat_settings', JSON.stringify(settings));
 
     if (getGasUrl()) {
-      gasCall('simpanNomor', {nomorUrut:nextNo, nomorSurat:data.nomorSurat, tanggal:tglStr, agenda, tujuan:'', tglGeneret:tglGen, pesertaCount:pesertaHadir.length}).catch(()=>{});
+    const folderNameForNomor = `${String(tgl.getDate()).padStart(2,'0')} ${BULAN_ID[tgl.getMonth()]} ${tgl.getFullYear()}`;
+gasCall('simpanNomor', {
+  nomorUrut:    nextNo,
+  nomorSurat:   data.nomorSurat,
+  tanggal:      tanggalVal,        // kirim format YYYY-MM-DD agar bisa di-parse Date()
+  agenda:       agenda,
+  tujuan:       '',
+  tglGeneret:   tglGen,
+  pesertaCount: pesertaHadir.length,
+  folderName:   folderNameForNomor  // untuk cari folder di Drive
+}).catch(() => {});
       syncArsipToCloud(newItem);
       const folderName = `${String(tgl.getDate()).padStart(2,'0')} ${BULAN_ID[tgl.getMonth()]} ${tgl.getFullYear()}`;
       setTimeout(() => uploadSemuaFile(arsipId, folderName), 500);
