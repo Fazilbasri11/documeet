@@ -214,12 +214,11 @@ function refreshStats() {
   const dy = document.getElementById('dash-tahun'); if (dy) animCount(dy, ti);
   const da = document.getElementById('dash-avg');   if (da) animCount(da, avg);
   const totalDok = arsipList.reduce((acc, r) => {
-  const files = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
-  return acc + files.filter(f =>
-    f?.status === 'done' &&
-    f?.name &&
-    !f._isDraft &&
-    (f.name.toLowerCase().endsWith('.pdf') || isImage(f.name))
+  const allFiles = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
+  const unique = new Map();
+  allFiles.forEach(f => { if (f?.name && f?.status === 'done') unique.set(f.name, f); });
+  return acc + [...unique.values()].filter(f =>
+    f.name.toLowerCase().endsWith('.pdf') || isImage(f.name)
   ).length;
 }, 0);
 const dd = document.getElementById('dash-dok'); if (dd) animCount(dd, totalDok);
