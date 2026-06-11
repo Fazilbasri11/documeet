@@ -16,6 +16,13 @@ const DEFAULT_PESERTA = [
 ];
 
 let pesertaList  = JSON.parse(localStorage.getItem('sirapat_peserta') || 'null') || DEFAULT_PESERTA.map(p => ({...p}));
+const DEFAULT_YTH = [
+  'Seluruh Anggota',
+  'Sekretaris',
+  'Pejabat Struktural dan Pejabat Fungsional',
+  'Bendahara Pengeluaran',
+];
+let ythList = JSON.parse(localStorage.getItem('sirapat_yth') || 'null') || [...DEFAULT_YTH];
 let arsipList    = JSON.parse(localStorage.getItem('sirapat_arsip')   || '[]');
 let settings     = JSON.parse(localStorage.getItem('sirapat_settings')|| 'null') || {
   instansi:'KIP Kabupaten Pidie Jaya', kota:'Meureudu',
@@ -713,6 +720,7 @@ async function generateDokumen() {
     kotaTanggal: `${settings.kota}, ${tglStr}`, tahun: String(tgl.getFullYear()),
     bulan: BULAN_ID[tgl.getMonth()], instansi: settings.instansi,
     jumlahPeserta: String(pesertaHadir.length), tgl_generet: tglGen,
+    yth: ythList.map((y, i) => ({ no: String(i+1), namaYth: y })),
     peserta: pesertaHadir.map((p, i) => ({
       no: String(i+1),
       nama: p.nama,
@@ -1198,6 +1206,38 @@ function resetPeserta() {
   pesertaList = DEFAULT_PESERTA.map(p => ({...p}));
   localStorage.setItem('sirapat_peserta', JSON.stringify(pesertaList));
   renderPesertaManage(); renderPesertaGen(); showToast('Direset ke default.','info');
+}
+
+// ════ YTH LIST ════════════════════════════════════════════════
+function renderYthManage() {
+  const cont = document.getElementById('yth-manage-list');
+  if (!cont) return;
+  cont.innerHTML = ythList.map((y, i) =>
+    `<div class="peserta-row" style="gap:8px">
+      <div class="peserta-num">${i+1}</div>
+      <input type="text" value="${y}" placeholder="Contoh: Seluruh Anggota" id="yth-item-${i}" style="flex:1;font-family:'Inter',sans-serif;font-size:12px;padding:6px 9px;border:1.5px solid #e8ddd5;border-radius:5px;background:#fdfaf7;outline:none">
+      <button class="btn-icon" onclick="hapusYthRow(${i})">✕</button>
+    </div>`
+  ).join('');
+}
+function tambahYth() {
+  ythList.push(''); renderYthManage();
+}
+function hapusYthRow(i) {
+  ythList.splice(i, 1); renderYthManage();
+}
+function simpanYth() {
+  ythList = ythList.map((_,i) => document.getElementById('yth-item-'+i)?.value.trim() || '').filter(Boolean);
+  localStorage.setItem('sirapat_yth', JSON.stringify(ythList));
+  showToast('Daftar Yth. disimpan!','success');
+  if (getGasUrl()) gasCall('simpanYth', {yth: ythList}).catch(()=>{});
+}
+function resetYth() {
+  if (!confirm('Reset ke default?')) return;
+  ythList = [...DEFAULT_YTH];
+  localStorage.setItem('sirapat_yth', JSON.stringify(ythList));
+  renderYthManage();
+  showToast('Direset ke default.','info');
 }
 
 // ════ PENGATURAN ══════════════════════════════════════════════
