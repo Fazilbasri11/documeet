@@ -1541,7 +1541,7 @@ function renderHealthMeter() {
   const undOk  = countDonePdf('undangan');
   const absOk  = countDonePdf('absen');
   const risOk  = countDonePdf('risalah');
-  const baOk   = countDonePdf('ba');
+  const baOk = countDonePdf('berita');
   const fotoOk = list.filter(r => {
     const allFiles = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
     return allFiles.some(f => f?.name && isImage(f.name) && f.status === 'done');
