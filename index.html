@@ -843,7 +843,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
       <div class="stat-card"><div class="stat-label">Total Rapat</div><div class="stat-value" id="dash-total">0</div><div class="stat-sub">Sepanjang waktu</div></div>
       <div class="stat-card"><div class="stat-label">Tahun Ini</div><div class="stat-value" id="dash-tahun">0</div><div class="stat-sub" id="dash-tahun-lbl">Rapat 2026</div></div>
       <div class="stat-card"><div class="stat-label">Avg Peserta</div><div class="stat-value" id="dash-avg">0</div><div class="stat-sub">Per rapat</div></div>
-      <div class="stat-card"><div class="stat-label">Dokumen</div><div class="stat-value" id="dash-dok">0</div><div class="stat-sub">Und+Absen+Risalah</div></div>
+   <div class="stat-sub">File Final tersimpan</div> 
     </div>
 
   </div>
@@ -877,7 +877,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 
     <div class="health-card">
       <div class="health-header">
-        <span class="health-title">📊 Kelengkapan Arsip Drive</span>
+        <span class="health-title">📊 Kelengkapan Arsip Cloud</span>
         <span class="health-score" id="health-score">—</span>
       </div>
       <div id="health-rows"></div>
@@ -921,7 +921,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
   <div class="page-header">
     <div class="page-header-inner">
       <h1>Buat Rapat</h1>
-      <p>Isi formulir untuk generate dokumen Undangan, Absen, dan Risalah otomatis</p>
+      <p>Isi formulir untuk generate dokumen Undangan, Daftar hadir, dan Risalah otomatis</p>
     </div>
   </div>
   
@@ -943,12 +943,12 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
         <div id="booking-warn" style="display:none;background:rgba(229,57,53,.08);border:1px solid rgba(229,57,53,.25);border-radius:7px;padding:9px 12px;font-size:11px;color:#c62828;margin-bottom:1rem"></div>
         <div class="section-divider"><span>Agenda Rapat</span></div>
         <div class="agenda-tabs">
-          <div class="agenda-chip active" onclick="pilihAgenda(this,'Rapat Pleno Rutin, Evaluasi Pelaksanaan Kegiatan Mingguan dan Hal-hal lain yang dianggap perlu.')">Pleno Rutin</div>
+          <div class="agenda-chip active" onclick="pilihAgenda(this,'Rapat Pleno Rutin, Evaluasi Pelaksanaan Kegiatan Mingguan dan hal-hal lain yang dianggap perlu.')">Pleno Rutin</div>
           <div class="agenda-chip" onclick="pilihAgenda(this,'Evaluasi Pelaksanaan Kegiatan Bulanan dan Hal-hal lain yang dianggap perlu.')">Evaluasi Bulanan</div>
           <div class="agenda-chip" onclick="pilihAgenda(this,'Rapat Koordinasi Internal KIP Kabupaten Pidie Jaya.')">Koordinasi</div>
           <div class="agenda-chip" onclick="pilihAgenda(this,'')">✏ Ketik Sendiri</div>
         </div>
-        <div class="field"><textarea id="inp-agenda" rows="2">Rapat Pleno Rutin, Evaluasi Pelaksanaan Kegiatan Mingguan dan Hal-hal lain yang dianggap perlu.</textarea></div>
+        <div class="field"><textarea id="inp-agenda" rows="2">Rapat Pleno Rutin, Evaluasi Pelaksanaan Kegiatan Mingguan dan hal-hal lain yang dianggap perlu.</textarea></div>
         <div class="section-divider"><span>Peserta yang Diundang</span></div>
         <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Centang peserta yang hadir.</p>
         <div class="peserta-grid" id="peserta-gen-grid"></div>
@@ -965,7 +965,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
       <div class="generate-area">
         <div class="doc-preview">
           <span class="doc-badge undangan">Undangan</span>
-          <span class="doc-badge absen">Absen</span>
+          <span class="doc-badge absen">Daftar hadir</span>
           <span class="doc-badge risalah">Risalah</span>
         </div>
         <div class="gen-btns">
@@ -1038,13 +1038,13 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
               <code>UND_template.docx</code> · <code>ABSEN_template.docx</code> · <code>RISALAH_template.docx</code></div>
             </div>
             <div class="tpl-status-row"><span class="tpl-status-label">📄 Undangan</span><span class="tpl-status-path">./templates/UND_template.docx</span><span class="tpl-badge idle" id="st-auto-und" onclick="testAutoUrl('und')">Test</span></div>
-            <div class="tpl-status-row"><span class="tpl-status-label">📋 Absen</span><span class="tpl-status-path">./templates/ABSEN_template.docx</span><span class="tpl-badge idle" id="st-auto-abs" onclick="testAutoUrl('abs')">Test</span></div>
+            <div class="tpl-status-row"><span class="tpl-status-label">📋 Daftar hadir</span><span class="tpl-status-path">./templates/ABSEN_template.docx</span><span class="tpl-badge idle" id="st-auto-abs" onclick="testAutoUrl('abs')">Test</span></div>
             <div class="tpl-status-row"><span class="tpl-status-label">📝 Risalah</span><span class="tpl-status-path">./templates/RISALAH_template.docx</span><span class="tpl-badge idle" id="st-auto-ris" onclick="testAutoUrl('ris')">Test</span></div>
             <button class="tpl-test-btn" style="width:100%;margin-top:9px;padding:9px;border-radius:7px" onclick="testSemuaAuto()">🔍 Test Semua Template</button>
           </div>
           <div class="tpl-mode-panel" id="tpl-panel-manual">
             <div class="tpl-url-row"><span style="font-size:11px;font-weight:600;color:var(--text-mid)">📄 Undangan</span><input type="text" id="url-und" placeholder="https://…/UND_template.docx"><div style="display:flex;gap:5px;align-items:center"><span class="tpl-badge idle" id="badge-und">—</span><button class="tpl-test-btn" onclick="testManualUrl('und')">Test</button></div></div>
-            <div class="tpl-url-row"><span style="font-size:11px;font-weight:600;color:var(--text-mid)">📋 Absen</span><input type="text" id="url-abs" placeholder="https://…/ABSEN_template.docx"><div style="display:flex;gap:5px;align-items:center"><span class="tpl-badge idle" id="badge-abs">—</span><button class="tpl-test-btn" onclick="testManualUrl('abs')">Test</button></div></div>
+            <div class="tpl-url-row"><span style="font-size:11px;font-weight:600;color:var(--text-mid)">📋 Daftar hadir</span><input type="text" id="url-abs" placeholder="https://…/ABSEN_template.docx"><div style="display:flex;gap:5px;align-items:center"><span class="tpl-badge idle" id="badge-abs">—</span><button class="tpl-test-btn" onclick="testManualUrl('abs')">Test</button></div></div>
             <div class="tpl-url-row"><span style="font-size:11px;font-weight:600;color:var(--text-mid)">📝 Risalah</span><input type="text" id="url-ris" placeholder="https://…/RISALAH_template.docx"><div style="display:flex;gap:5px;align-items:center"><span class="tpl-badge idle" id="badge-ris">—</span><button class="tpl-test-btn" onclick="testManualUrl('ris')">Test</button></div></div>
             <div class="tpl-hint">⚠ Gunakan URL <strong>github.io</strong>. Repo harus <strong>Public</strong> dan GitHub Pages aktif.</div>
           </div>
