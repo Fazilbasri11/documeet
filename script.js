@@ -213,7 +213,16 @@ function refreshStats() {
   const dt = document.getElementById('dash-total'); if (dt) animCount(dt, total);
   const dy = document.getElementById('dash-tahun'); if (dy) animCount(dy, ti);
   const da = document.getElementById('dash-avg');   if (da) animCount(da, avg);
-  const dd = document.getElementById('dash-dok');   if (dd) animCount(dd, total * 3);
+  const totalDok = arsipList.reduce((acc, r) => {
+  const files = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
+  return acc + files.filter(f =>
+    f?.status === 'done' &&
+    f?.name &&
+    !f._isDraft &&
+    (f.name.toLowerCase().endsWith('.pdf') || isImage(f.name))
+  ).length;
+}, 0);
+const dd = document.getElementById('dash-dok'); if (dd) animCount(dd, totalDok);
   const dl = document.getElementById('dash-tahun-lbl'); if (dl) dl.textContent = 'Rapat ' + yr;
   const cl = document.getElementById('chart-tahun-lbl'); if (cl) cl.textContent = yr;
 
@@ -827,7 +836,7 @@ gasCall('simpanNomor', {
     lastGenId = arsipId;
     document.getElementById('btn-awan').classList.add('visible');
     updateNomorPreview(); renderCalInline(); refreshStats();
-    showToast('✓ 3 dokumen berhasil diunduh (Undangan, Absen, Risalah)!','success');
+    showToast('✓ 3 dokumen berhasil diunduh (Undangan, Daftar hadir, Risalah)!','success');
   } catch (err) { console.error(err); showToast('❌ ' + err.message,'error'); }
   finally { btn.disabled = false; sp.style.display = 'none'; tx.textContent = 'Generate 3 Dokumen'; }
 }
@@ -1555,7 +1564,7 @@ const overall = Math.round((pUnd + pAbs + pRis + pFoto + pBa) / 5);
   rowsEl.innerHTML = [
     {icon:'📋', label:'Berita Acara (PDF)',   ok:baOk,   pct:pBa},
     {icon:'📨', label:'Undangan (PDF)',      ok:undOk,  pct:pUnd},
-    {icon:'✅', label:'Absen Hadir (PDF)',   ok:absOk,  pct:pAbs},
+    {icon:'✅', label:'Daftar Hadir (PDF)',   ok:absOk,  pct:pAbs},
     {icon:'📝', label:'Risalah (PDF)',        ok:risOk,  pct:pRis},
     {icon:'📸', label:'Dokumentasi (Foto)',  ok:fotoOk, pct:pFoto},
   ].map(row => `
