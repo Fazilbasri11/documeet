@@ -464,9 +464,14 @@ function renderYthGen() {
 }
 function toggleYth(i) { document.getElementById('ygen-' + i)?.classList.toggle('checked'); }
 function getCheckedYth() {
-  return ythList
-    .filter((_, i) => document.getElementById('ygen-' + i)?.classList.contains('checked'))
-    .map((y, i) => ({ no: String(i + 1), namaYth: y }));
+  const result = [];
+  let urut = 1;
+  ythList.forEach((y, i) => {
+    if (document.getElementById('ygen-' + i)?.classList.contains('checked')) {
+      result.push({ no: String(urut++), namaYth: y });
+    }
+  });
+  return result;
 }
 function togglePeserta(i)   { document.getElementById('pgen-'+i).classList.toggle('checked'); }
 function getCheckedPeserta(){ return pesertaList.filter((_, i) => document.getElementById('pgen-'+i)?.classList.contains('checked')); }
@@ -739,7 +744,7 @@ async function generateDokumen() {
     kotaTanggal: `${settings.kota}, ${tglStr}`, tahun: String(tgl.getFullYear()),
     bulan: BULAN_ID[tgl.getMonth()], instansi: settings.instansi,
     jumlahPeserta: String(pesertaHadir.length), tgl_generet: tglGen,
-    yth: getCheckedYth().map((y, i) => ({ ...y, no: String(i + 1) })),
+    yth: getCheckedYth(),
     peserta: pesertaHadir.map((p, i) => ({
       no: String(i+1),
       nama: p.nama,
