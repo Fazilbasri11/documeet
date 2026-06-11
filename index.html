@@ -985,10 +985,20 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
   <div class="content-section">
     <div class="peserta-manage-list" id="peserta-manage-list"></div>
     <button class="btn-add" onclick="tambahPeserta()">+ Tambah Peserta</button>
+    <div style="margin-top:2rem">
+  <div class="section-divider"><span>Daftar Yth. (untuk Undangan)</span></div>
+  <p style="font-size:11px;color:var(--text-muted);margin-bottom:.75rem">
+    Akan dirender sebagai <code style="background:rgba(122,16,32,.08);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:11px;color:var(--maroon)">[[yth]]</code> di template undangan.
+    Loop: <code style="background:rgba(201,147,42,.1);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:11px;color:#7a5010">[#yth][[no]]. [[namaYth]][/yth]</code>
+  </p>
+  <div class="peserta-manage-list" id="yth-manage-list"></div>
+  <button class="btn-add" onclick="tambahYth()">+ Tambah Yth.</button>
+</div>
   </div>
   <div class="save-bar">
-    <button class="btn-sm" onclick="resetPeserta()">Reset Default</button>
-    <button class="btn-primary" onclick="simpanPeserta()">Simpan Perubahan</button>
+    <button class="btn-sm" onclick="resetPeserta()">Reset Peserta</button>
+<button class="btn-sm" onclick="resetYth()">Reset Yth.</button>
+<button class="btn-primary" onclick="simpanPeserta();simpanYth()">Simpan Semua</button>
   </div>
 </div>
 
