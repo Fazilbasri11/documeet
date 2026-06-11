@@ -1230,7 +1230,9 @@ function simpanYth() {
   ythList = ythList.map((_,i) => document.getElementById('yth-item-'+i)?.value.trim() || '').filter(Boolean);
   localStorage.setItem('sirapat_yth', JSON.stringify(ythList));
   showToast('Daftar Yth. disimpan!','success');
-  if (getGasUrl()) gasCall('simpanYth', {yth: ythList}).catch(()=>{});
+  if (getGasUrl()) gasCall('simpanYth', {
+  yth: ythList.map((y, i) => ({ no: String(i + 1), namaYth: y }))
+}).catch(() => {});
 }
 function resetYth() {
   if (!confirm('Reset ke default?')) return;
@@ -1269,7 +1271,7 @@ function showPage(id, btn) {
   const targetPage = document.getElementById('page-' + id);
   if (targetPage) targetPage.classList.add('active');
   if (btn) btn.classList.add('active');
-  if (id === 'peserta')    renderPesertaManage();
+ if (id === 'peserta') { renderPesertaManage(); renderYthManage(); }
   if (id === 'beranda') {
     renderCalInline();
     renderArsip();
@@ -1323,7 +1325,8 @@ function mulaiAutoSync() {
   Promise.all([
     fetchNomor(),
     loadArsipFromCloud(),
-    loadPesertaFromCloud()
+    loadPesertaFromCloud(),
+    loadYthFromCloud()
   ]).then(() => {
     // Render semua hanya 1x di sini setelah semua data cloud selesai
     renderCalInline();
@@ -1331,6 +1334,7 @@ function mulaiAutoSync() {
     refreshStats();       // sudah include renderUpNext + renderRisalahQuick + renderHealthMeter
     updateNomorPreview();
     renderPesertaGen();
+    renderYthManage();
     if (document.getElementById('page-peserta')?.classList.contains('active')) renderPesertaManage();
     checkBooking();
   });
@@ -1345,6 +1349,19 @@ async function loadPesertaFromCloud() {
       localStorage.setItem('sirapat_peserta', JSON.stringify(pesertaList));
     }
   } catch (e) { console.error('Gagal memuat peserta dari cloud:', e); }
+}
+
+async function loadYthFromCloud() {
+  if (!getGasUrl()) return;
+  try {
+    const data = await gasCall('getYth');
+    if (data.yth?.length) {
+      // Simpan sebagai array of string (namaYth saja)
+      ythList = data.yth.map(y => y.namaYth);
+      localStorage.setItem('sirapat_yth', JSON.stringify(ythList));
+      renderYthManage();
+    }
+  } catch (e) { console.error('Gagal memuat Yth dari cloud:', e); }
 }
 
 // ════ AGENDA TERDEKAT (UP NEXT) ══════════════════════════════
@@ -1486,17 +1503,19 @@ function renderHealthMeter() {
   const undOk  = countDonePdf('undangan');
   const absOk  = countDonePdf('absen');
   const risOk  = countDonePdf('risalah');
+  const baOk   = countDonePdf('ba');
   const fotoOk = list.filter(r => {
     const allFiles = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
     return allFiles.some(f => f?.name && isImage(f.name) && f.status === 'done');
   }).length;
 
   const pct  = u => Math.round(u / total * 100);
-  const pUnd = pct(undOk), pAbs = pct(absOk), pRis = pct(risOk), pFoto = pct(fotoOk);
-  const overall = Math.round((pUnd + pAbs + pRis + pFoto) / 4);
+  const pUnd = pct(undOk), pAbs = pct(absOk), pRis = pct(risOk), pFoto = pct(fotoOk), pBa = pct(baOk);
+const overall = Math.round((pUnd + pAbs + pRis + pFoto + pBa) / 5);
   const cls  = v => v >= 90 ? 'ok' : v >= 60 ? 'warn' : 'err';
 
   rowsEl.innerHTML = [
+    {icon:'📋', label:'Berita Acara (PDF)',   ok:baOk,   pct:pBa},
     {icon:'📨', label:'Undangan (PDF)',      ok:undOk,  pct:pUnd},
     {icon:'✅', label:'Absen Hadir (PDF)',   ok:absOk,  pct:pAbs},
     {icon:'📝', label:'Risalah (PDF)',        ok:risOk,  pct:pRis},
@@ -1519,10 +1538,11 @@ function renderHealthMeter() {
     const allFiles  = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
     const doneFiles = allFiles.filter(f => f?.status === 'done' && f?.name);
     const hasUnd  = doneFiles.some(f => /undangan/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
-    const hasAbs  = doneFiles.some(f => /absen/i.test(f.name)    && f.name.toLowerCase().endsWith('.pdf'));
-    const hasRis  = doneFiles.some(f => /risalah/i.test(f.name)  && f.name.toLowerCase().endsWith('.pdf'));
-    const hasFoto = doneFiles.some(f => isImage(f.name));
-    return !(hasUnd && hasAbs && hasRis && hasFoto);
+const hasAbs  = doneFiles.some(f => /absen/i.test(f.name)    && f.name.toLowerCase().endsWith('.pdf'));
+const hasRis  = doneFiles.some(f => /risalah/i.test(f.name)  && f.name.toLowerCase().endsWith('.pdf'));
+const hasBa   = doneFiles.some(f => /ba/i.test(f.name)       && f.name.toLowerCase().endsWith('.pdf'));
+const hasFoto = doneFiles.some(f => isImage(f.name));
+return !(hasUnd && hasAbs && hasRis && hasBa && hasFoto);
   }).length;
 
   if (footEl) footEl.textContent = belum > 0 ? `${belum} arsip belum lengkap dokumen Drive` : '✓ Semua arsip tahun ini lengkap';
@@ -1535,10 +1555,11 @@ function scrollToArsipBelum() {
     const allFiles  = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
     const doneFiles = allFiles.filter(f => f?.status === 'done' && f?.name);
     const hasUnd  = doneFiles.some(f => /undangan/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
-    const hasAbs  = doneFiles.some(f => /absen/i.test(f.name)    && f.name.toLowerCase().endsWith('.pdf'));
-    const hasRis  = doneFiles.some(f => /risalah/i.test(f.name)  && f.name.toLowerCase().endsWith('.pdf'));
-    const hasFoto = doneFiles.some(f => isImage(f.name));
-    return !(hasUnd && hasAbs && hasRis && hasFoto);
+const hasAbs  = doneFiles.some(f => /absen/i.test(f.name)    && f.name.toLowerCase().endsWith('.pdf'));
+const hasRis  = doneFiles.some(f => /risalah/i.test(f.name)  && f.name.toLowerCase().endsWith('.pdf'));
+const hasBa   = doneFiles.some(f => /ba/i.test(f.name)       && f.name.toLowerCase().endsWith('.pdf'));
+const hasFoto = doneFiles.some(f => isImage(f.name));
+return !(hasUnd && hasAbs && hasRis && hasBa && hasFoto);
   });
   if (!belum) { showToast('Semua arsip tahun ini sudah lengkap!','success'); return; }
   const el = document.getElementById('arsip-item-' + belum.id);
