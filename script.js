@@ -15,6 +15,8 @@ const DEFAULT_PESERTA = [
   {nama:'FAZIL BASRI, S.Kom.',     jabatan:'Notulen'},
 ];
 
+
+
 let pesertaList  = JSON.parse(localStorage.getItem('sirapat_peserta') || 'null') || DEFAULT_PESERTA.map(p => ({...p}));
 const DEFAULT_YTH = [
   'Seluruh Anggota',
@@ -36,11 +38,12 @@ if (settings.nomorFmt?.includes('[BULAN]')) {
   settings.nomorFmt = settings.nomorFmt.replace('[BULAN]', '1');
   localStorage.setItem('sirapat_settings', JSON.stringify(settings));
 }
-
+let nomorBALast = parseInt(localStorage.getItem('sirapat_nomorBA') || '0');
 const AUTO_PATHS = {
   und: './templates/UND_template.docx',
   abs: './templates/ABSEN_template.docx',
-  ris: './templates/RISALAH_template.docx'
+  ris: './templates/RISALAH_template.docx',
+  ba:  './templates/BA_template.docx'
 };
 const BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const HARI_ID  = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
@@ -58,6 +61,31 @@ let uploadFiles    = {};
 // ════ HELPERS ═════════════════════════════════════════════════
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbz2CWZbBPaBBfXL1jtSQDhd65FnUAWZogzA-yl51cjxIQMFznhmgneI2G71xN593w/exec';
 function getGasUrl() { return GAS_URL; }
+
+function tahunTerbilang(tahun) {
+  const satuan = ['','Satu','Dua','Tiga','Empat','Lima','Enam','Tujuh','Delapan','Sembilan',
+    'Sepuluh','Sebelas','Dua Belas','Tiga Belas','Empat Belas','Lima Belas','Enam Belas',
+    'Tujuh Belas','Delapan Belas','Sembilan Belas'];
+  const puluhan = ['','','Dua Puluh','Tiga Puluh','Empat Puluh','Lima Puluh',
+    'Enam Puluh','Tujuh Puluh','Delapan Puluh','Sembilan Puluh'];
+
+  const ribuan = Math.floor(tahun / 1000);
+  const ratusan = Math.floor((tahun % 1000) / 100);
+  const sisa = tahun % 100;
+
+  let hasil = '';
+  if (ribuan) hasil += (ribuan === 1 ? 'Seribu' : satuan[ribuan] + ' Ribu') + ' ';
+  if (ratusan) hasil += (ratusan === 1 ? 'Seratus' : satuan[ratusan] + ' Ratus') + ' ';
+  if (sisa > 0 && sisa < 20) hasil += satuan[sisa];
+  else if (sisa >= 20) hasil += puluhan[Math.floor(sisa/10)] + (sisa%10 ? ' ' + satuan[sisa%10] : '');
+
+  return hasil.trim();
+}
+
+function buildNomorBA(no, tgl) {
+  const tahun = tgl instanceof Date ? tgl.getFullYear() : today.getFullYear();
+  return `${no}/PK.01-BA/1118/2/${tahun}`;
+}
 
 // ★ FIX TIMEZONE: parse tanggal string "YYYY-MM-DD" sebagai local time
 function parseTanggal(str) {
@@ -363,6 +391,15 @@ async function hapusArsipCloud(id) {
 
 // ════ NOMOR SURAT ═════════════════════════════════════════════
 // ★ fetchNomor TIDAK memanggil refreshStats — diserahkan ke mulaiAutoSync
+async function fetchNomorBA() {
+  if (!getGasUrl()) return;
+  try {
+    const data = await gasCall('getLastNomorBA');
+    nomorBALast = data.lastNomorBA;
+    localStorage.setItem('sirapat_nomorBA', String(nomorBALast));
+  } catch (e) { console.error('Gagal fetch nomor BA:', e); }
+}
+
 async function fetchNomor() {
   const dot  = document.getElementById('nomor-dot');
   const prev = document.getElementById('nomor-preview');
@@ -409,7 +446,9 @@ async function testAutoUrl(key) {
   try { const s = await testUrl(AUTO_PATHS[key]); b.className = 'tpl-badge ok'; b.textContent = `✓ OK (${(s/1024).toFixed(1)}KB)`; }
   catch (e) { b.className = 'tpl-badge err'; b.textContent = '✗ ' + e.message; }
 }
-async function testSemuaAuto() { await Promise.all(['und','abs','ris'].map(k => testAutoUrl(k))); }
+async function testSemuaAuto() {
+  await Promise.all(['und','abs','ris','ba'].map(k => testAutoUrl(k)));
+}
 async function testManualUrl(key) {
   const b   = document.getElementById('badge-'+key);
   const url = (document.getElementById('url-'+key)||{value:''}).value.trim();
@@ -651,7 +690,7 @@ async function tplCacheGet(key) {
 async function preloadTemplates() {
   if (!navigator.onLine) return;
   try {
-    const keys = ['und', 'abs', 'ris'];
+    const keys = ['und', 'abs', 'ris', 'ba'];
     const urls = { und: getTemplateUrl('und'), abs: getTemplateUrl('abs'), ris: getTemplateUrl('ris') };
     let cached = 0;
     for (const key of keys) {
@@ -743,6 +782,13 @@ async function generateDokumen() {
   const jamFmt  = jamVal + ' WIB s/d Selesai';
 
   let nextNo = settings.nomorLast + 1;
+  let nextNoBA = nomorBALast + 1;
+if (getGasUrl()) {
+  try {
+    const dBA = await gasCall('getLastNomorBA');
+    nextNoBA = dBA.nextNomorBA;
+  } catch {}
+}
   if (getGasUrl()) { try { const d = await gasCall('getLastNomor'); nextNo = d.nextNomor; } catch {} }
 
   const data = {
@@ -753,6 +799,9 @@ async function generateDokumen() {
     bulan: BULAN_ID[tgl.getMonth()], instansi: settings.instansi,
     jumlahPeserta: String(pesertaHadir.length), tgl_generet: tglGen,
     yth: getCheckedYth(),
+    nomorBA:        buildNomorBA(nextNoBA, tgl),   // ← tambah
+  tglAngka:       String(tgl.getDate()),
+  tahunTerbilang: tahunTerbilang(tgl.getFullYear()),
     peserta: pesertaHadir.map((p, i) => ({
       no: String(i+1),
       nama: p.nama,
@@ -778,7 +827,8 @@ async function generateDokumen() {
       blobs = await Promise.all([
         fetchAndInject(urlUnd, data, 'und'),
         fetchAndInject(urlAbs, data, 'abs'),
-        fetchAndInject(urlRis, data, 'ris')
+        fetchAndInject(urlRis, data, 'ris'),
+         fetchAndInject(urlBa,  data, 'ba')
       ]);
     }
     catch (e) { setPS('ps-fetch','err'); throw e; }
@@ -791,6 +841,8 @@ async function generateDokumen() {
     dlBlob(blobs[1], `${prefix}_AbsenHadir.docx`);
     await new Promise(r => setTimeout(r, 300));
     dlBlob(blobs[2], `${prefix}_Risalah.docx`);
+    await new Promise(r => setTimeout(r, 300));
+    dlBlob(blobs[3], `${prefix}_BeritaAcara.docx`);
     setPS('ps-zip','done'); setPS('ps-done','done');
 
     lastGenBlobs = blobs; lastGenPrefix = prefix;
@@ -805,6 +857,7 @@ async function generateDokumen() {
       mkDraft(blobs[0],'Undangan.docx'),
       mkDraft(blobs[1],'AbsenHadir.docx'),
       mkDraft(blobs[2],'Risalah.docx'),
+      mkDraft(blobs[3], 'BeritaAcara.docx'),
     ];
 
     const newItem = {id:arsipId, tanggal:tanggalVal, hari:hariStr, jam:jamVal, tempat, agenda,
@@ -827,6 +880,18 @@ gasCall('simpanNomor', {
   pesertaCount: pesertaHadir.length,
   folderName:   folderNameForNomor  // untuk cari folder di Drive
 }).catch(() => {});
+// Simpan nomor BA ke sheet BA
+gasCall('simpanNomorBA', {
+  noUrut:  nextNoBA,
+  nomorBA: data.nomorBA,
+  tanggal: tanggalVal,
+  tentang: `BA RAPAT RUTIN - ${agenda.substring(0, 60)}`,
+  linkBA:  ''   // bisa diupdate nanti setelah file terupload
+}).catch(() => {});
+      // Update state lokal
+nomorBALast = nextNoBA;
+localStorage.setItem('sirapat_nomorBA', String(nomorBALast));
+      
       syncArsipToCloud(newItem);
       const folderName = `${String(tgl.getDate()).padStart(2,'0')} ${BULAN_ID[tgl.getMonth()]} ${tgl.getFullYear()}`;
       setTimeout(() => uploadSemuaFile(arsipId, folderName), 500);
@@ -1368,6 +1433,7 @@ async function loginAdmin() {
 function mulaiAutoSync() {
   Promise.all([
     fetchNomor(),
+    fetchNomorBA(),
     loadArsipFromCloud(),
     loadPesertaFromCloud(),
     loadYthFromCloud()
