@@ -242,7 +242,7 @@ function refreshStats() {
 
   const ht = document.getElementById('hs-total');  if (ht) animCount(ht, total);
   const hy = document.getElementById('hs-tahun');  if (hy) animCount(hy, ti);
-  const hn = document.getElementById('hs-nomor');  if (hn) hn.textContent = '#' + (settings.nomorLast + 1);
+  const hn = document.getElementById('hs-arsip');  if (hn) animCount(hn, total);
 
   const dt = document.getElementById('dash-total'); if (dt) animCount(dt, total);
   const dy = document.getElementById('dash-tahun'); if (dy) animCount(dy, ti);
@@ -554,7 +554,7 @@ function renderCalInline() {
   const selTempat = document.getElementById('inp-tempat').value.trim();
   const firstDay  = new Date(calYearInline, calMonthInline, 1).getDay();
   const days      = new Date(calYearInline, calMonthInline + 1, 0).getDate();
-  const todayStr  = today.toISOString().split('T')[0];
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
 
   let html = HARI_ID.map((_, i) => `<div class="cal-day-name">${['Min','Sen','Sel','Rab','Kam','Jum','Sab'][i]}</div>`).join('');
   for (let i = 0; i < firstDay; i++) html += `<div class="cal-day other-month"></div>`;
