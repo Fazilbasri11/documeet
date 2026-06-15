@@ -1514,6 +1514,13 @@ async function loginAdmin() {
   }
 }
 
+//logout
+function logoutAdmin() {
+  if (!confirm('Keluar dari sesi admin?')) return;
+  sessionStorage.removeItem('documeet_auth');
+  location.reload();
+}
+
 // ★ SATU-SATUNYA tempat yang memanggil semua render setelah data siap
 function mulaiAutoSync() {
   Promise.all([
