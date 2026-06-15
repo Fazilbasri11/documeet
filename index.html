@@ -811,7 +811,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
         <div class="hero-stat-sep"></div>
         <div class="hero-stat"><div class="hero-stat-val" id="hs-tahun">0</div><div class="hero-stat-lbl">Tahun Ini</div></div>
         <div class="hero-stat-sep"></div>
-        <div class="hero-stat"><div class="hero-stat-val" id="hs-nomor">—</div><div class="hero-stat-lbl">Arsip</div></div>
+        <div class="hero-stat"><div class="hero-stat-val" id="hs-arsip">—</div><div class="hero-stat-lbl">Arsip</div></div>
       </div>
       <div class="hero-sync-badge">
         <div class="hero-sync-dot" id="hero-sync-dot"></div>
@@ -1125,20 +1125,28 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
       <div class="about-row"><div class="lbl">Penyimpanan</div><div class="val">Google Sheets (permanen) + localStorage (cache)</div></div>
     </div>
     <div class="about-card">
-      <h3>❓ FAQ</h3>
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">1. Kenapa data arsip hilang saat clear browser? <span class="faq-arrow">▼</span></div>
-        <div class="faq-a">Data arsip disimpan permanen di Google Sheets via GAS. localStorage hanya cache. Pastikan URL GAS diisi di Pengaturan.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">2. Cara generate dokumen rapat? <span class="faq-arrow">▼</span></div>
-        <div class="faq-a"><ol>
-          <li>Pilih tanggal, jam, tempat, agenda, centang peserta</li>
-          <li>Klik <strong>Generate 3 Dokumen</strong> — file .docx terunduh otomatis</li>
-          <li>Arsip langsung tersimpan ke cloud</li>
-        </ol></div>
-      </div>
-    </div>
+  <h3>❓ FAQ Penggunaan</h3>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">1. Bagaimana cara membuat dokumen rapat baru? <span class="faq-arrow">▼</span></div>
+    <div class="faq-a">Klik menu <strong>Buat Rapat</strong>, isi tanggal, jam, tempat, dan agenda. Centang peserta yang hadir, lalu klik <strong>Generate 4 Template</strong>. Empat file Word (Undangan, Daftar Hadir, Risalah, Berita Acara) akan otomatis terunduh.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">2. Bagaimana cara menyimpan dokumen ke Google Drive? <span class="faq-arrow">▼</span></div>
+    <div class="faq-a">Setelah generate selesai, klik tombol <strong>☁ Awan</strong> yang muncul di samping tombol Generate. Sistem akan membuka arsip rapat tersebut — upload file PDF dan foto dokumentasi dari sana. File tersimpan otomatis di folder Drive sesuai tanggal rapat.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">3. Bagaimana cara menambah atau mengubah daftar peserta? <span class="faq-arrow">▼</span></div>
+    <div class="faq-a">Buka menu <strong>Peserta</strong>. Tambah, edit, atau hapus nama dan jabatan sesuai kebutuhan, lalu klik <strong>Simpan Semua</strong>. Perubahan akan otomatis tersinkron ke cloud dan berlaku untuk generate berikutnya.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">4. Apa yang dimaksud "Kelengkapan Arsip Cloud"? <span class="faq-arrow">▼</span></div>
+    <div class="faq-a">Meter ini menunjukkan seberapa lengkap dokumen final (PDF dan foto) yang sudah diunggah ke Drive untuk setiap rapat tahun ini. Satu arsip dianggap lengkap jika sudah ada: Berita Acara, Undangan, Daftar Hadir, Risalah (semua PDF), dan minimal satu foto dokumentasi.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">5. Bisakah sistem ini digunakan tanpa internet? <span class="faq-arrow">▼</span></div>
+    <div class="faq-a">Ya. DocuMeet adalah PWA (Progressive Web App) yang bisa diinstal dan digunakan offline. Generate dokumen tetap bisa dilakukan selama template sudah pernah dimuat sebelumnya. Upload ke Drive akan otomatis dilakukan saat koneksi internet kembali tersedia.</div>
+  </div>
+</div>
   </div>
 </div>
 
