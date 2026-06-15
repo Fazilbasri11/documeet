@@ -2,7 +2,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DocuMeet — KIP Pidie Jaya</title>
+<title>DocuMeet — KIP Kab. Pidie Jaya</title>
   <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#7a1020">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -790,7 +790,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
   <button class="nav-btn active" onclick="showPage('beranda',this);closeDrawer()">🏠 Beranda</button>
   <button class="nav-btn" onclick="showPage('generate',this);closeDrawer()">⚡ Buat Rapat</button>
   <button class="nav-btn" onclick="showPage('peserta',this);closeDrawer()">👥 Peserta</button>
-  <button class="nav-btn" onclick="showPage('pengaturan',this);closeDrawer()">⚙ Pengaturan</button>
+  <button class="nav-btn" onclick="showPage('pengaturan',this);closeDrawer()">⚙️ Pengaturan</button>
   <button class="nav-btn" onclick="showPage('tentang',this);closeDrawer()">ℹ Tentang</button>
 </div>
 
@@ -800,7 +800,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
     <div class="hero-ring"></div><div class="hero-ring"></div><div class="hero-ring"></div>
     <div class="hero-shimmer"></div>
     <div class="hero-inner">
-      <div class="hero-badge">Sistem Rapat Digital · KIP Pidie Jaya</div>
+      <div class="hero-badge">Sistem Rapat Digital · KIP Kab. Pidie Jaya</div>
       <div class="hero-brand-line">
         <div class="hero-brand-name">Docu<em>Meet</em></div>
         <div class="hero-brand-dot"></div>
@@ -811,7 +811,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
         <div class="hero-stat-sep"></div>
         <div class="hero-stat"><div class="hero-stat-val" id="hs-tahun">0</div><div class="hero-stat-lbl">Tahun Ini</div></div>
         <div class="hero-stat-sep"></div>
-        <div class="hero-stat"><div class="hero-stat-val" id="hs-nomor">—</div><div class="hero-stat-lbl">Nomor Berikutnya</div></div>
+        <div class="hero-stat"><div class="hero-stat-val" id="hs-nomor">—</div><div class="hero-stat-lbl">Arsip</div></div>
       </div>
       <div class="hero-sync-badge">
         <div class="hero-sync-dot" id="hero-sync-dot"></div>
@@ -926,7 +926,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
   <div class="page-header">
     <div class="page-header-inner">
       <h1>Buat Rapat</h1>
-      <p>Isi formulir untuk generate dokumen Undangan, Daftar hadir, dan Risalah otomatis</p>
+      <p>Isi formulir untuk generate template Undangan, Daftar hadir, BA, dan Risalah otomatis</p>
     </div>
   </div>
   
@@ -936,14 +936,14 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
       <div class="form-body">
         <div class="nomor-status-bar">
           <div class="nomor-dot" id="nomor-dot"></div>
-          <span style="font-weight:500;color:var(--text-muted);font-size:11px">Nomor berikutnya:</span>
+          <span style="font-weight:500;color:var(--text-muted);font-size:11px">Nomor surat berikutnya:</span>
           <span class="nomor-status-val" id="nomor-preview">— (isi URL Apps Script di Pengaturan)</span>
           <button class="nomor-refresh-btn" onclick="fetchNomor()">↻ Refresh</button>
         </div>
         <div class="form-row">
           <div class="field"><label>Tanggal Rapat</label><input type="date" id="inp-tanggal" onchange="updateNomorPreview();checkBooking()"></div>
           <div class="field"><label>Pukul Mulai</label><input type="time" id="inp-jam" value="09:00" onchange="checkBooking()"></div>
-          <div class="field"><label>Tempat / Ruangan</label><input type="text" id="inp-tempat" value="Aula Kantor KIP Kabupaten Pidie Jaya" onchange="checkBooking()"></div>
+          <div class="field"><label>Tempat / Ruangan</label><input type="text" id="inp-tempat" value="Aula KIP Kabupaten Pidie Jaya" onchange="checkBooking()"></div>
         </div>
         <div id="booking-warn" style="display:none;background:rgba(229,57,53,.08);border:1px solid rgba(229,57,53,.25);border-radius:7px;padding:9px 12px;font-size:11px;color:#c62828;margin-bottom:1rem"></div>
         <div class="section-divider"><span>Agenda Rapat</span></div>
@@ -979,7 +979,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
           <button class="btn-generate" onclick="generateDokumen()" id="btn-gen">
             <div class="spinner" id="spinner"></div>
             <span class="gold-star">✦</span>
-            <span id="btn-gen-text">Generate 3 Dokumen</span>
+            <span id="btn-gen-text">Generate 4 Template</span>
           </button>
         </div>
       </div>
@@ -1015,7 +1015,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
   <div class="page-header"><div class="page-header-inner"><h1>Pengaturan</h1><p>Konfigurasi sistem DocuMeet</p></div></div>
   <div class="content-section">
     <div class="form-card"><div class="form-body">
-      <div class="setting-group">
+      <!-- <div class="setting-group">
         <h3>⚡ Koneksi Google Apps Script</h3>
         <div class="gas-banner">
           <div style="font-size:15px;flex-shrink:0">☁</div>
@@ -1029,7 +1029,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
             <div id="gas-status" style="margin-top:5px;font-size:11px;color:#888"></div>
           </div>
         </div>
-      </div>
+      </div> -->
       <div class="setting-group">
         <h3>📄 Sumber Template Word</h3>
         <div class="tpl-box">
@@ -1111,7 +1111,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
   </div>
   <div class="content-section">
     <div class="about-card">
-      <h3>🏛 Identitas Instansi</h3>
+      <h3>🏛 Profil Instansi</h3>
       <div class="about-row"><div class="lbl">Nama Lembaga</div><div class="val">Komisi Independen Pemilihan (KIP) Kabupaten Pidie Jaya</div></div>
       <div class="about-row"><div class="lbl">Provinsi</div><div class="val">Aceh</div></div>
       <div class="about-row"><div class="lbl">Kabupaten</div><div class="val">Pidie Jaya</div></div>
@@ -1119,8 +1119,8 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
     </div>
     <div class="about-card">
       <h3>💻 Tentang DocuMeet</h3>
-      <div class="about-row"><div class="lbl">Nama Sistem</div><div class="val">DocuMeet — Sistem Rapat Digital KIP Pidie Jaya</div></div>
-      <div class="about-row"><div class="lbl">Fungsi Utama</div><div class="val">Generate otomatis 3 dokumen rapat dari template Word</div></div>
+      <div class="about-row"><div class="lbl">Nama Sistem</div><div class="val">DocuMeet — Sistem Rapat Digital KIP Kab. Pidie Jaya</div></div>
+      <div class="about-row"><div class="lbl">Fungsi Utama</div><div class="val">Generate otomatis 4 template rapat dari template Word</div></div>
       <div class="about-row"><div class="lbl">Teknologi</div><div class="val">HTML5 · docxtemplater · Google Apps Script · Drive</div></div>
       <div class="about-row"><div class="lbl">Penyimpanan</div><div class="val">Google Sheets (permanen) + localStorage (cache)</div></div>
     </div>
