@@ -846,8 +846,9 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
     <button class="nav-btn active" onclick="showPage('beranda',this)">🏠 Beranda</button>
     <button class="nav-btn" onclick="showPage('generate',this)">⚡ Buat Rapat</button>
     <button class="nav-btn" onclick="showPage('peserta',this)">👥 Peserta</button>
-    <button class="nav-btn" onclick="showPage('pengaturan',this)">⚙ Pengaturan</button>
+    <button class="nav-btn" onclick="showPage('pengaturan',this)">⚙️ Pengaturan</button>
     <button class="nav-btn" onclick="showPage('tentang',this)">ℹ Tentang</button>
+    <button class="nav-btn" onclick="logoutAdmin()" style="color:#ff8a8a">💥 Keluar</button>
   </div>
   <button class="nav-toggle" id="nav-toggle" aria-label="Menu" onclick="toggleDrawer()">☰</button>
 </nav>
@@ -861,6 +862,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
   <button class="nav-btn" onclick="showPage('peserta',this);closeDrawer()">👥 Peserta</button>
   <button class="nav-btn" onclick="showPage('pengaturan',this);closeDrawer()">⚙️ Pengaturan</button>
   <button class="nav-btn" onclick="showPage('tentang',this);closeDrawer()">ℹ Tentang</button>
+   <button class="nav-btn" onclick="logoutAdmin();closeDrawer()" style="color:#ff8a8a">💥 Keluar</button>
 </div>
 
 <div id="page-beranda" class="page active">
