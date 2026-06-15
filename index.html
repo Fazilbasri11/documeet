@@ -8,7 +8,8 @@
 <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="icon" href="https://drive.google.com/thumbnail?id=1tXpzP80fM4Qha_iSosx5OdpoU_Onq1Oj&sz=w128">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+  <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
 <script src="https://unpkg.com/docxtemplater@3.44.0/build/docxtemplater.js"></script>
 <style>
 :root{
@@ -25,35 +26,90 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--text-dar
 
   /* ════ LAYAR LOGIN ADMIN ════ */
 .login-screen {
-  position: fixed; inset: 0; background: var(--cream);
+  position: fixed; inset: 0;
+  background: linear-gradient(180deg, var(--cream), #f8f1e6);
   display: flex; align-items: center; justify-content: center; z-index: 99999;
+  overflow: hidden;
 }
+
+/* ── Ikon melayang di background ── */
+.login-screen .floaty {
+  position: absolute; pointer-events: none; z-index: 1;
+  color: var(--maroon);
+}
+.login-screen .floaty.gold { color: var(--gold); }
+
+@keyframes docu-float-a {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-18px) rotate(8deg); }
+}
+@keyframes docu-float-b {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(16px) translateX(-10px); }
+}
+@keyframes docu-float-c {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(-10deg); }
+}
+
+/* ════ Kartu login (tetap seperti sebelumnya) ════ */
 .login-card {
-  background: var(--white); padding: 2.5rem 2rem; border-radius: var(--r);
-  box-shadow: var(--shadow-lg); border: 1px solid rgba(122,16,32,.1);
+  position: relative; z-index: 2; overflow: hidden;
+  background: var(--white); padding: 2.75rem 2.25rem; border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(122,16,32,.18);
+  border: 1px solid rgba(122,16,32,.08);
   text-align: center; max-width: 360px; width: calc(100% - 2rem);
 }
 .login-logo {
-  width: 65px; height: 65px; background: linear-gradient(135deg, var(--gold), var(--gold-light));
-  border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  width: 68px; height: 68px; margin: 0 auto 1.1rem;
+  background: linear-gradient(135deg, var(--maroon), var(--maroon-dark));
+  border-radius: 16px; display: flex; align-items: center; justify-content: center;
   font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700;
-  color: var(--maroon-deep); margin: 0 auto 1rem;
+  color: var(--gold-light); box-shadow: 0 8px 20px rgba(122,16,32,.25);
 }
-.login-card h2 { font-family: 'Playfair Display', serif; color: var(--maroon); font-size: 1.25rem; margin-bottom: 0.35rem; }
-.login-card p { font-size: 12px; color: var(--text-muted); margin-bottom: 1.75rem; line-height: 1.5; }
-.pin-group { display: flex; flex-direction: column; gap: 10px; }
-.pin-group input { 
-  font-family: 'Inter', sans-serif; font-size: 14px; padding: 11px 14px; 
-  border: 1.5px solid #e8ddd5; border-radius: 7px; text-align: center; 
-  outline: none; transition: border-color 0.2s; letter-spacing: 0.1em;
+.login-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(122,16,32,.06); color: var(--maroon);
+  font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 999px;
+  margin-bottom: .9rem; letter-spacing: .04em;
 }
-.pin-group input:focus { border-color: var(--maroon); box-shadow: 0 0 0 3px rgba(122,16,32,.07); }
-.pin-group button { 
-  background: var(--maroon); color: white; border: none; padding: 11px; 
-  border-radius: 7px; font-weight: 600; cursor: pointer; transition: background 0.2s; 
+.login-badge::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--gold);
 }
-.pin-group button:hover { background: var(--maroon-dark); }
-.pin-group button:disabled { opacity: 0.7; cursor: not-allowed; }
+.login-card h2 {
+  font-family: 'Playfair Display', serif; color: var(--maroon-dark);
+  font-size: 1.5rem; margin-bottom: .4rem;
+}
+.login-card h2 .accent { color: var(--gold); }
+.login-card p {
+  font-size: 12.5px; color: var(--text-muted); margin-bottom: 1.85rem; line-height: 1.6;
+}
+.pin-group { display: flex; flex-direction: column; gap: 11px; }
+.pin-wrap { position: relative; }
+.pin-wrap i {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  font-size: 16px; color: #c9b8a8;
+}
+.pin-group input {
+  width: 100%; box-sizing: border-box;
+  font-family: 'Inter', sans-serif; font-size: 14px; padding: 12px 14px 12px 38px;
+  border: 1.5px solid #ecdfd3; border-radius: 9px; text-align: center;
+  outline: none; transition: border-color .2s, box-shadow .2s;
+  letter-spacing: .18em; background: #fdfaf6;
+}
+.pin-group input:focus {
+  border-color: var(--maroon); box-shadow: 0 0 0 3px rgba(122,16,32,.07);
+}
+.pin-group button {
+  background: linear-gradient(135deg, var(--maroon), var(--maroon-dark));
+  color: var(--gold-light); border: none; padding: 12px;
+  border-radius: 9px; font-weight: 600; cursor: pointer;
+  letter-spacing: .03em; box-shadow: 0 6px 16px rgba(122,16,32,.28);
+  transition: filter .2s, transform .15s;
+}
+.pin-group button:hover { filter: brightness(1.08); }
+.pin-group button:active { transform: scale(.98); }
+.pin-group button:disabled { opacity: .7; cursor: not-allowed; }
 
 /* NAV */
 nav{background:var(--maroon-deep);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:60px;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.3)}
@@ -751,12 +807,25 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 <body>
 
   <div id="login-screen" class="login-screen">
+  <i class="ti ti-file-text floaty" style="top:12%; left:8%; font-size:34px; opacity:.12; animation: docu-float-a 7s ease-in-out infinite;"></i>
+  <i class="ti ti-calendar-event floaty gold" style="top:18%; right:10%; font-size:40px; opacity:.16; animation: docu-float-b 9s ease-in-out infinite;"></i>
+  <i class="ti ti-clipboard-text floaty gold" style="bottom:16%; left:11%; font-size:30px; opacity:.14; animation: docu-float-c 8s ease-in-out infinite;"></i>
+  <i class="ti ti-users floaty" style="bottom:22%; right:7%; font-size:36px; opacity:.1; animation: docu-float-a 10s ease-in-out infinite reverse;"></i>
+  <i class="ti ti-stamp floaty" style="top:46%; left:4%; font-size:26px; opacity:.1; animation: docu-float-b 11s ease-in-out infinite;"></i>
+  <i class="ti ti-mail floaty gold" style="top:8%; right:32%; font-size:24px; opacity:.15; animation: docu-float-c 6.5s ease-in-out infinite reverse;"></i>
+  <i class="ti ti-photo floaty" style="bottom:8%; right:34%; font-size:28px; opacity:.09; animation: docu-float-a 9.5s ease-in-out infinite;"></i>
+  <i class="ti ti-checklist floaty gold" style="top:62%; left:22%; font-size:22px; opacity:.13; animation: docu-float-b 7.5s ease-in-out infinite reverse;"></i>
+
   <div class="login-card">
     <div class="login-logo">KIP</div>
-    <h2>DocuMeet</h2>
+    <div class="login-badge">SISTEM RAPAT DIGITAL</div>
+    <h2>Docu<span class="accent">Meet</span><span class="accent">.</span></h2>
     <p>Sistem Pengelolaan Rapat Digital.<br>Masukkan PIN untuk mengakses data.</p>
     <div class="pin-group">
-      <input type="password" id="admin-pin" placeholder="Masukkan PIN..." onkeypress="if(event.key==='Enter') loginAdmin()">
+      <div class="pin-wrap">
+        <i class="ti ti-lock"></i>
+        <input type="password" id="admin-pin" placeholder="Masukkan PIN..." onkeypress="if(event.key==='Enter') loginAdmin()">
+      </div>
       <button id="btn-login" onclick="loginAdmin()">Masuk</button>
     </div>
     <div id="login-error" style="color:#e53935; font-size:11px; margin-top:10px; display:none; font-weight:500;"></div>
