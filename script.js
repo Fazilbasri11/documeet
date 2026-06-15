@@ -1085,14 +1085,21 @@ function showArsipDetail(id) {
     <div class="upload-section">
       <div class="upload-section-title">☁ Upload Dokumen ke Drive <span class="folder-tag">📁 ${folderName}</span></div>
       ${!getGasUrl()?'<div class="no-gas-warning">⚠ URL Apps Script belum diisi di Pengaturan.</div>':''}
-      <div class="upload-zone" id="dropzone-${id}"
-           ondrop="handleDrop(event,${id})" ondragover="event.preventDefault();this.classList.add('dragover')"
-           ondragleave="this.classList.remove('dragover')" onclick="document.getElementById('fi-${id}').click()">
-        <div class="upload-zone-icon">📂</div>
-        <div class="upload-zone-text"><strong>Drag & drop file</strong><br>atau klik untuk pilih<br>
-          <span style="font-size:10px">.docx .pdf .zip .jpg .png .webp — maks 10MB</span></div>
-        <input type="file" id="fi-${id}" multiple accept=".docx,.doc,.pdf,.zip,.jpg,.jpeg,.png,.webp,.gif" onchange="handleFileInput(event,${id})">
-      </div>
+      <div class="upload-slots" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+  ${SLOT_DEFS.map(s => `
+    <div class="upload-zone" style="padding:1rem .75rem"
+         id="dropzone-${id}-${s.key}"
+         ondrop="handleDropSlot(event,${id},'${s.key}')"
+         ondragover="event.preventDefault();this.classList.add('dragover')"
+         ondragleave="this.classList.remove('dragover')"
+         onclick="document.getElementById('fi-${id}-${s.key}').click()">
+      <div class="upload-zone-icon" style="font-size:1.25rem">${s.label.split(' ')[0]}</div>
+      <div class="upload-zone-text"><strong>${s.label.split(' ').slice(1).join(' ')}</strong><br>
+        <span style="font-size:10px">klik / drop file</span></div>
+      <input type="file" id="fi-${id}-${s.key}" accept=".docx,.doc,.pdf,.zip,.jpg,.jpeg,.png,.webp,.gif"
+             onchange="handleFileInputSlot(event,${id},'${s.key}')">
+    </div>`).join('')}
+</div>
       <div class="uploaded-files" id="file-list-${id}"></div>
       <div class="upload-actions" id="upload-actions-${id}" style="display:none">
         <button class="btn-upload-all" id="upload-btn-${id}" onclick="uploadSemuaFile(${id},'${folderName}')">☁ Upload ke Drive</button>
