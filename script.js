@@ -152,9 +152,15 @@ async function gasCall(action, payload = null) {
   if (!url) throw new Error('GAS URL belum diisi');
   let res;
   if (payload) {
-    res = await fetch(url, { method: 'POST', body: JSON.stringify({action, ...payload}) });
+    res = await fetch(url, {
+      method: 'POST',
+      redirect: 'follow',
+      body: JSON.stringify({action, ...payload})
+    });
   } else {
-    res = await fetch(`${url}?action=${action}`);
+    res = await fetch(`${url}?action=${action}`, {
+      redirect: 'follow'
+    });
   }
   const d = await res.json();
   if (d.error) throw new Error(d.error);
@@ -767,7 +773,7 @@ async function generateDokumen() {
     return;
   }
 
-  const urlUnd = getTemplateUrl('und'), urlAbs = getTemplateUrl('abs'), urlRis = getTemplateUrl('ris');
+ const urlUnd = getTemplateUrl('und'), urlAbs = getTemplateUrl('abs'), urlRis = getTemplateUrl('ris'), urlBa = getTemplateUrl('ba');
   if (!urlUnd||!urlAbs||!urlRis) { showToast('URL template belum lengkap!','error'); return; }
   const pesertaHadir = getCheckedPeserta();
   if (!pesertaHadir.length) { showToast('Pilih minimal 1 peserta!','error'); return; }
