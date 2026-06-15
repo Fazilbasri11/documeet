@@ -900,7 +900,7 @@ localStorage.setItem('sirapat_nomorBA', String(nomorBALast));
     lastGenId = arsipId;
     document.getElementById('btn-awan').classList.add('visible');
     updateNomorPreview(); renderCalInline(); refreshStats();
-    showToast('✓ 3 dokumen berhasil diunduh (Undangan, Daftar hadir, Risalah)!','success');
+    showToast('✓ 4 dokumen berhasil diunduh (Undangan, Daftar hadir, Risalah, BA)!','success');
   } catch (err) { console.error(err); showToast('❌ ' + err.message,'error'); }
   finally { btn.disabled = false; sp.style.display = 'none'; tx.textContent = 'Generate 3 Dokumen'; }
 }
