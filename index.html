@@ -972,6 +972,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
           <span class="doc-badge undangan">Undangan</span>
           <span class="doc-badge absen">Daftar hadir</span>
           <span class="doc-badge risalah">Risalah</span>
+          <span class="doc-badge risalah">Berita Acara</span>
         </div>
         <div class="gen-btns">
           <button class="btn-awan" id="btn-awan" onclick="simpanKeAwan()">☁ Awan</button>
@@ -1045,6 +1046,11 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
             <div class="tpl-status-row"><span class="tpl-status-label">📄 Undangan</span><span class="tpl-status-path">./templates/UND_template.docx</span><span class="tpl-badge idle" id="st-auto-und" onclick="testAutoUrl('und')">Test</span></div>
             <div class="tpl-status-row"><span class="tpl-status-label">📋 Daftar hadir</span><span class="tpl-status-path">./templates/ABSEN_template.docx</span><span class="tpl-badge idle" id="st-auto-abs" onclick="testAutoUrl('abs')">Test</span></div>
             <div class="tpl-status-row"><span class="tpl-status-label">📝 Risalah</span><span class="tpl-status-path">./templates/RISALAH_template.docx</span><span class="tpl-badge idle" id="st-auto-ris" onclick="testAutoUrl('ris')">Test</span></div>
+           <div class="tpl-status-row">
+  <span class="tpl-status-label">📋 Berita Acara</span>
+  <span class="tpl-status-path">./templates/BA_template.docx</span>
+  <span class="tpl-badge idle" id="st-auto-ba" onclick="testAutoUrl('ba')">Test</span>
+</div>
             <button class="tpl-test-btn" style="width:100%;margin-top:9px;padding:9px;border-radius:7px" onclick="testSemuaAuto()">🔍 Test Semua Template</button>
           </div>
           <div class="tpl-mode-panel" id="tpl-panel-manual">
