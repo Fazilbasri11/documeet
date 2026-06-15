@@ -59,7 +59,7 @@ let currentModalId = null;
 let uploadFiles    = {};
 
 // ════ HELPERS ═════════════════════════════════════════════════
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbx2HNxDRCjtv_8YLyhEJgGKSeSH12vNnM-JkLwvgLiPY7WOTjvNkkWSMRuA9EiiEHU/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyLbKTTR9Ko6o92wsX6j4iz4TA6KN9DnKrYCmgvRPdMgETHMxKrduRRIcp_HXEt1MM/exec';
 function getGasUrl() { return GAS_URL; }
 
 function tahunTerbilang(tahun) {
