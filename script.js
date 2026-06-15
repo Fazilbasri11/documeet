@@ -45,6 +45,14 @@ const AUTO_PATHS = {
   ris: './templates/RISALAH_template.docx',
   ba:  './templates/BA_template.docx'
 };
+
+const SLOT_DEFS = [
+  {key:'undangan', label:'📨 Undangan', match:/undangan/i},
+  {key:'ba',       label:'📋 Berita Acara', match:/berita|^ba_|_ba/i},
+  {key:'absen',    label:'✅ Daftar Hadir', match:/absen|hadir/i},
+  {key:'risalah',  label:'📝 Risalah', match:/risalah/i},
+];
+
 const BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const HARI_ID  = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
 const SH_ID    = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
@@ -169,6 +177,28 @@ async function gasCall(action, payload = null) {
 const gasGet  = (action)  => gasCall(action);
 const gasPost = (payload) => gasCall(payload.action, payload);
 
+//SYNC NAME DRIVE
+async function syncFileNamesFromDrive(id) {
+  if (!getGasUrl()) return;
+  try {
+    const res = await gasCall('refreshFileNames', {id});
+    if (res.success) {
+      const r = arsipList.find(x => x.id === id);
+      if (r) { r.uploadedFiles = res.uploadedFiles; saveLocal(); }
+      uploadFiles[id] = (uploadFiles[id]||[]).map(old => {
+        const updated = res.uploadedFiles.find(f => f.url === old.url);
+        return updated ? {...old, name: updated.name} : old;
+      });
+      // tambahkan file 'done' baru yang belum ada di uploadFiles
+      res.uploadedFiles.forEach(f => {
+        if (!uploadFiles[id].some(x => x.url === f.url)) {
+          uploadFiles[id].push({...f, file:null, type:f.type||'', _showPreview:false});
+        }
+      });
+      renderFileList(id);
+    }
+  } catch {}
+}
 // ════ SANITASI ARSIP ══════════════════════════════════════════
 function sanitasiField(val, type) {
   const s = String(val || '');
@@ -1070,6 +1100,7 @@ function showArsipDetail(id) {
     </div>`;
   renderFileList(id);
   document.getElementById('modal-overlay').classList.add('open');
+  syncFileNamesFromDrive(id); // tambahan
 }
 
 function renderDraftSection(id) {
@@ -1143,6 +1174,7 @@ function renderFileList(id) {
   }).join('');
 }
 
+
 function togglePreview(arsipId, fileIdx) {
   const files = uploadFiles[arsipId]; if (!files?.[fileIdx]) return;
   files[fileIdx]._showPreview = !files[fileIdx]._showPreview;
@@ -1183,7 +1215,47 @@ function addFiles(id, files) {
   if (!navigator.onLine) showToast('📶 Offline — file disimpan, auto-upload saat online', 'info');
   renderFileList(id);
 }
+function renameForSlot(file, slotKey, originalName) {
+  const SLOT_PREFIX = {undangan:'Undangan', ba:'BeritaAcara', absen:'AbsenHadir', risalah:'Risalah'};
+  const ext = (originalName.split('.').pop() || '').toLowerCase();
+  return `${SLOT_PREFIX[slotKey]}.${ext}`;
+}
 
+function addFileToSlot(id, file, slotKey) {
+  uploadFiles[id] ??= [];
+  const maxMB = file.type.startsWith('image/') ? 20 : 10;
+  if (file.size > maxMB*1024*1024) { showToast(`${file.name} terlalu besar (maks ${maxMB}MB)`,'error'); return; }
+  const renamedName = renameForSlot(file, slotKey, file.name);
+  const blobUrl = file.type.startsWith('image/') ? URL.createObjectURL(file) : null;
+
+  // Hapus file lama di slot yang sama (jika belum diupload)
+  uploadFiles[id] = uploadFiles[id].filter(f => !(f._slot === slotKey && f.status !== 'done'));
+
+  const entry = {
+    file, name: renamedName, size: file.size, status:'pending',
+    url:null, type:file.type||'', _blobUrl:blobUrl, _showPreview:false, _slot:slotKey
+  };
+  uploadFiles[id].push(entry);
+
+  if (!navigator.onLine) {
+    const r = arsipList.find(x => x.id === id);
+    const folder = r ? getFolderName(r) : String(id);
+    idbSave(id, folder, entry).then(updateOfflinePendingCount);
+  }
+  renderFileList(id);
+}
+
+function handleFileInputSlot(ev, id, slotKey) {
+  const f = ev.target.files[0];
+  if (f) addFileToSlot(id, f, slotKey);
+  ev.target.value = '';
+}
+function handleDropSlot(ev, id, slotKey) {
+  ev.preventDefault();
+  document.getElementById(`dropzone-${id}-${slotKey}`)?.classList.remove('dragover');
+  const f = ev.dataTransfer.files[0];
+  if (f) addFileToSlot(id, f, slotKey);
+}
 function hapusFile(id, i) {
   if (!confirm('Hapus file ini?')) return;
   if (!uploadFiles[id]) return;
