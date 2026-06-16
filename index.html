@@ -1007,11 +1007,17 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
       <div class="form-card-header"><div class="step-dot">1</div><h2>Waktu & Tempat Rapat</h2></div>
       <div class="form-body">
         <div class="nomor-status-bar">
-          <div class="nomor-dot" id="nomor-dot"></div>
-          <span style="font-weight:500;color:var(--text-muted);font-size:11px">Nomor surat berikutnya:</span>
-          <span class="nomor-status-val" id="nomor-preview">— (isi URL Apps Script di Pengaturan)</span>
-          <button class="nomor-refresh-btn" onclick="fetchNomor()">↻ Refresh</button>
-        </div>
+  <div class="nomor-dot" id="nomor-dot"></div>
+  <span style="font-weight:500;color:var(--text-muted);font-size:11px;white-space:nowrap">Nomor surat:</span>
+  <input type="text" id="inp-nomor-manual"
+    placeholder="Memuat dari Sheets..."
+    title="Kosongkan untuk nomor otomatis"
+    oninput="this.dataset.userEdited='1'"
+    style="flex:1;min-width:0;font-family:monospace;font-weight:700;color:var(--maroon);
+           font-size:12px;border:none;background:transparent;outline:none;
+           border-bottom:1.5px dashed rgba(201,147,42,.35);padding:2px 4px">
+  <button class="nomor-refresh-btn" onclick="fetchNomor();delete document.getElementById('inp-nomor-manual').dataset.userEdited">↻ Refresh</button>
+</div>
         <div class="form-row">
           <div class="field"><label>Tanggal Rapat</label><input type="date" id="inp-tanggal" onchange="updateNomorPreview();checkBooking()"></div>
           <div class="field"><label>Pukul Mulai</label><input type="time" id="inp-jam" value="09:00" onchange="checkBooking()"></div>
