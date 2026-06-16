@@ -293,11 +293,11 @@ const dd = document.getElementById('dash-dok'); if (dd) animCount(dd, totalDok);
   tiArsip.forEach(r => months[parseTanggal(r.tanggal).getMonth()]++);
   const max = Math.max(...months, 1);
   const bc = document.getElementById('bar-chart-home');
-  if (bc) bc.innerHTML = months.map((n, i) =>
-    `<div class="bar-group">${n > 0 ? `<div class="bar-val">${n}</div>` : ''}` +
-    `<div class="bar" style="height:${Math.round(n/max*80)}px"><div class="bar-inner" style="height:100%"></div></div>` +
-    `<div class="bar-label">${SH_ID[i]}</div></div>`
-  ).join('');
+if (bc) bc.innerHTML = months.map((n, i) =>
+  `<div class="bar-group">${n > 0 ? `<div class="bar-val">${n}</div>` : ''}` +
+  `<div class="bar" style="height:${Math.round(n/max*80)}px"><div class="bar-inner" style="height:100%"></div></div>` +
+  `<div class="bar-label">${SH_ID[i]}</div></div>`
+).join('');
 
   renderUpNext();
   renderRisalahQuick();
@@ -454,10 +454,13 @@ async function fetchNomor() {
   }
 }
 function updateNomorPreview() {
-  const tgl  = document.getElementById('inp-tanggal').value;
-  const d    = tgl ? parseTanggal(tgl) : new Date();
-  const hint = tgl ? ` (urut ke-${settings.nomorLast+1})` : ' (Silakan tentukan tanggal rapat)';
-  document.getElementById('nomor-preview').textContent = buildNomor(settings.nomorLast + 1, d) + hint;
+  const tgl = document.getElementById('inp-tanggal').value;
+  const d   = tgl ? parseTanggal(tgl) : new Date();
+  const inp = document.getElementById('inp-nomor-manual');
+  // Hanya update preview jika user belum isi manual
+  if (inp && inp.value.trim()) return;
+  const auto = buildNomor(settings.nomorLast + 1, d);
+  if (inp) inp.value = auto;
 }
 
 // ════ TEMPLATE ════════════════════════════════════════════════
@@ -827,8 +830,10 @@ if (getGasUrl()) {
 }
   if (getGasUrl()) { try { const d = await gasCall('getLastNomor'); nextNo = d.nextNomor; } catch {} }
 
+  const inpManual = document.getElementById('inp-nomor-manual');
+  const nomorManual = inpManual ? inpManual.value.trim() : '';
   const data = {
-    nomorSurat: buildNomor(nextNo, tgl), hari: hariStr, tanggal: tglStr,
+    nomorSurat: nomorManual || buildNomor(nextNo, tgl), hari: hariStr, tanggal: tglStr,
     tanggalHari: `${hariStr}, ${tglStr}`, jam: jamFmt, jamPolos: jamVal, tempat, agenda,
     ketua: settings.ketua, sekretaris: settings.sekretaris, kota: settings.kota,
     kotaTanggal: `${settings.kota}, ${tglStr}`, tahun: String(tgl.getFullYear()),
@@ -1072,6 +1077,10 @@ function showArsipDetail(id) {
   if (shareBtn) shareBtn.style.display = hasDriveFiles ? '' : 'none';
   document.getElementById('modal-title').textContent = 'Detail Rapat';
   document.getElementById('modal-body').innerHTML = `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+    <button class="btn-sm" id="btn-edit-detail" onclick="toggleEditDetail(${r.id})">✏ Edit</button>
+  </div>
+  <div id="detail-view-${r.id}">
     <div class="detail-row"><div class="detail-label">Tanggal</div><div class="detail-val">${r.hari}, ${tglFull(d)}</div></div>
     <div class="detail-row"><div class="detail-label">Pukul</div><div class="detail-val">${r.jam} WIB</div></div>
     <div class="detail-row"><div class="detail-label">Tempat</div><div class="detail-val">${r.tempat}</div></div>
@@ -1081,6 +1090,23 @@ function showArsipDetail(id) {
     <div class="detail-row" style="border-bottom:none"><div class="detail-label">Peserta (${(r.peserta||[]).length})</div>
       <div class="detail-val">${(r.peserta||[]).map((n,i)=>`${i+1}. ${n}`).join('<br>')}</div>
     </div>
+  </div>
+  <div id="detail-edit-${r.id}" style="display:none">
+    <div class="field" style="margin-bottom:8px"><label>Tanggal</label>
+      <input type="date" id="edit-tgl-${r.id}" value="${r.tanggal}"></div>
+    <div class="field" style="margin-bottom:8px"><label>Pukul</label>
+      <input type="time" id="edit-jam-${r.id}" value="${r.jam}"></div>
+    <div class="field" style="margin-bottom:8px"><label>Tempat</label>
+      <input type="text" id="edit-tempat-${r.id}" value="${r.tempat}"></div>
+    <div class="field" style="margin-bottom:8px"><label>Agenda</label>
+      <textarea id="edit-agenda-${r.id}" rows="3">${r.agenda}</textarea></div>
+    <div class="field" style="margin-bottom:8px"><label>Nomor Surat</label>
+      <input type="text" id="edit-nomor-${r.id}" value="${r.nomorSurat||''}"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button class="btn-sm" onclick="toggleEditDetail(${r.id})">Batal</button>
+      <button class="btn-primary" onclick="simpanEditDetail(${r.id})">💾 Simpan</button>
+    </div>
+  </div>
     ${renderDraftSection(id)}
     <div class="upload-section">
       <div class="upload-section-title">☁ Upload Dokumen ke Drive <span class="folder-tag">📁 ${folderName}</span></div>
@@ -1108,6 +1134,44 @@ function showArsipDetail(id) {
   renderFileList(id);
   document.getElementById('modal-overlay').classList.add('open');
   syncFileNamesFromDrive(id); // tambahan
+}
+
+function toggleEditDetail(id) {
+  const view = document.getElementById(`detail-view-${id}`);
+  const edit = document.getElementById(`detail-edit-${id}`);
+  const btn  = document.getElementById('btn-edit-detail');
+  const isEditing = edit.style.display !== 'none';
+  view.style.display = isEditing ? '' : 'none';
+  edit.style.display = isEditing ? 'none' : '';
+  btn.textContent = isEditing ? '✏ Edit' : '✕ Batal';
+}
+
+function simpanEditDetail(id) {
+  const r = arsipList.find(x => x.id === id); if (!r) return;
+  const tgl    = document.getElementById(`edit-tgl-${id}`).value;
+  const jam    = document.getElementById(`edit-jam-${id}`).value;
+  const tempat = document.getElementById(`edit-tempat-${id}`).value.trim();
+  const agenda = document.getElementById(`edit-agenda-${id}`).value.trim();
+  const nomor  = document.getElementById(`edit-nomor-${id}`).value.trim();
+
+  if (!tgl || !agenda) { showToast('Tanggal dan agenda wajib diisi', 'error'); return; }
+
+  const d = parseTanggal(tgl);
+  r.tanggal    = tgl;
+  r.hari       = HARI_ID[d.getDay()];
+  r.jam        = jam;
+  r.tempat     = tempat;
+  r.agenda     = agenda;
+  r.nomorSurat = nomor;
+
+  saveLocal();
+  syncArsipToCloud(r);
+  renderArsip();
+  renderCalInline();
+  showToast('✓ Detail rapat diperbarui', 'success');
+  // Tutup modal lalu buka ulang agar tampilan refresh
+  closeModal();
+  setTimeout(() => showArsipDetail(id), 200);
 }
 
 function renderDraftSection(id) {
