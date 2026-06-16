@@ -437,30 +437,33 @@ async function fetchNomorBA() {
 }
 
 async function fetchNomor() {
-  const dot  = document.getElementById('nomor-dot');
-  const prev = document.getElementById('nomor-preview');
-  if (!getGasUrl()) { dot.className = 'nomor-dot err'; prev.textContent = '— isi URL Apps Script di Pengaturan'; return; }
-  dot.className = 'nomor-dot loading'; prev.textContent = 'Membaca dari Sheets...';
+  const dot = document.getElementById('nomor-dot');
+  const inp = document.getElementById('inp-nomor-manual');
+  if (!getGasUrl()) { dot.className = 'nomor-dot err'; if (inp) inp.placeholder = '— isi URL Apps Script di Pengaturan'; return; }
+  dot.className = 'nomor-dot loading';
+  if (inp && !inp.dataset.userEdited) inp.value = '';  // kosongkan dulu saat loading
+  if (inp) inp.placeholder = 'Membaca dari Sheets...';
   try {
     const data = await gasCall('getLastNomor');
     settings.nomorLast = data.lastNomor;
     localStorage.setItem('sirapat_settings', JSON.stringify(settings));
     dot.className = 'nomor-dot ok';
-    updateNomorPreview();
-    // ★ TIDAK memanggil refreshStats() di sini
+    if (inp) inp.placeholder = 'Nomor surat...';
+    updateNomorPreview(); // ← isi value jika belum diedit user
   } catch {
     dot.className = 'nomor-dot err';
-    prev.textContent = '❌ Gagal — pakai nomor lokal: ' + (settings.nomorLast + 1);
+    if (inp && !inp.dataset.userEdited) inp.value = buildNomor(settings.nomorLast + 1, new Date());
+    if (inp) inp.placeholder = '❌ Gagal — pakai nomor lokal';
   }
 }
+
 function updateNomorPreview() {
-  const tgl = document.getElementById('inp-tanggal').value;
-  const d   = tgl ? parseTanggal(tgl) : new Date();
-  const inp = document.getElementById('inp-nomor-manual');
-  // Hanya update preview jika user belum isi manual
-  if (inp && inp.value.trim()) return;
+  const tgl  = document.getElementById('inp-tanggal').value;
+  const d    = tgl ? parseTanggal(tgl) : new Date();
   const auto = buildNomor(settings.nomorLast + 1, d);
-  if (inp) inp.value = auto;
+  const inp  = document.getElementById('inp-nomor-manual');
+  if (!inp) return;
+  if (!inp.dataset.userEdited) inp.value = auto;
 }
 
 // ════ TEMPLATE ════════════════════════════════════════════════
