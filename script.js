@@ -68,7 +68,7 @@ let uploadFiles    = {};
 
 // ════ HELPERS ═════════════════════════════════════════════════
 // const GAS_URL = 'https://script.google.com/macros/s/AKfycbyLbKTTR9Ko6o92wsX6j4iz4TA6KN9DnKrYCmgvRPdMgETHMxKrduRRIcp_HXEt1MM/exec';
-const GAS_URL ='https://script.google.com/macros/s/AKfycbxXrFQBzmsTUkS7yahMdIUQ1hRDCq4MElSoPo1zAdWz0WqEXcVoEgTQx_2-ci0qbfbD/exec';
+const GAS_URL ='https://script.google.com/macros/s/AKfycbyVyokwyLQLgL7QqEK-cTb5idjWA-_fVydbzr3t0VxFCj30r7Mw48FP3bdhRtY9VoCe/exec';
 function getGasUrl() { return GAS_URL; }
 
 function tahunTerbilang(tahun) {
@@ -471,6 +471,12 @@ async function loadArsipFromCloud() {
 
 // Tombol sync manual dari UI — perlu render ulang setelah selesai
 async function refreshArsipCloud() {
+  showSync('Menyamakan data dengan Drive...', 'syncing');
+  try {
+    if (getGasUrl()) await gasCall('bersihkanSemuaArsip');
+  } catch (e) {
+    console.warn('bersihkanSemuaArsip gagal:', e);
+  }
   await loadArsipFromCloud();
   renderCalInline();
   renderArsip();
@@ -1712,7 +1718,18 @@ function logoutAdmin() {
 }
 
 // ★ SATU-SATUNYA tempat yang memanggil semua render setelah data siap
-function mulaiAutoSync() {
+async function mulaiAutoSync() {
+  // ★ OPSI B: bersihkan dulu seluruh arsip dari file yang sudah dihapus/trashed
+  // di Drive SEBELUM membaca arsip — supaya UI yang ditampilkan sudah sesuai
+  // kondisi Drive yang sebenarnya, tidak menunggu trigger terjadwal.
+  // Tidak blocking fatal kalau gagal (mis. offline) — lanjut pakai data lama.
+  setHeroSync('syncing', 'Menyamakan data dengan Drive...');
+  try {
+    if (getGasUrl()) await gasCall('bersihkanSemuaArsip');
+  } catch (e) {
+    console.warn('bersihkanSemuaArsip gagal (lanjut tanpa sync):', e);
+  }
+
   Promise.all([
     fetchNomor(),
     fetchNomorBA(),
