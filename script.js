@@ -444,9 +444,9 @@ async function syncArsipToCloud(item) {
     showSync('Tersimpan ke cloud','ok');
   } catch { showSync('Gagal sync cloud','err'); }
 }
-async function hapusArsipCloud(id) {
+async function hapusArsipCloud(id, folderName) {
   if (!getGasUrl()) return;
-  try { await gasCall('hapusArsip', {id}); } catch {}
+  try { await gasCall('hapusArsip', {id, folderName}); } catch {}
 }
 
 // ════ NOMOR SURAT ═════════════════════════════════════════════
@@ -1073,11 +1073,13 @@ function renderArsip() {
 }
 
 function hapusArsip(id) {
-  if (!confirm('Hapus arsip ini dari lokal dan cloud?')) return;
-  arsipList = arsipList.filter(r => r.id !== id);
-  saveLocal(); delete uploadFiles[id]; hapusArsipCloud(id);
+  const r = arsipList.find(x => x.id === id);
+  if (!confirm('Hapus arsip ini? Folder & semua file di Drive untuk rapat ini juga akan dihapus (dipindah ke Trash Drive).')) return;
+  const folderName = r ? getFolderName(r) : null;
+  arsipList = arsipList.filter(x => x.id !== id);
+  saveLocal(); delete uploadFiles[id]; hapusArsipCloud(id, folderName);
   renderArsip(); renderCalInline(); refreshStats();
-  showToast('Arsip dihapus','info');
+  showToast('Arsip + folder Drive dihapus','info');
 }
 
 // ════ MODAL DETAIL ════════════════════════════════════════════
@@ -1384,10 +1386,20 @@ function handleDropSlot(ev, id, slotKey) {
   const f = ev.dataTransfer.files[0];
   if (f) addFileToSlot(id, f, slotKey);
 }
+
 function hapusFile(id, i) {
-  if (!confirm('Hapus file ini?')) return;
+  if (!confirm('Hapus file ini? Kalau file sudah tersimpan di Drive, file aslinya juga akan dihapus.')) return;
   if (!uploadFiles[id]) return;
+
+  const f = uploadFiles[id][i];
+  const adaDiDrive = f && f.status === 'done' && f.url;
+
   revokeBlobUrl(id, i); uploadFiles[id].splice(i, 1); renderFileList(id);
+
+  if (adaDiDrive && getGasUrl()) {
+    gasCall('hapusFileDrive', { url: f.url }).catch(() => {});
+  }
+
   const r = arsipList.find(x => x.id === id);
   if (r) {
     r.uploadedFiles = uploadFiles[id].filter(f => f.status==='done').map(f => ({name:f.name, size:f.size, status:f.status, url:f.url||null}));
