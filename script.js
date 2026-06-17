@@ -1502,10 +1502,9 @@ async function uploadSemuaFile(id, folderName) {
 
 // ════ SHARE & PRINT FILE ══════════════════════════════════════
 function shareSingleFile(url, name) {
-  const text = `File Rapat: ${name}\n${url}`;
-  if (navigator.share) navigator.share({title:name, text}).catch(()=>{});
-  else navigator.clipboard.writeText(text).then(() => showToast('✓ Link disalin!','success'))
-    .catch(() => prompt('Salin link:', text));
+  navigator.clipboard.writeText(url)
+    .then(() => showToast('🔗 Link disalin!', 'success'))
+    .catch(() => prompt('Salin link file:', url));
 }
 
 function printSingleFile(arsipId, fileIdx) {
