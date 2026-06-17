@@ -270,6 +270,48 @@ function sanitasiArsip(list) {
   }));
 }
 
+//===Taruh di bagian UPLOAD section, setelah function syncFileNamesFromDrive
+async function verifyAndCleanFiles(id) {
+  if (!getGasUrl()) return;
+  const files = uploadFiles[id] || [];
+  const doneUrls = files
+    .filter(f => f.status === 'done' && f.url)
+    .map(f => f.url);
+  if (!doneUrls.length) return;
+
+  try {
+    const res = await gasCall('checkFilesAlive', { urls: doneUrls });
+    if (!res.success) return;
+
+    let changed = false;
+    uploadFiles[id] = uploadFiles[id].filter(f => {
+      if (f.status === 'done' && f.url && res.results[f.url] === false) {
+        changed = true;
+        return false; // buang dari list
+      }
+      return true;
+    });
+
+    if (changed) {
+      showToast('⚠ Beberapa file sudah dihapus dari Drive, dihapus dari daftar.', 'info');
+      renderFileList(id);
+
+      // Sync ke cloud — update uploadedFiles tanpa file yang sudah trash
+      const r = arsipList.find(x => x.id === id);
+      if (r) {
+        r.uploadedFiles = uploadFiles[id]
+          .filter(f => f.status === 'done' && f.url)
+          .map(f => ({ name: f.name, size: f.size, status: f.status, url: f.url }));
+        saveLocal();
+        gasCall('updateArsipFiles', { id, uploadedFiles: r.uploadedFiles }).catch(() => {});
+      }
+      refreshStats();
+    }
+  } catch (e) {
+    console.warn('verifyAndCleanFiles gagal:', e);
+  }
+}
+
 // ════ STATS ═══════════════════════════════════════════════════
 function animCount(el, target) {
   let cur = 0;
@@ -1150,7 +1192,8 @@ function showArsipDetail(id) {
     </div>`;
   renderFileList(id);
   document.getElementById('modal-overlay').classList.add('open');
-  syncFileNamesFromDrive(id); // tambahan
+  syncFileNamesFromDrive(id);
+  verifyAndCleanFiles(id);
 }
 
 function toggleEditDetail(id) {
