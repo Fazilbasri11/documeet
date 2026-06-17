@@ -296,14 +296,20 @@ async function verifyAndCleanFiles(id) {
       showToast('⚠ Beberapa file sudah dihapus dari Drive, dihapus dari daftar.', 'info');
       renderFileList(id);
 
-      // Sync ke cloud — update uploadedFiles tanpa file yang sudah trash
       const r = arsipList.find(x => x.id === id);
       if (r) {
-        r.uploadedFiles = uploadFiles[id]
+        // ★ Update KEDUA tempat: memory lokal DAN Sheets
+        const cleanFiles = uploadFiles[id]
           .filter(f => f.status === 'done' && f.url)
           .map(f => ({ name: f.name, size: f.size, status: f.status, url: f.url }));
-        saveLocal();
-        gasCall('updateArsipFiles', { id, uploadedFiles: r.uploadedFiles }).catch(() => {});
+        
+        r.uploadedFiles = cleanFiles;   // ← update object di arsipList
+        saveLocal();                    // ← update localStorage
+        
+        // ← update Google Sheets agar tidak muncul lagi di session berikutnya
+        if (getGasUrl()) {
+          gasCall('updateArsipFiles', { id, uploadedFiles: cleanFiles }).catch(() => {});
+        }
       }
       refreshStats();
     }
@@ -960,9 +966,10 @@ if (getGasUrl()) {
       mkDraft(blobs[3], 'BeritaAcara.docx'),
     ];
 
+    // newItem.uploadedFiles harus tetap [] — draft hanya di uploadFiles[arsipId] (memory)
     const newItem = {id:arsipId, tanggal:tanggalVal, hari:hariStr, jam:jamVal, tempat, agenda,
       nomorSurat: data.nomorSurat, tglGeneret:tglGen,
-      peserta: pesertaHadir.map(p => p.nama), uploadedFiles:[]};
+      peserta: pesertaHadir.map(p => p.nama), uploadedFiles:[]};  // ← uploadedFiles SELALU []
     arsipList.unshift(newItem); saveLocal();
 
     settings.nomorLast = nextNo;
