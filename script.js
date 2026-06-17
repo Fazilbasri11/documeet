@@ -340,13 +340,19 @@ function refreshStats() {
   const dy = document.getElementById('dash-tahun'); if (dy) animCount(dy, ti);
   const da = document.getElementById('dash-avg');   if (da) animCount(da, avg);
   const totalDok = arsipList.reduce((acc, r) => {
-  const allFiles = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
-  const unique = new Map();
-  allFiles.forEach(f => { if (f?.name && f?.status === 'done') unique.set(f.name, f); });
-  return acc + [...unique.values()].filter(f =>
-    f.name.toLowerCase().endsWith('.pdf') || isImage(f.name)
-  ).length;
-}, 0);
+    const allFiles = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
+    // Dedup by URL (lebih akurat dari nama)
+    const uniqueUrls = new Map();
+    allFiles.forEach(f => {
+      if (f?.status === 'done' && f?.url && f?.name) {
+        const ext = f.name.toLowerCase();
+        if (ext.endsWith('.pdf') || isImage(f.name)) {
+          uniqueUrls.set(f.url, f);
+        }
+      }
+    });
+    return acc + uniqueUrls.size;
+  }, 0);
 const dd = document.getElementById('dash-dok'); if (dd) animCount(dd, totalDok);
   const dl = document.getElementById('dash-tahun-lbl'); if (dl) dl.textContent = 'Rapat ' + yr;
   const cl = document.getElementById('chart-tahun-lbl'); if (cl) cl.textContent = yr;
@@ -1939,6 +1945,8 @@ return !(hasUnd && hasAbs && hasRis && hasBa && hasFoto);
 
 function scrollToArsipBelum() {
   const yr    = today.getFullYear();
+  const lbl = document.getElementById('health-year-lbl');
+  if (lbl) lbl.textContent = yr;
   const belum = arsipList.find(r => {
     if (parseTanggal(r.tanggal).getFullYear() !== yr) return false;
     const allFiles  = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
