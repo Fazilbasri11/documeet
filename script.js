@@ -181,24 +181,37 @@ const gasPost = (payload) => gasCall(payload.action, payload);
 async function syncFileNamesFromDrive(id) {
   if (!getGasUrl()) return;
   try {
-    const res = await gasCall('refreshFileNames', {id});
-    if (res.success) {
-      const r = arsipList.find(x => x.id === id);
-      if (r) { r.uploadedFiles = res.uploadedFiles; saveLocal(); }
-      uploadFiles[id] = (uploadFiles[id]||[]).map(old => {
-        const updated = res.uploadedFiles.find(f => f.url === old.url);
-        return updated ? {...old, name: updated.name} : old;
-      });
-      // tambahkan file 'done' baru yang belum ada di uploadFiles
-      res.uploadedFiles.forEach(f => {
-        if (!uploadFiles[id].some(x => x.url === f.url)) {
-          uploadFiles[id].push({...f, file:null, type:f.type||'', _showPreview:false});
-        }
-      });
-      renderFileList(id);
+    const res = await gasCall('refreshFileNames', { id });
+    if (!res.success) return;
+
+    const r = arsipList.find(x => x.id === id);
+    if (r) { r.uploadedFiles = res.uploadedFiles; saveLocal(); }
+
+    uploadFiles[id] = (uploadFiles[id] || []).map(old => {
+      const updated = res.uploadedFiles.find(f => f.url === old.url);
+      return updated ? { ...old, name: updated.name } : old;
+    });
+
+    res.uploadedFiles.forEach(f => {
+      if (!uploadFiles[id].some(x => x.url === f.url)) {
+        uploadFiles[id].push({ ...f, file: null, type: f.type || '', _showPreview: false });
+      }
+    });
+
+    if (r) {
+      const deduped = [...new Map(
+        uploadFiles[id]
+          .filter(f => f.status === 'done' && f.url)
+          .map(f => [f.url, { name: f.name, size: f.size, status: f.status, url: f.url }])
+      ).values()];
+      gasCall('updateArsipFiles', { id, uploadedFiles: deduped }).catch(() => {});
     }
-  } catch {}
+
+    renderFileList(id);
+    refreshStats();
+  } catch (e) { console.warn('syncFileNamesFromDrive gagal:', e); }
 }
+
 // ════ SANITASI ARSIP ══════════════════════════════════════════
 function sanitasiField(val, type) {
   const s = String(val || '');
@@ -1344,36 +1357,64 @@ function hapusFile(id, i) {
 }
 
 async function uploadSemuaFile(id, folderName) {
-  if (!getGasUrl()) { showToast('URL Apps Script belum diisi!','error'); return; }
+  if (!getGasUrl()) { showToast('URL Apps Script belum diisi!', 'error'); return; }
   const allFiles = uploadFiles[id] || [];
-  allFiles.forEach(f => { if (f._isDraft && f._blob && f.status==='draft') { f.file=f._blob; f.status='pending'; } });
-  const pending = allFiles.filter(f => f.status==='pending' || f.status==='err');
-  if (!pending.length) { showToast('Tidak ada file yang perlu diupload.','info'); return; }
+  allFiles.forEach(f => { if (f._isDraft && f._blob && f.status === 'draft') { f.file = f._blob; f.status = 'pending'; } });
+  const pending = allFiles.filter(f => f.status === 'pending' || f.status === 'err');
+  if (!pending.length) { showToast('Tidak ada file yang perlu diupload.', 'info'); return; }
+
   const btn = document.getElementById(`upload-btn-${id}`);
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Mengupload...'; }
+
   let ok = 0, fail = 0;
+
   for (let i = 0; i < allFiles.length; i++) {
-    const f = allFiles[i]; if (f.status!=='pending' && f.status!=='err') continue;
-    if (!f.file) { allFiles[i].status='err'; fail++; renderFileList(id); continue; }
-    allFiles[i].status = 'uploading'; renderFileList(id);
+    const f = allFiles[i];
+    if (f.status !== 'pending' && f.status !== 'err') continue;
+    if (!f.file) { allFiles[i].status = 'err'; fail++; renderFileList(id); continue; }
+    allFiles[i].status = 'uploading';
+    renderFileList(id);
     try {
-      const res = await gasCall('uploadFile', {fileName:f.name, fileBase64:await toBase64(f.file), mimeType:f.file.type||'application/octet-stream', folderName});
-      if (!res.success) throw new Error(res.error||'Unknown');
-      allFiles[i].status='done'; allFiles[i].url=res.fileUrl; allFiles[i].type=allFiles[i].type||f.file?.type||'';
-      allFiles[i]._isDraft=false; ok++;
-    } catch { allFiles[i].status='err'; fail++; }
+      const res = await gasCall('uploadFile', {
+        fileName:   f.name,
+        fileBase64: await toBase64(f.file),
+        mimeType:   f.file.type || 'application/octet-stream',
+        folderName
+      });
+      if (!res.success) throw new Error(res.error || 'Unknown');
+      allFiles[i].status   = 'done';
+      allFiles[i].url      = res.fileUrl;
+      allFiles[i].type     = allFiles[i].type || f.file?.type || '';
+      allFiles[i]._isDraft = false;
+      ok++;
+    } catch { allFiles[i].status = 'err'; fail++; }
     renderFileList(id);
   }
-  if (btn) { btn.disabled=false; btn.textContent='☁ Upload ke Drive'; }
-  showToast(`Upload: ${ok} berhasil${fail?`, ${fail} gagal`:''}`, ok?'success':'error');
-  const r = arsipList.find(x => x.id===id);
+
+  if (btn) { btn.disabled = false; btn.textContent = '☁ Upload ke Drive'; }
+  showToast(`Upload: ${ok} berhasil${fail ? `, ${fail} gagal` : ''}`, ok ? 'success' : 'error');
+
+  const r = arsipList.find(x => x.id === id);
   if (r) {
-    r.uploadedFiles = allFiles.map(f => ({name:f.name, size:f.size, status:f.status, url:f.url||null}));
-    saveLocal(); if (getGasUrl()) gasCall('updateArsipFiles', {id, uploadedFiles:r.uploadedFiles}).catch(()=>{});
+    r.uploadedFiles = allFiles
+      .filter(f => f.status === 'done' && f.url)
+      .map(f => ({ name: f.name, size: f.size, status: f.status, url: f.url }));
+    saveLocal();
+    if (getGasUrl()) gasCall('updateArsipFiles', { id, uploadedFiles: r.uploadedFiles }).catch(() => {});
   }
+
+  // Update link folder di sheet Surat Keluar setelah upload berhasil
+  if (ok > 0 && r?.nomorSurat) {
+    const nomorUrut = parseInt(r.nomorSurat);
+    if (!isNaN(nomorUrut) && nomorUrut > 0) {
+      gasCall('updateLinkFolder', { nomorUrut, folderName }).catch(() => {});
+    }
+  }
+
   const shareBtn = document.getElementById('modal-share-btn');
-  if (shareBtn) shareBtn.style.display = allFiles.some(f=>f.status==='done'&&f.url) ? '' : 'none';
+  if (shareBtn) shareBtn.style.display = allFiles.some(f => f.status === 'done' && f.url) ? '' : 'none';
   renderArsip();
+  refreshStats();
 }
 
 // ════ SHARE & PRINT FILE ══════════════════════════════════════
