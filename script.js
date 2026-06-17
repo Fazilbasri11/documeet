@@ -1232,7 +1232,7 @@ function showArsipDetail(id) {
     </div>`;
   renderFileList(id);
   document.getElementById('modal-overlay').classList.add('open');
-  verifyAndCleanFiles(id).then(() => syncFileNamesFromDrive(id));
+  syncFileNamesFromDrive(id).then(() => verifyAndCleanFiles(id));
 }
 
 function toggleEditDetail(id) {
