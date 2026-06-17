@@ -891,7 +891,7 @@ if (getGasUrl()) {
     catch (e) { setPS('ps-fetch','err'); throw e; }
     setPS('ps-fetch','done'); setPS('ps-inject','done');
 
-    setPS('ps-zip','active'); tx.textContent = 'Mengunduh 3 dokumen...';
+    setPS('ps-zip','active'); tx.textContent = 'Mengunduh 4 dokumen...';
     const prefix = `Rapat_${tanggalVal.replace(/-/g,'')}`;
     dlBlob(blobs[0], `${prefix}_Undangan.docx`);
     await new Promise(r => setTimeout(r, 300));
@@ -959,7 +959,7 @@ localStorage.setItem('sirapat_nomorBA', String(nomorBALast));
     updateNomorPreview(); renderCalInline(); refreshStats();
     showToast('✓ 4 dokumen berhasil diunduh (Undangan, Daftar hadir, Risalah, BA)!','success');
   } catch (err) { console.error(err); showToast('❌ ' + err.message,'error'); }
-  finally { btn.disabled = false; sp.style.display = 'none'; tx.textContent = 'Generate 3 Dokumen'; }
+  finally { btn.disabled = false; sp.style.display = 'none'; tx.textContent = 'Generate 4 Dokumen'; }
 }
 
 function simpanKeAwan() {
