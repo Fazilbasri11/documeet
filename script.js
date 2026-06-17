@@ -178,40 +178,6 @@ async function gasCall(action, payload = null) {
 const gasGet  = (action)  => gasCall(action);
 const gasPost = (payload) => gasCall(payload.action, payload);
 
-//SYNC NAME DRIVE
-async function syncFileNamesFromDrive(id) {
-  if (!getGasUrl()) return;
-  try {
-    const res = await gasCall('refreshFileNames', { id });
-    if (!res.success) return;
-
-    const r = arsipList.find(x => x.id === id);
-    if (r) { r.uploadedFiles = res.uploadedFiles; saveLocal(); }
-
-    uploadFiles[id] = (uploadFiles[id] || []).map(old => {
-      const updated = res.uploadedFiles.find(f => f.url === old.url);
-      return updated ? { ...old, name: updated.name } : old;
-    });
-
-    res.uploadedFiles.forEach(f => {
-      if (!uploadFiles[id].some(x => x.url === f.url)) {
-        uploadFiles[id].push({ ...f, file: null, type: f.type || '', _showPreview: false });
-      }
-    });
-
-    if (r) {
-      const deduped = [...new Map(
-        uploadFiles[id]
-          .filter(f => f.status === 'done' && f.url)
-          .map(f => [f.url, { name: f.name, size: f.size, status: f.status, url: f.url }])
-      ).values()];
-      gasCall('updateArsipFiles', { id, uploadedFiles: deduped }).catch(() => {});
-    }
-
-    renderFileList(id);
-    refreshStats();
-  } catch (e) { console.warn('syncFileNamesFromDrive gagal:', e); }
-}
 
 // ════ SANITASI ARSIP ══════════════════════════════════════════
 function sanitasiField(val, type) {
@@ -270,54 +236,38 @@ function sanitasiArsip(list) {
   }));
 }
 
-//===Taruh di bagian UPLOAD section, setelah function syncFileNamesFromDrive
-async function verifyAndCleanFiles(id) {
+
+// ════ SCAN FOLDER DRIVE — sinkron total dgn isi folder Drive ══
+async function scanArsipDrive(id) {
   if (!getGasUrl()) return;
-  const files = uploadFiles[id] || [];
-  const doneUrls = files
-    .filter(f => f.status === 'done' && f.url)
-    .map(f => f.url);
-  if (!doneUrls.length) return;
+  const r = arsipList.find(x => x.id === id);
+  if (!r) return;
+  const folderName = getFolderName(r);
 
   try {
-    const res = await gasCall('checkFilesAlive', { urls: doneUrls });
+    const res = await gasCall('scanFolderArsip', { id, folderName });
     if (!res.success) return;
 
-    let changed = false;
-    uploadFiles[id] = uploadFiles[id].filter(f => {
-      if (f.status === 'done' && f.url && res.results[f.url] === false) {
-        changed = true;
-        return false; // buang dari list
-      }
-      return true;
-    });
+    r.uploadedFiles = res.uploadedFiles;
+    saveLocal();
 
-    if (changed) {
-      showToast('⚠ Beberapa file sudah dihapus dari Drive, dihapus dari daftar.', 'info');
-      renderFileList(id);
+    // pertahankan file draft/pending/uploading/err yg masih di memory,
+    // timpa bagian "done" dengan hasil scan Drive yang sebenarnya
+    const sisaLokal = (uploadFiles[id] || []).filter(f =>
+      f._isDraft || f.status === 'pending' || f.status === 'uploading' || f.status === 'err'
+    );
+    uploadFiles[id] = [
+      ...sisaLokal,
+      ...res.uploadedFiles.map(f => ({ ...f, file: null, type: f.type || '', _showPreview: false }))
+    ];
 
-      const r = arsipList.find(x => x.id === id);
-      if (r) {
-        // ★ Update KEDUA tempat: memory lokal DAN Sheets
-        const cleanFiles = uploadFiles[id]
-          .filter(f => f.status === 'done' && f.url)
-          .map(f => ({ name: f.name, size: f.size, status: f.status, url: f.url }));
-        
-        r.uploadedFiles = cleanFiles;   // ← update object di arsipList
-        saveLocal();                    // ← update localStorage
-        
-        // ← update Google Sheets agar tidak muncul lagi di session berikutnya
-        if (getGasUrl()) {
-          gasCall('updateArsipFiles', { id, uploadedFiles: cleanFiles }).catch(() => {});
-        }
-      }
-      refreshStats();
-    }
+    renderFileList(id);
+    renderArsip();
+    refreshStats();
   } catch (e) {
-    console.warn('verifyAndCleanFiles gagal:', e);
+    console.warn('scanArsipDrive gagal:', e);
   }
 }
-
 // ════ STATS ═══════════════════════════════════════════════════
 function animCount(el, target) {
   let cur = 0;
@@ -1214,7 +1164,9 @@ function showArsipDetail(id) {
   </div>
     ${renderDraftSection(id)}
     <div class="upload-section">
-      <div class="upload-section-title">☁ Upload Dokumen ke Drive <span class="folder-tag">📁 ${folderName}</span></div>
+      <div class="upload-section-title">☁ Upload Dokumen ke Drive <span class="folder-tag">📁 ${folderName}</span>
+  <button class="btn-sm" style="margin-left:auto" onclick="scanArsipDrive(${id})">🔄 Scan Drive</button>
+</div>
       ${!getGasUrl()?'<div class="no-gas-warning">⚠ URL Apps Script belum diisi di Pengaturan.</div>':''}
       <div class="upload-slots" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
   ${SLOT_DEFS.map(s => `
@@ -1238,7 +1190,7 @@ function showArsipDetail(id) {
     </div>`;
   renderFileList(id);
   document.getElementById('modal-overlay').classList.add('open');
-  syncFileNamesFromDrive(id).then(() => verifyAndCleanFiles(id));
+  scanArsipDrive(id);
 }
 
 function toggleEditDetail(id) {
