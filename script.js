@@ -490,12 +490,33 @@ async function hapusArsipCloud(id) {
 // ════ NOMOR SURAT ═════════════════════════════════════════════
 // ★ fetchNomor TIDAK memanggil refreshStats — diserahkan ke mulaiAutoSync
 async function fetchNomorBA() {
-  if (!getGasUrl()) return;
+  const dot = document.getElementById('nomor-ba-dot');
+  const inp = document.getElementById('inp-nomor-ba-manual');
+  if (!getGasUrl()) {
+    if (dot) dot.className = 'nomor-dot err';
+    if (inp && !inp.dataset.userEdited) inp.placeholder = '— isi URL Apps Script di Pengaturan';
+    return;
+  }
+  if (dot) dot.className = 'nomor-dot loading';
+  if (inp && !inp.dataset.userEdited) { inp.value = ''; inp.placeholder = 'Membaca dari Sheets...'; }
   try {
     const data = await gasCall('getLastNomorBA');
     nomorBALast = data.lastNomorBA;
     localStorage.setItem('sirapat_nomorBA', String(nomorBALast));
-  } catch (e) { console.error('Gagal fetch nomor BA:', e); }
+    if (dot) dot.className = 'nomor-dot ok';
+    if (inp && !inp.dataset.userEdited) {
+      const tgl = document.getElementById('inp-tanggal')?.value;
+      const d   = tgl ? parseTanggal(tgl) : new Date();
+      inp.value = buildNomorBA(nomorBALast + 1, d);
+      inp.placeholder = 'Nomor BA...';
+    }
+  } catch (e) {
+    if (dot) dot.className = 'nomor-dot err';
+    if (inp && !inp.dataset.userEdited) {
+      inp.value = buildNomorBA(nomorBALast + 1, new Date());
+      inp.placeholder = '❌ Gagal — pakai nomor lokal';
+    }
+  }
 }
 
 async function fetchNomor() {
@@ -520,12 +541,16 @@ async function fetchNomor() {
 }
 
 function updateNomorPreview() {
-  const tgl  = document.getElementById('inp-tanggal').value;
-  const d    = tgl ? parseTanggal(tgl) : new Date();
-  const auto = buildNomor(settings.nomorLast + 1, d);
-  const inp  = document.getElementById('inp-nomor-manual');
-  if (!inp) return;
-  if (!inp.dataset.userEdited) inp.value = auto;
+  const tgl = document.getElementById('inp-tanggal').value;
+  const d   = tgl ? parseTanggal(tgl) : new Date();
+
+  // Nomor Surat
+  const inp = document.getElementById('inp-nomor-manual');
+  if (inp && !inp.dataset.userEdited) inp.value = buildNomor(settings.nomorLast + 1, d);
+
+  // ★ Nomor BA
+  const inpBA = document.getElementById('inp-nomor-ba-manual');
+  if (inpBA && !inpBA.dataset.userEdited) inpBA.value = buildNomorBA(nomorBALast + 1, d);
 }
 
 // ════ TEMPLATE ════════════════════════════════════════════════
@@ -897,6 +922,8 @@ if (getGasUrl()) {
 
   const inpManual = document.getElementById('inp-nomor-manual');
   const nomorManual = inpManual ? inpManual.value.trim() : '';
+  const inpBAManual  = document.getElementById('inp-nomor-ba-manual');
+  const nomorBAManual = inpBAManual ? inpBAManual.value.trim() : '';
   const data = {
     nomorSurat: nomorManual || buildNomor(nextNo, tgl), hari: hariStr, tanggal: tglStr,
     tanggalHari: `${hariStr}, ${tglStr}`, jam: jamFmt, jamPolos: jamVal, tempat, agenda,
@@ -905,7 +932,7 @@ if (getGasUrl()) {
     bulan: BULAN_ID[tgl.getMonth()], instansi: settings.instansi,
     jumlahPeserta: String(pesertaHadir.length), tgl_generet: tglGen,
     yth: getCheckedYth(),
-    nomorBA:        buildNomorBA(nextNoBA, tgl),   // ← tambah
+    nomorBA: nomorBAManual || buildNomorBA(nextNoBA, tgl),
   tglAngka:       String(tgl.getDate()),
   tahunTerbilang: tahunTerbilang(tgl.getFullYear()),
     peserta: pesertaHadir.map((p, i) => ({
