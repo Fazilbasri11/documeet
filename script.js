@@ -238,11 +238,17 @@ function sanitasiArsip(list) {
 
 
 // ════ SCAN FOLDER DRIVE — sinkron total dgn isi folder Drive ══
-async function scanArsipDrive(id) {
+async function scanArsipDrive(id, btnEl) {
   if (!getGasUrl()) return;
   const r = arsipList.find(x => x.id === id);
   if (!r) return;
   const folderName = getFolderName(r);
+
+  const teksAsli = btnEl ? btnEl.innerHTML : '';
+  if (btnEl) {
+    btnEl.disabled = true;
+    btnEl.innerHTML = '<span class="cloud-spin" style="display:inline-block;vertical-align:-2px;margin-right:4px"></span>Memindai...';
+  }
 
   try {
     const res = await gasCall('scanFolderArsip', { id, folderName });
@@ -251,8 +257,6 @@ async function scanArsipDrive(id) {
     r.uploadedFiles = res.uploadedFiles;
     saveLocal();
 
-    // pertahankan file draft/pending/uploading/err yg masih di memory,
-    // timpa bagian "done" dengan hasil scan Drive yang sebenarnya
     const sisaLokal = (uploadFiles[id] || []).filter(f =>
       f._isDraft || f.status === 'pending' || f.status === 'uploading' || f.status === 'err'
     );
@@ -264,8 +268,12 @@ async function scanArsipDrive(id) {
     renderFileList(id);
     renderArsip();
     refreshStats();
+    if (btnEl) showToast(`✓ Scan selesai — ${res.uploadedFiles.length} file ditemukan`, 'success');
   } catch (e) {
     console.warn('scanArsipDrive gagal:', e);
+    if (btnEl) showToast('Gagal memindai Drive', 'error');
+  } finally {
+    if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = teksAsli; }
   }
 }
 // ════ STATS ═══════════════════════════════════════════════════
@@ -866,6 +874,15 @@ async function generateDokumen() {
   document.getElementById('btn-awan').classList.remove('visible');
   lastGenId = lastGenBlobs = lastGenPrefix = null;
 
+  // ★ Nyalakan feedback visual SEGERA saat diklik, sebelum nunggu apa pun
+  // const btn = document.getElementById('btn-gen');
+  // const sp  = document.getElementById('spinner');
+  // const tx  = document.getElementById('btn-gen-text');
+  // btn.disabled = true; sp.style.display = 'block';
+  // document.getElementById('progress-bar').style.display = 'flex';
+  // ['ps-fetch','ps-inject','ps-zip','ps-done'].forEach(id => setPS(id,''));
+  setPS('ps-fetch','active'); tx.textContent = 'Menyiapkan nomor surat...';
+
   const tgl     = parseTanggal(tanggalVal);
   const hariStr = HARI_ID[tgl.getDay()];
   const tglStr  = tglFull(tgl);
@@ -874,13 +891,12 @@ async function generateDokumen() {
 
   let nextNo = settings.nomorLast + 1;
   let nextNoBA = nomorBALast + 1;
-if (getGasUrl()) {
-  try {
-    const dBA = await gasCall('getLastNomorBA');
-    nextNoBA = dBA.nextNomorBA;
-  } catch {}
-}
-  if (getGasUrl()) { try { const d = await gasCall('getLastNomor'); nextNo = d.nextNomor; } catch {} }
+  if (getGasUrl()) {
+    try { const dBA = await gasCall('getLastNomorBA'); nextNoBA = dBA.nextNomorBA; } catch {}
+  }
+  if (getGasUrl()) {
+    try { const d = await gasCall('getLastNomor'); nextNo = d.nextNomor; } catch {}
+  }
 
   const inpManual = document.getElementById('inp-nomor-manual');
   const nomorManual = inpManual ? inpManual.value.trim() : '';
