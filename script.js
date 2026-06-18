@@ -1183,7 +1183,7 @@ function showArsipDetail(id) {
     ${renderDraftSection(id)}
     <div class="upload-section">
       <div class="upload-section-title">☁ Upload Dokumen ke Drive <span class="folder-tag">📁 ${folderName}</span>
-  <button class="btn-sm" style="margin-left:auto" onclick="scanArsipDrive(${id})">🔄 Scan Drive</button>
+      <button class="btn-sm" style="margin-left:auto" onclick="scanArsipDrive(${id}, this)">🔄 Scan Drive</button>
 </div>
       ${!getGasUrl()?'<div class="no-gas-warning">⚠ URL Apps Script belum diisi di Pengaturan.</div>':''}
       <div class="upload-slots" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
