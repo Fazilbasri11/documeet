@@ -873,16 +873,7 @@ async function generateDokumen() {
 
   document.getElementById('btn-awan').classList.remove('visible');
   lastGenId = lastGenBlobs = lastGenPrefix = null;
-
-  // ★ Nyalakan feedback visual SEGERA saat diklik, sebelum nunggu apa pun
-  // const btn = document.getElementById('btn-gen');
-  // const sp  = document.getElementById('spinner');
-  // const tx  = document.getElementById('btn-gen-text');
-  // btn.disabled = true; sp.style.display = 'block';
-  // document.getElementById('progress-bar').style.display = 'flex';
-  // ['ps-fetch','ps-inject','ps-zip','ps-done'].forEach(id => setPS(id,''));
-  setPS('ps-fetch','active'); tx.textContent = 'Menyiapkan nomor surat...';
-
+  
   const tgl     = parseTanggal(tanggalVal);
   const hariStr = HARI_ID[tgl.getDay()];
   const tglStr  = tglFull(tgl);
