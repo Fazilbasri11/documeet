@@ -16,6 +16,8 @@ const DEFAULT_PESERTA = [
 ];
 
 
+let currentRole = null; // 'admin' | 'user'
+function isAdmin() { return currentRole === 'admin'; }
 
 let pesertaList  = JSON.parse(localStorage.getItem('sirapat_peserta') || 'null') || DEFAULT_PESERTA.map(p => ({...p}));
 const DEFAULT_YTH = [
@@ -846,6 +848,7 @@ async function fetchAndInject(url, data, cacheKey) {
 function setPS(id, state) { const el = document.getElementById(id); if (el) el.className = 'prog-step' + (state ? ' '+state : ''); }
 
 async function generateDokumen() {
+  if (!isAdmin()) { showToast('⛔ Hanya Admin yang bisa generate dokumen.', 'error'); return; }
   const tanggalVal = document.getElementById('inp-tanggal').value;
   const jamVal     = document.getElementById('inp-jam').value;
   const tempat     = document.getElementById('inp-tempat').value.trim();
@@ -1073,13 +1076,15 @@ function renderArsip() {
         </div>
       </div>
       <div class="arsip-actions" onclick="event.stopPropagation()">
-        <button class="btn-sm" onclick="hapusArsip(${r.id})">Hapus</button>
+        ${isAdmin() ? `<button class="btn-sm" onclick="hapusArsip(${r.id})">Hapus</button>` : ''}
       </div>
     </div>`;
   }).join('');
+  if (!isAdmin()) applyRoleUI();
 }
 
 function hapusArsip(id) {
+  if (!isAdmin()) { showToast('⛔ Hanya Admin yang bisa menghapus arsip.', 'error'); return; }
   const r = arsipList.find(x => x.id === id);
   if (!confirm('Hapus arsip ini? Folder & semua file di Drive untuk rapat ini juga akan dihapus (dipindah ke Trash Drive).')) return;
   const folderName = r ? getFolderName(r) : null;
@@ -1142,7 +1147,7 @@ function showArsipDetail(id) {
   document.getElementById('modal-title').textContent = 'Detail Rapat';
   document.getElementById('modal-body').innerHTML = `
     <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-    <button class="btn-sm" id="btn-edit-detail" onclick="toggleEditDetail(${r.id})">✏ Edit</button>
+   ${isAdmin() ? `<button class="btn-sm" id="btn-edit-detail" onclick="toggleEditDetail(${r.id})">✏ Edit</button>` : ''}
   </div>
   <div id="detail-view-${r.id}">
     <div class="detail-row"><div class="detail-label">Tanggal</div><div class="detail-val">${r.hari}, ${tglFull(d)}</div></div>
@@ -1194,7 +1199,7 @@ function showArsipDetail(id) {
 </div>
       <div class="uploaded-files" id="file-list-${id}"></div>
       <div class="upload-actions" id="upload-actions-${id}" style="display:none">
-        <button class="btn-upload-all" id="upload-btn-${id}" onclick="uploadSemuaFile(${id},'${folderName}')">☁ Upload ke Drive</button>
+       ${isAdmin() ? `<button class="btn-upload-all" id="upload-btn-${id}" onclick="uploadSemuaFile(${id},'${folderName}')">☁ Upload ke Drive</button>` : '<span style="font-size:11px;color:var(--text-muted)">👁 Mode lihat saja</span>'}
       </div>
     </div>`;
   renderFileList(id);
@@ -1213,6 +1218,7 @@ function toggleEditDetail(id) {
 }
 
 function simpanEditDetail(id) {
+  if (!isAdmin()) { showToast('⛔ Akses ditolak.', 'error'); return; }
   const r = arsipList.find(x => x.id === id); if (!r) return;
   const tgl    = document.getElementById(`edit-tgl-${id}`).value;
   const jam    = document.getElementById(`edit-jam-${id}`).value;
@@ -1395,6 +1401,7 @@ function handleDropSlot(ev, id, slotKey) {
 }
 
 function hapusFile(id, i) {
+  if (!isAdmin()) { showToast('⛔ Akses ditolak.', 'error'); return; }
   if (!confirm('Hapus file ini? Kalau file sudah tersimpan di Drive, file aslinya juga akan dihapus.')) return;
   if (!uploadFiles[id]) return;
 
@@ -1417,6 +1424,7 @@ function hapusFile(id, i) {
 }
 
 async function uploadSemuaFile(id, folderName) {
+  if (!isAdmin()) { showToast('⛔ Hanya Admin yang bisa upload file.', 'error'); return; }
   if (!getGasUrl()) { showToast('URL Apps Script belum diisi!', 'error'); return; }
   const allFiles = uploadFiles[id] || [];
   allFiles.forEach(f => { if (f._isDraft && f._blob && f.status === 'draft') { f.file = f._blob; f.status = 'pending'; } });
@@ -1552,6 +1560,7 @@ function hapusPesertaRow(i) {
   showToast('Peserta dihapus','info');
 }
 function simpanPeserta() {
+  if (!isAdmin()) { showToast('⛔ Akses ditolak.', 'error'); return; }
   pesertaList = pesertaList.map((_,i) => ({
     nama:    document.getElementById('pm-nama-'+i)?.value||'',
     jabatan: document.getElementById('pm-jab-'+i)?.value||''
@@ -1586,6 +1595,7 @@ function hapusYthRow(i) {
   ythList.splice(i, 1); renderYthManage();
 }
 function simpanYth() {
+  if (!isAdmin()) { showToast('⛔ Akses ditolak.', 'error'); return; }
   ythList = ythList.map((_,i) => document.getElementById('yth-item-'+i)?.value.trim() || '').filter(Boolean);
   localStorage.setItem('sirapat_yth', JSON.stringify(ythList));
   showToast('Daftar Yth. disimpan!','success');
@@ -1612,6 +1622,7 @@ function loadPengaturan() {
   if (settings.tplMode === 'manual') document.querySelectorAll('.tpl-mode-tab')[1]?.click();
 }
 function simpanPengaturan() {
+  if (!isAdmin()) { showToast('⛔ Akses ditolak.', 'error'); return; }
   ['instansi','kota','ketua','sekretaris'].forEach(k => { const el=document.getElementById('set-'+k); if(el) settings[k]=el.value; });
   const nf=document.getElementById('set-nomor-fmt');  if(nf) settings.nomorFmt=nf.value;
   const nl=document.getElementById('set-nomor-last'); if(nl) settings.nomorLast=parseInt(nl.value)||0;
@@ -1651,8 +1662,13 @@ function showToast(msg, type='info') {
 
 // ════ LOGIN & AUTO SYNC ═══════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
-  if (sessionStorage.getItem('documeet_auth') === 'true') {
-    const screen = document.getElementById('login-screen'); if (screen) screen.style.display='none';
+  const auth = sessionStorage.getItem('documeet_auth');
+  const role = sessionStorage.getItem('documeet_role');
+  if (auth === 'true' && role) {
+    currentRole = role;
+    const screen = document.getElementById('login-screen');
+    if (screen) screen.style.display = 'none';
+    applyRoleUI();
     mulaiAutoSync();
   }
 });
@@ -1662,22 +1678,55 @@ async function loginAdmin() {
   const err = document.getElementById('login-error');
   const btn = document.getElementById('btn-login');
   if (!inp) return;
-  btn.textContent='Memeriksa PIN...'; btn.disabled=true;
+  btn.textContent = 'Memeriksa PIN...'; btn.disabled = true;
   try {
     const data = await gasCall('getPin');
     if (inp === String(data.pin)) {
-      sessionStorage.setItem('documeet_auth','true');
-      document.getElementById('login-screen').style.display='none';
-      showToast('✓ Berhasil masuk','success');
-      mulaiAutoSync();
+      currentRole = 'admin';
+      sessionStorage.setItem('documeet_auth', 'true');
+      sessionStorage.setItem('documeet_role', 'admin');
+    } else if (inp === String(data.pinUser)) {
+      currentRole = 'user';
+      sessionStorage.setItem('documeet_auth', 'true');
+      sessionStorage.setItem('documeet_role', 'user');
     } else {
       tampilError('❌ PIN salah! Silakan coba lagi.');
+      return;
     }
+    document.getElementById('login-screen').style.display = 'none';
+    applyRoleUI();
+    showToast(isAdmin() ? '✓ Masuk sebagai Admin' : '✓ Masuk sebagai Pengguna', 'success');
+    mulaiAutoSync();
   } catch { tampilError('❌ Gagal terhubung ke Google Sheets.'); }
   function tampilError(p) {
-    err.textContent=p; err.style.display='block';
-    setTimeout(()=>{ err.style.display='none'; },3500);
-    btn.textContent='Masuk Kelola Arsip'; btn.disabled=false;
+    err.textContent = p; err.style.display = 'block';
+    setTimeout(() => { err.style.display = 'none'; }, 3500);
+    btn.textContent = 'Masuk'; btn.disabled = false;
+  }
+}
+
+function applyRoleUI() {
+  const admin = isAdmin();
+
+  // Nav: sembunyikan menu khusus admin
+  ['generate','peserta','pengaturan'].forEach(id => {
+    document.querySelectorAll(`.nav-btn[onclick*="'${id}'"]`).forEach(el => {
+      el.style.display = admin ? '' : 'none';
+    });
+  });
+
+  // Tombol Keluar
+  document.querySelectorAll(`.nav-btn[onclick*="logoutAdmin"]`).forEach(el => {
+    el.style.display = admin ? '' : 'flex';
+  });
+
+  // Badge role di hero
+  const badge = document.getElementById('hero-sync-badge-role');
+  if (badge) badge.textContent = admin ? '👑 Admin' : '👁 Pengguna';
+
+  // Sembunyikan tombol hapus arsip untuk user
+  if (!admin) {
+    document.querySelectorAll('.arsip-actions').forEach(el => el.style.display = 'none');
   }
 }
 
