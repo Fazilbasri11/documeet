@@ -137,6 +137,22 @@ function fmtSize(b) {
   if (b < 1048576) return (b / 1024).toFixed(1) + 'KB';
   return (b / 1048576).toFixed(1) + 'MB';
 }
+
+function shortFileName(name) {
+  const map = {
+    'undangan':    'Undangan',
+    'beritaacara': 'Berita Acara',
+    'absenhadir':  'Daftar Hadir',
+    'risalah':     'Risalah',
+  };
+  const base = name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z]/g, '');
+  for (const [k, v] of Object.entries(map)) {
+    if (base.includes(k)) return v;
+  }
+  // fallback: potong 22 karakter
+  return name.length > 22 ? name.substring(0, 20) + '…' : name;
+}
+
 function statusLbl(s) {
   return {pending:'Menunggu', uploading:'Uploading...', done:'Tersimpan', draft:'Draft', err:'Gagal'}[s] || s;
 }
@@ -1306,9 +1322,9 @@ function renderFileList(id) {
     return `<div class="uploaded-file-item" id="fitem-${id}-${realIdx}" style="flex-direction:column;align-items:stretch">
       <div style="display:flex;align-items:center;gap:9px">
         <div class="file-icon">${getFileIcon(f.name)}</div>
-        <div class="file-name">${f.name}</div>
-        <div class="file-size">${fmtSize(f.size)}</div>
-        <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;margin-left:auto">
+       <div class="file-name" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px" title="${f.name}">${shortFileName(f.name)}</div>
+<div class="file-size">${fmtSize(f.size)}</div>
+<div style="display:flex;align-items:center;gap:3px;flex-shrink:0;margin-left:auto">
           ${btns}
           ${f.status!=='uploading' ? `<button onclick="hapusFile(${id},${realIdx})" title="Hapus" style="background:none;border:none;cursor:pointer;font-size:12px;padding:2px 5px;border-radius:3px;color:var(--text-muted)">✕</button>` : ''}
         </div>
@@ -1732,7 +1748,7 @@ function applyRoleUI() {
 
 //logout
 function logoutAdmin() {
-  if (!confirm('Keluar dari sesi admin?')) return;
+  if (!confirm('Keluar dari sesi?')) return;
   sessionStorage.removeItem('documeet_auth');
   location.reload();
 }
