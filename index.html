@@ -675,6 +675,29 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
   .toast { right: .75rem; left: .75rem; max-width: none; font-size: 12px; }
   .sync-indicator { left: .75rem; bottom: .75rem; font-size: 10px; padding: 6px 10px; }
 
+  /*peserta name  */
+   .peserta-row {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .peserta-row .drag-handle { order: 0; }
+  .peserta-row .peserta-num { order: 1; }
+  .peserta-row input[id^="pm-nama"] {
+    order: 2;
+    flex: 1 1 calc(100% - 80px);
+    min-width: 0;
+  }
+  .peserta-row input[id^="pm-jab"] {
+    order: 3;
+    flex: 1 1 calc(100% - 40px);
+    min-width: 0;
+    margin-left: 44px; /* indent sejajar nama */
+  }
+  .peserta-row .btn-icon {
+    order: 4;
+    align-self: flex-end;
+  }
+  
   /* Up Next di mobile: tampilkan maks 2 item */
   .upnext-item:nth-child(n+3) { display: none; }
 }
@@ -775,6 +798,18 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
   .prog-step { font-size: 10px; padding: 4px 8px; }
   .prog-arrow { font-size: 10px; }
 
+  /*box file arsip  */
+.uploaded-file-item > div:first-child {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .file-name {
+    width: 100%;
+    max-width: none;
+    flex: 1 1 100%;
+  }
+  .file-size { flex-shrink: 0; }
+  
   /* Up Next mobile: 1 item saja */
   .upnext-item:nth-child(n+2) { display: none; }
 
