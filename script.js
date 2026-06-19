@@ -49,10 +49,11 @@ const AUTO_PATHS = {
 };
 
 const SLOT_DEFS = [
-  { key: 'undangan', label: '📨 Undangan', match: /undangan/i },
-  { key: 'ba', label: '📋 Berita Acara', match: /berita|^ba_|_ba/i },
-  { key: 'absen', label: '✅ Daftar Hadir', match: /absen|hadir/i },
-  { key: 'risalah', label: '📝 Risalah', match: /risalah/i },
+  {key:'undangan', label:'📨 Undangan', match:/undangan/i},
+  {key:'ba',       label:'📋 Berita Acara', match:/berita|^ba_|_ba/i},
+  {key:'absen',    label:'✅ Daftar Hadir', match:/absen|hadir/i},
+  {key:'risalah',  label:'📝 Risalah', match:/risalah/i},
+  {key:'foto',     label:'📸 Foto Dokumentasi', match:/foto|dokumentasi|whatsapp/i, multi:true},
 ];
 
 const BULAN_ID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -1201,7 +1202,7 @@ function showArsipDetail(id) {
       ${!getGasUrl() ? '<div class="no-gas-warning">⚠ URL Apps Script belum diisi di Pengaturan.</div>' : ''}
       <div class="upload-slots" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
   ${SLOT_DEFS.map(s => `
-    <div class="upload-zone" style="padding:1rem .75rem"
+    <div class="upload-zone${s.key==='foto'?' upload-zone-foto':''}" style="padding:1rem .75rem${s.key==='foto'?';grid-column:1/-1':''}"
          id="dropzone-${id}-${s.key}"
          ondrop="handleDropSlot(event,${id},'${s.key}')"
          ondragover="event.preventDefault();this.classList.add('dragover')"
@@ -1209,8 +1210,9 @@ function showArsipDetail(id) {
          onclick="document.getElementById('fi-${id}-${s.key}').click()">
       <div class="upload-zone-icon" style="font-size:1.25rem">${s.label.split(' ')[0]}</div>
       <div class="upload-zone-text"><strong>${s.label.split(' ').slice(1).join(' ')}</strong><br>
-        <span style="font-size:10px">klik / drop file</span></div>
-      <input type="file" id="fi-${id}-${s.key}" accept=".docx,.doc,.pdf,.zip,.jpg,.jpeg,.png,.webp,.gif"
+        <span style="font-size:10px">${s.multi ? 'klik / drop beberapa foto sekaligus' : 'klik / drop file'}</span></div>
+      <input type="file" id="fi-${id}-${s.key}" accept="${s.key==='foto'?'.jpg,.jpeg,.png,.webp,.gif':'.docx,.doc,.pdf,.zip,.jpg,.jpeg,.png,.webp,.gif'}"
+             ${s.multi ? 'multiple' : ''}
              onchange="handleFileInputSlot(event,${id},'${s.key}')">
     </div>`).join('')}
 </div>
@@ -1376,7 +1378,8 @@ function addFiles(id, files) {
   renderFileList(id);
 }
 function renameForSlot(file, slotKey, originalName) {
-  const SLOT_PREFIX = { undangan: 'Undangan', ba: 'BeritaAcara', absen: 'AbsenHadir', risalah: 'Risalah' };
+  if (slotKey === 'foto') return originalName; // foto: nama asli dipertahankan
+  const SLOT_PREFIX = {undangan:'Undangan', ba:'BeritaAcara', absen:'AbsenHadir', risalah:'Risalah'};
   const ext = (originalName.split('.').pop() || '').toLowerCase();
   return `${SLOT_PREFIX[slotKey]}.${ext}`;
 }
@@ -1388,8 +1391,11 @@ function addFileToSlot(id, file, slotKey) {
   const renamedName = renameForSlot(file, slotKey, file.name);
   const blobUrl = file.type.startsWith('image/') ? URL.createObjectURL(file) : null;
 
-  // Hapus file lama di slot yang sama (jika belum diupload)
-  uploadFiles[id] = uploadFiles[id].filter(f => !(f._slot === slotKey && f.status !== 'done'));
+  // Slot foto: boleh banyak file. Slot lain: hapus file lama yang belum terupload
+  const slot = SLOT_DEFS.find(s => s.key === slotKey);
+  if (!slot?.multi) {
+    uploadFiles[id] = uploadFiles[id].filter(f => !(f._slot === slotKey && f.status !== 'done'));
+  }
 
   const entry = {
     file, name: renamedName, size: file.size, status: 'pending',
@@ -1406,15 +1412,26 @@ function addFileToSlot(id, file, slotKey) {
 }
 
 function handleFileInputSlot(ev, id, slotKey) {
-  const f = ev.target.files[0];
-  if (f) addFileToSlot(id, f, slotKey);
+  const slot = SLOT_DEFS.find(s => s.key === slotKey);
+  if (slot?.multi) {
+    Array.from(ev.target.files).forEach(f => addFileToSlot(id, f, slotKey));
+  } else {
+    const f = ev.target.files[0];
+    if (f) addFileToSlot(id, f, slotKey);
+  }
   ev.target.value = '';
 }
+
 function handleDropSlot(ev, id, slotKey) {
   ev.preventDefault();
   document.getElementById(`dropzone-${id}-${slotKey}`)?.classList.remove('dragover');
-  const f = ev.dataTransfer.files[0];
-  if (f) addFileToSlot(id, f, slotKey);
+  const slot = SLOT_DEFS.find(s => s.key === slotKey);
+  if (slot?.multi) {
+    Array.from(ev.dataTransfer.files).forEach(f => addFileToSlot(id, f, slotKey));
+  } else {
+    const f = ev.dataTransfer.files[0];
+    if (f) addFileToSlot(id, f, slotKey);
+  }
 }
 
 function hapusFile(id, i) {
