@@ -310,6 +310,8 @@ function refreshStats() {
 
   const ht = document.getElementById('hs-total');  if (ht) animCount(ht, total);
   const hy = document.getElementById('hs-tahun');  if (hy) animCount(hy, ti);
+  const htfc = document.getElementById('hs-total-fc'); if (htfc) animCount(htfc, total);
+  const hyfc = document.getElementById('hs-tahun-fc'); if (hyfc) animCount(hyfc, ti);
   const hn = document.getElementById('hs-arsip');  if (hn) animCount(hn, total);
 
   const dt = document.getElementById('dash-total'); if (dt) animCount(dt, total);
