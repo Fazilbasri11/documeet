@@ -135,7 +135,9 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 .page{display:none}.page.active{display:block}
 
 /* HERO */
-.hero{background:linear-gradient(160deg,var(--maroon-deep) 0%,var(--maroon) 55%,var(--maroon-light) 100%);padding:2.5rem 1.5rem 2.5rem;position:relative;overflow:hidden;min-height:260px}
+.hero{background:linear-gradient(160deg,var(--maroon-deep) 0%,var(--maroon) 55%,var(--maroon-light) 100%);padding:3.5rem 1.5rem 7rem;position:relative;overflow:hidden;min-height:420px}
+.hero-wave{position:absolute;bottom:-2px;left:0;width:100%;line-height:0;z-index:3;pointer-events:none}
+.hero-wave svg{display:block;width:100%;height:80px}
 #hero-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.55}
 .hero-ring{position:absolute;border-radius:50%;border:1px solid rgba(201,147,42,.18);animation:ring-pulse 4s ease-in-out infinite}
 .hero-ring:nth-child(1){width:320px;height:320px;top:-90px;right:-60px;animation-delay:0s}
@@ -166,6 +168,29 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
 @keyframes hero-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* FLOATING CARDS DI HERO */
+.hero-float-card{position:absolute;z-index:4;background:rgba(255,255,255,.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:10px 14px;color:var(--white);font-size:12px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.2);white-space:nowrap}
+.hero-float-card .fc-icon{font-size:14px;margin-right:6px}
+.hero-float-card .fc-val{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--gold-light);display:block;line-height:1.2}
+.hero-float-card .fc-lbl{font-size:9px;color:rgba(255,255,255,.65);letter-spacing:.08em;text-transform:uppercase}
+.hero-float-card.verified{background:rgba(34,139,34,.25);border-color:rgba(76,175,80,.4)}
+.hero-float-card.verified .fc-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#4caf50;margin-right:5px;vertical-align:middle}
+@keyframes float-a{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-12px) rotate(2deg)}}
+@keyframes float-b{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-9px) rotate(-2deg)}}
+@keyframes float-c{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.hero-float-card:nth-child(1){animation:float-a 5s ease-in-out infinite}
+.hero-float-card:nth-child(2){animation:float-b 6.5s ease-in-out infinite}
+.hero-float-card:nth-child(3){animation:float-c 4.5s ease-in-out infinite}
+@media(max-width:768px){
+  .hero{padding:2.5rem 1rem 6rem;min-height:360px}
+  .hero-float-card{display:none}
+  .hero-wave svg{height:55px}
+}
+@media(max-width:480px){
+  .hero{padding:2rem .9rem 5.5rem;min-height:300px}
+  .hero-wave svg{height:45px}
+}
 
 /* HOME PANEL */
   .home-panel {
@@ -909,6 +934,20 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
     <canvas id="hero-canvas"></canvas>
     <div class="hero-ring"></div><div class="hero-ring"></div><div class="hero-ring"></div>
     <div class="hero-shimmer"></div>
+
+    <!-- Floating Cards -->
+    <div class="hero-float-card verified" style="top:18%;right:7%">
+      <span class="fc-dot"></span><span style="font-size:11px;font-weight:600">Drive Terverifikasi</span>
+      <div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:2px">Dokumen tersimpan aman di cloud</div>
+    </div>
+    <div class="hero-float-card" style="top:52%;right:3%;text-align:center;padding:12px 16px">
+      <span class="fc-val" id="hs-total-fc">0</span>
+      <span class="fc-lbl">Total Arsip Rapat</span>
+    </div>
+    <div class="hero-float-card" style="bottom:22%;right:20%;padding:9px 13px;font-size:11px">
+      <span class="fc-icon">📅</span>Tahun ini: <strong id="hs-tahun-fc" style="color:var(--gold-light)">0</strong> rapat
+    </div>
+
     <div class="hero-inner">
       <div class="hero-badge">Sistem Rapat Digital · KIP Kab. Pidie Jaya</div>
       <div class="hero-brand-line">
@@ -916,6 +955,7 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
         <div class="hero-brand-dot"></div>
       </div>
       <div class="hero-tagline">Rapat lebih rapi, dokumen siap dalam hitungan detik.</div>
+      <p>Platform digital pengelolaan rapat pleno — dari undangan, daftar hadir, risalah, hingga berita acara, otomatis dalam satu klik.</p>
       <div class="hero-stats">
         <div class="hero-stat"><div class="hero-stat-val" id="hs-total">0</div><div class="hero-stat-lbl">Total Rapat</div></div>
         <div class="hero-stat-sep"></div>
@@ -927,6 +967,13 @@ nav{background:var(--maroon-deep);display:flex;align-items:center;justify-conten
         <div class="hero-sync-dot" id="hero-sync-dot"></div>
         <span id="hero-sync-text">Memuat data cloud...</span>
       </div>
+    </div>
+
+    <!-- Wave separator -->
+    <div class="hero-wave">
+      <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,40 C240,80 480,0 720,40 C960,80 1200,0 1440,40 L1440,80 L0,80 Z" fill="#fdf8f0"/>
+      </svg>
     </div>
   </div>
 
