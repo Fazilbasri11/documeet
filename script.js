@@ -1,25 +1,25 @@
 // ════ STATE & CONSTANTS ═════════
 const DEFAULT_PESERTA = [
-  {nama:'ISKANDAR, S.Sos.',        jabatan:'Ketua'},
-  {nama:'DARKASYI ABDUL HAMID, S.Pd.', jabatan:'Anggota'},
-  {nama:'ABDULLAH, S.Sos.',        jabatan:'Anggota'},
-  {nama:'MASRUR, MA.',             jabatan:'Anggota'},
-  {nama:'HASMUNIR, SH.',           jabatan:'Anggota'},
-  {nama:'ISWANDI, S.Sos.',         jabatan:'Sekretaris'},
-  {nama:'DAHLAN, A.Md.',           jabatan:'Kasubbag Keuangan, Umum, dan Logistik'},
-  {nama:'MASYKUR, S.Pd.I.',        jabatan:'Kasubbag Perencanaan, Data dan Informasi'},
-  {nama:'MAHMUNIR, S.Kom.',        jabatan:'Kasubbag Teknis Penyelenggaraan Pemilu, dan Hukum'},
-  {nama:'MAIMUN MAHMILUL, S.IP.',  jabatan:'Kasubbag Parmas dan SDM'},
-  {nama:'ISNAINI, SE.',            jabatan:'Analis Pengelola Keuangan APBN Ahli Muda'},
-  {nama:'NURHAYATI, A.Md.',        jabatan:'Bendahara Pengeluaran'},
-  {nama:'FAZIL BASRI, S.Kom.',     jabatan:'Notulen'},
+  { nama: 'ISKANDAR, S.Sos.', jabatan: 'Ketua' },
+  { nama: 'DARKASYI ABDUL HAMID, S.Pd.', jabatan: 'Anggota' },
+  { nama: 'ABDULLAH, S.Sos.', jabatan: 'Anggota' },
+  { nama: 'MASRUR, MA.', jabatan: 'Anggota' },
+  { nama: 'HASMUNIR, SH.', jabatan: 'Anggota' },
+  { nama: 'ISWANDI, S.Sos.', jabatan: 'Sekretaris' },
+  { nama: 'DAHLAN, A.Md.', jabatan: 'Kasubbag Keuangan, Umum, dan Logistik' },
+  { nama: 'MASYKUR, S.Pd.I.', jabatan: 'Kasubbag Perencanaan, Data dan Informasi' },
+  { nama: 'MAHMUNIR, S.Kom.', jabatan: 'Kasubbag Teknis Penyelenggaraan Pemilu, dan Hukum' },
+  { nama: 'MAIMUN MAHMILUL, S.IP.', jabatan: 'Kasubbag Parmas dan SDM' },
+  { nama: 'ISNAINI, SE.', jabatan: 'Analis Pengelola Keuangan APBN Ahli Muda' },
+  { nama: 'NURHAYATI, A.Md.', jabatan: 'Bendahara Pengeluaran' },
+  { nama: 'FAZIL BASRI, S.Kom.', jabatan: 'Notulen' },
 ];
 
 
 let currentRole = null; // 'admin' | 'user'
 function isAdmin() { return currentRole === 'admin'; }
 
-let pesertaList  = JSON.parse(localStorage.getItem('sirapat_peserta') || 'null') || DEFAULT_PESERTA.map(p => ({...p}));
+let pesertaList = JSON.parse(localStorage.getItem('sirapat_peserta') || 'null') || DEFAULT_PESERTA.map(p => ({ ...p }));
 const DEFAULT_YTH = [
   'Seluruh Anggota',
   'Sekretaris',
@@ -27,12 +27,12 @@ const DEFAULT_YTH = [
   'Bendahara Pengeluaran',
 ];
 let ythList = JSON.parse(localStorage.getItem('sirapat_yth') || 'null') || [...DEFAULT_YTH];
-let arsipList    = JSON.parse(localStorage.getItem('sirapat_arsip')   || '[]');
-let settings     = JSON.parse(localStorage.getItem('sirapat_settings')|| 'null') || {
-  instansi:'KIP Kabupaten Pidie Jaya', kota:'Meureudu',
-  ketua:'Iskandar', sekretaris:'Iswandi',
-  nomorFmt:'[NO]/PK.01-Und/1118/1/[TAHUN]', nomorLast:0,
-  gasUrl:'', urlUnd:'', urlAbs:'', urlRis:'', tplMode:'auto'
+let arsipList = JSON.parse(localStorage.getItem('sirapat_arsip') || '[]');
+let settings = JSON.parse(localStorage.getItem('sirapat_settings') || 'null') || {
+  instansi: 'KIP Kabupaten Pidie Jaya', kota: 'Meureudu',
+  ketua: 'Iskandar', sekretaris: 'Iswandi',
+  nomorFmt: '[NO]/PK.01-Und/1118/1/[TAHUN]', nomorLast: 0,
+  gasUrl: '', urlUnd: '', urlAbs: '', urlRis: '', tplMode: 'auto'
 };
 
 // Paksa ganti [BULAN] → 1 jika masih ada
@@ -45,40 +45,39 @@ const AUTO_PATHS = {
   und: './templates/UND_template.docx',
   abs: './templates/ABSEN_template.docx',
   ris: './templates/RISALAH_template.docx',
-  ba:  './templates/BA_template.docx'
+  ba: './templates/BA_template.docx'
 };
 
 const SLOT_DEFS = [
-  {key:'undangan', label:'📨 Undangan', match:/undangan/i},
-  {key:'ba',       label:'📋 Berita Acara', match:/berita|^ba_|_ba/i},
-  {key:'absen',    label:'✅ Daftar Hadir', match:/absen|hadir/i},
-  {key:'risalah',  label:'📝 Risalah', match:/risalah/i},
+  { key: 'undangan', label: '📨 Undangan', match: /undangan/i },
+  { key: 'ba', label: '📋 Berita Acara', match: /berita|^ba_|_ba/i },
+  { key: 'absen', label: '✅ Daftar Hadir', match: /absen|hadir/i },
+  { key: 'risalah', label: '📝 Risalah', match: /risalah/i },
 ];
 
-const BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-const HARI_ID  = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-const SH_ID    = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const BULAN_ID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+const HARI_ID = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+const SH_ID = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 
-let tplMode        = settings.tplMode || 'auto';
+let tplMode = settings.tplMode || 'auto';
 let calYearInline, calMonthInline;
-const today        = new Date();
-let lastGenId      = null;
-let lastGenBlobs   = null;
-let lastGenPrefix  = null;
+const today = new Date();
+let lastGenId = null;
+let lastGenBlobs = null;
+let lastGenPrefix = null;
 let currentModalId = null;
-let uploadFiles    = {};
+let uploadFiles = {};
 
 // ════ HELPERS ═════════════════════════════════════════════════
-// const GAS_URL = 'https://script.google.com/macros/s/AKfycbyLbKTTR9Ko6o92wsX6j4iz4TA6KN9DnKrYCmgvRPdMgETHMxKrduRRIcp_HXEt1MM/exec';
-const GAS_URL ='https://script.google.com/macros/s/AKfycbyVyokwyLQLgL7QqEK-cTb5idjWA-_fVydbzr3t0VxFCj30r7Mw48FP3bdhRtY9VoCe/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyVyokwyLQLgL7QqEK-cTb5idjWA-_fVydbzr3t0VxFCj30r7Mw48FP3bdhRtY9VoCe/exec';
 function getGasUrl() { return GAS_URL; }
 
 function tahunTerbilang(tahun) {
-  const satuan = ['','Satu','Dua','Tiga','Empat','Lima','Enam','Tujuh','Delapan','Sembilan',
-    'Sepuluh','Sebelas','Dua Belas','Tiga Belas','Empat Belas','Lima Belas','Enam Belas',
-    'Tujuh Belas','Delapan Belas','Sembilan Belas'];
-  const puluhan = ['','','Dua Puluh','Tiga Puluh','Empat Puluh','Lima Puluh',
-    'Enam Puluh','Tujuh Puluh','Delapan Puluh','Sembilan Puluh'];
+  const satuan = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan',
+    'Sepuluh', 'Sebelas', 'Dua Belas', 'Tiga Belas', 'Empat Belas', 'Lima Belas', 'Enam Belas',
+    'Tujuh Belas', 'Delapan Belas', 'Sembilan Belas'];
+  const puluhan = ['', '', 'Dua Puluh', 'Tiga Puluh', 'Empat Puluh', 'Lima Puluh',
+    'Enam Puluh', 'Tujuh Puluh', 'Delapan Puluh', 'Sembilan Puluh'];
 
   const ribuan = Math.floor(tahun / 1000);
   const ratusan = Math.floor((tahun % 1000) / 100);
@@ -88,7 +87,7 @@ function tahunTerbilang(tahun) {
   if (ribuan) hasil += (ribuan === 1 ? 'Seribu' : satuan[ribuan] + ' Ribu') + ' ';
   if (ratusan) hasil += (ratusan === 1 ? 'Seratus' : satuan[ratusan] + ' Ratus') + ' ';
   if (sisa > 0 && sisa < 20) hasil += satuan[sisa];
-  else if (sisa >= 20) hasil += puluhan[Math.floor(sisa/10)] + (sisa%10 ? ' ' + satuan[sisa%10] : '');
+  else if (sisa >= 20) hasil += puluhan[Math.floor(sisa / 10)] + (sisa % 10 ? ' ' + satuan[sisa % 10] : '');
 
   return hasil.trim();
 }
@@ -112,13 +111,13 @@ function getMenitDariJam(jamStr) {
 }
 function buildNomor(no, tgl) {
   return settings.nomorFmt
-    .replace('[NO]',    String(no))
+    .replace('[NO]', String(no))
     .replace('[BULAN]', tgl instanceof Date ? tgl.getMonth() + 1 : no)
     .replace('[TAHUN]', tgl instanceof Date ? tgl.getFullYear() : today.getFullYear());
 }
 function tglGeneret() { return `${today.getDate()} ${BULAN_ID[today.getMonth()]} ${today.getFullYear()}`; }
-function tglFull(d)   { return `${d.getDate()} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`; }
-function saveLocal()  { localStorage.setItem('sirapat_arsip', JSON.stringify(arsipList)); }
+function tglFull(d) { return `${d.getDate()} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`; }
+function saveLocal() { localStorage.setItem('sirapat_arsip', JSON.stringify(arsipList)); }
 
 function dlBlob(blob, filename) {
   const a = document.createElement('a');
@@ -130,20 +129,20 @@ function dlBlob(blob, filename) {
 }
 
 function isImage(n) { return /\.(jpe?g|png|webp|gif|bmp|svg)$/i.test(n || ''); }
-function isPdf(n)   { return /\.pdf$/i.test(n || ''); }
+function isPdf(n) { return /\.pdf$/i.test(n || ''); }
 function fmtSize(b) {
   if (!b) return '';
-  if (b < 1024)    return b + 'B';
+  if (b < 1024) return b + 'B';
   if (b < 1048576) return (b / 1024).toFixed(1) + 'KB';
   return (b / 1048576).toFixed(1) + 'MB';
 }
 
 function shortFileName(name) {
   const map = {
-    'undangan':    'Undangan',
+    'undangan': 'Undangan',
     'beritaacara': 'Berita Acara',
-    'absenhadir':  'Daftar Hadir',
-    'risalah':     'Risalah',
+    'absenhadir': 'Daftar Hadir',
+    'risalah': 'Risalah',
   };
   const base = name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z]/g, '');
   for (const [k, v] of Object.entries(map)) {
@@ -154,20 +153,20 @@ function shortFileName(name) {
 }
 
 function statusLbl(s) {
-  return {pending:'Menunggu', uploading:'Uploading...', done:'Tersimpan', draft:'Draft', err:'Gagal'}[s] || s;
+  return { pending: 'Menunggu', uploading: 'Uploading...', done: 'Tersimpan', draft: 'Draft', err: 'Gagal' }[s] || s;
 }
 function getFileIcon(n) {
-  return {pdf:'📕',doc:'📝',docx:'📝',zip:'📦',jpg:'🖼️',jpeg:'🖼️',png:'🖼️',webp:'🖼️',gif:'🖼️',bmp:'🖼️'}
-    [(n||'').split('.').pop().toLowerCase()] || '📄';
+  return { pdf: '📕', doc: '📝', docx: '📝', zip: '📦', jpg: '🖼️', jpeg: '🖼️', png: '🖼️', webp: '🖼️', gif: '🖼️', bmp: '🖼️' }
+  [(n || '').split('.').pop().toLowerCase()] || '📄';
 }
 function extractDriveId(url) {
-  const m = (url||'').match(/\/d\/([a-zA-Z0-9_-]+)/);
+  const m = (url || '').match(/\/d\/([a-zA-Z0-9_-]+)/);
   return m ? m[1] : '';
 }
 function toBase64(file) {
   return new Promise((res, rej) => {
     const r = new FileReader();
-    r.onload  = () => res(r.result.split(',')[1]);
+    r.onload = () => res(r.result.split(',')[1]);
     r.onerror = () => rej(new Error('Baca gagal'));
     r.readAsDataURL(file);
   });
@@ -182,7 +181,7 @@ async function gasCall(action, payload = null) {
     res = await fetch(url, {
       method: 'POST',
       redirect: 'follow',
-      body: JSON.stringify({action, ...payload})
+      body: JSON.stringify({ action, ...payload })
     });
   } else {
     res = await fetch(`${url}?action=${action}`, {
@@ -193,7 +192,7 @@ async function gasCall(action, payload = null) {
   if (d.error) throw new Error(d.error);
   return d;
 }
-const gasGet  = (action)  => gasCall(action);
+const gasGet = (action) => gasCall(action);
 const gasPost = (payload) => gasCall(payload.action, payload);
 
 
@@ -220,7 +219,7 @@ function sanitasiField(val, type) {
         if (!isNaN(d)) {
           return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
         }
-      } catch {}
+      } catch { }
     }
     if (v.length > 5 && v.includes(':')) v = v.substring(0, 5);
     if (v.includes(' ')) v = v.split(' ')[0];
@@ -235,10 +234,10 @@ function sanitasiField(val, type) {
         if (!isNaN(d)) {
           return `${d.getDate()} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;
         }
-      } catch {}
+      } catch { }
     }
     if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
-      try { const p = s.split('-'); return `${parseInt(p[2])} ${BULAN_ID[parseInt(p[1])-1]} ${p[0]}`; } catch {}
+      try { const p = s.split('-'); return `${parseInt(p[2])} ${BULAN_ID[parseInt(p[1]) - 1]} ${p[0]}`; } catch { }
     }
     return s;
   }
@@ -248,8 +247,8 @@ function sanitasiField(val, type) {
 function sanitasiArsip(list) {
   return list.map(r => ({
     ...r,
-    tanggal:    sanitasiField(r.tanggal,    'tanggal'),
-    jam:        sanitasiField(r.jam,        'jam'),
+    tanggal: sanitasiField(r.tanggal, 'tanggal'),
+    jam: sanitasiField(r.jam, 'jam'),
     tglGeneret: sanitasiField(r.tglGeneret, 'tglGeneret'),
   }));
 }
@@ -302,23 +301,21 @@ function animCount(el, target) {
 }
 
 function refreshStats() {
-  const yr      = today.getFullYear();
-  const total   = arsipList.length;
+  const yr = today.getFullYear();
+  const total = arsipList.length;
   const tiArsip = arsipList.filter(r => parseTanggal(r.tanggal).getFullYear() === yr);
-  const ti      = tiArsip.length;
-  const avg     = total ? Math.round(arsipList.reduce((a, r) => a + (r.peserta||[]).length, 0) / total) : 0;
+  const ti = tiArsip.length;
+  const avg = total ? Math.round(arsipList.reduce((a, r) => a + (r.peserta || []).length, 0) / total) : 0;
 
-  const ht = document.getElementById('hs-total');  if (ht) animCount(ht, total);
-  const hy = document.getElementById('hs-tahun');  if (hy) animCount(hy, ti);
-  const htfc = document.getElementById('hs-total-fc'); if (htfc) animCount(htfc, total);
-  const hyfc = document.getElementById('hs-tahun-fc'); if (hyfc) animCount(hyfc, ti);
-  const hn = document.getElementById('hs-arsip');  if (hn) animCount(hn, total);
+  const ht = document.getElementById('hs-total'); if (ht) animCount(ht, total);
+  const hy = document.getElementById('hs-tahun'); if (hy) animCount(hy, ti);
+  const hn = document.getElementById('hs-arsip'); if (hn) animCount(hn, total);
 
   const dt = document.getElementById('dash-total'); if (dt) animCount(dt, total);
   const dy = document.getElementById('dash-tahun'); if (dy) animCount(dy, ti);
-  const da = document.getElementById('dash-avg');   if (da) animCount(da, avg);
+  const da = document.getElementById('dash-avg'); if (da) animCount(da, avg);
   const totalDok = arsipList.reduce((acc, r) => {
-    const allFiles = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
+    const allFiles = [...(uploadFiles[r.id] || []), ...(r.uploadedFiles || [])];
     // Dedup by URL (lebih akurat dari nama)
     const uniqueUrls = new Map();
     allFiles.forEach(f => {
@@ -331,7 +328,7 @@ function refreshStats() {
     });
     return acc + uniqueUrls.size;
   }, 0);
-const dd = document.getElementById('dash-dok'); if (dd) animCount(dd, totalDok);
+  const dd = document.getElementById('dash-dok'); if (dd) animCount(dd, totalDok);
   const dl = document.getElementById('dash-tahun-lbl'); if (dl) dl.textContent = 'Rapat ' + yr;
   const cl = document.getElementById('chart-tahun-lbl'); if (cl) cl.textContent = yr;
 
@@ -339,18 +336,18 @@ const dd = document.getElementById('dash-dok'); if (dd) animCount(dd, totalDok);
   tiArsip.forEach(r => months[parseTanggal(r.tanggal).getMonth()]++);
   const max = Math.max(...months, 1);
   const bc = document.getElementById('bar-chart-home');
-if (bc) bc.innerHTML = months.map((n, i) =>
-  `<div class="bar-group">${n > 0 ? `<div class="bar-val">${n}</div>` : ''}` +
-  `<div class="bar" style="height:${Math.round(n/max*80)}px"><div class="bar-inner" style="height:100%"></div></div>` +
-  `<div class="bar-label">${SH_ID[i]}</div></div>`
-).join('');
+  if (bc) bc.innerHTML = months.map((n, i) =>
+    `<div class="bar-group">${n > 0 ? `<div class="bar-val">${n}</div>` : ''}` +
+    `<div class="bar" style="height:${Math.round(n / max * 80)}px"><div class="bar-inner" style="height:100%"></div></div>` +
+    `<div class="bar-label">${SH_ID[i]}</div></div>`
+  ).join('');
 
   renderUpNext();
   renderRisalahQuick();
   renderHealthMeter();
 }
 const updateHeroStats = refreshStats;
-const renderDashHome  = refreshStats;
+const renderDashHome = refreshStats;
 
 // ════ NAV HAMBURGER ═══════════════════════════════════════════
 function toggleDrawer() {
@@ -374,15 +371,15 @@ document.addEventListener('click', e => {
   const canvas = document.getElementById('hero-canvas'); if (!canvas) return;
   const ctx = canvas.getContext('2d'); let W, H, particles = [];
   function resize() { const h = canvas.parentElement; W = canvas.width = h.offsetWidth; H = canvas.height = h.offsetHeight; }
-  function mk() { return { x:Math.random()*W, y:H+10, r:Math.random()*2.5+.5, speed:Math.random()*.6+.3, opacity:Math.random()*.6+.2, drift:(Math.random()-.5)*.4, life:0, maxLife:Math.random()*160+80 }; }
+  function mk() { return { x: Math.random() * W, y: H + 10, r: Math.random() * 2.5 + .5, speed: Math.random() * .6 + .3, opacity: Math.random() * .6 + .2, drift: (Math.random() - .5) * .4, life: 0, maxLife: Math.random() * 160 + 80 }; }
   function draw() {
     ctx.clearRect(0, 0, W, H);
     if (particles.length < 55 && Math.random() < .35) particles.push(mk());
     particles = particles.filter(p => {
       p.y -= p.speed; p.x += p.drift; p.life++;
-      const t = p.life / p.maxLife, a = t < .2 ? t/.2 : t > .8 ? (1-t)/.2 : 1;
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(201,147,42,${p.opacity*a})`; ctx.fill();
+      const t = p.life / p.maxLife, a = t < .2 ? t / .2 : t > .8 ? (1 - t) / .2 : 1;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(201,147,42,${p.opacity * a})`; ctx.fill();
       return p.life < p.maxLife && p.y > -10;
     });
     requestAnimationFrame(draw);
@@ -402,10 +399,10 @@ function showSync(msg, state = 'syncing') {
 }
 function setHeroSync(state, msg) {
   const dot = document.getElementById('hero-sync-dot'); if (dot) dot.className = 'hero-sync-dot ' + state;
-  const tx  = document.getElementById('hero-sync-text'); if (tx) tx.textContent = msg;
+  const tx = document.getElementById('hero-sync-text'); if (tx) tx.textContent = msg;
 }
 function setCloudBanner(state, msg) {
-  const b  = document.getElementById('cloud-status-banner'); if (!b) return;
+  const b = document.getElementById('cloud-status-banner'); if (!b) return;
   const sp = document.getElementById('cloud-spin');
   const tx = document.getElementById('cloud-status-text');
   b.style.display = 'flex'; b.className = 'cloud-banner ' + state;
@@ -418,32 +415,32 @@ function setCloudBanner(state, msg) {
 // ★ loadArsipFromCloud TIDAK memanggil render apapun — diserahkan ke mulaiAutoSync
 async function loadArsipFromCloud() {
   if (!getGasUrl()) {
-    setHeroSync('err','GAS URL belum diisi');
-    setCloudBanner('warn','URL GAS belum diisi — data hanya dari browser lokal.');
+    setHeroSync('err', 'GAS URL belum diisi');
+    setCloudBanner('warn', 'URL GAS belum diisi — data hanya dari browser lokal.');
     return;
   }
-  setHeroSync('syncing','Menyinkron data cloud...'); showSync('Memuat dari cloud...','syncing');
+  setHeroSync('syncing', 'Menyinkron data cloud...'); showSync('Memuat dari cloud...', 'syncing');
   try {
-    const data       = await gasCall('getArsip');
+    const data = await gasCall('getArsip');
     const cloudArsip = sanitasiArsip(data.arsip || []);
-    const cloudIds   = new Set(cloudArsip.map(r => String(r.id)));
-    const localOnly  = arsipList.filter(r => !cloudIds.has(String(r.id)));
+    const cloudIds = new Set(cloudArsip.map(r => String(r.id)));
+    const localOnly = arsipList.filter(r => !cloudIds.has(String(r.id)));
     arsipList = [...cloudArsip, ...localOnly];
     arsipList.sort((a, b) => String(b.id).localeCompare(String(a.id)));
     saveLocal();
     arsipList.forEach(r => {
       if (r.uploadedFiles?.length && !uploadFiles[r.id]?.length)
-        uploadFiles[r.id] = r.uploadedFiles.map(f => ({...f, file:null, type:f.type||'', _showPreview:false}));
+        uploadFiles[r.id] = r.uploadedFiles.map(f => ({ ...f, file: null, type: f.type || '', _showPreview: false }));
     });
-    for (const item of localOnly) gasCall('simpanArsip', item).catch(() => {});
+    for (const item of localOnly) gasCall('simpanArsip', item).catch(() => { });
     setHeroSync('ok', `✓ ${arsipList.length} arsip tersinkron`);
     showSync(`${arsipList.length} arsip tersinkron`, 'ok');
     setCloudBanner('ok', `✓ ${arsipList.length} arsip dimuat dari cloud`);
     // ★ TIDAK memanggil renderArsip / renderCalInline / refreshStats di sini
   } catch (e) {
-    setHeroSync('err','Gagal sync — menggunakan data lokal');
-    setCloudBanner('err','❌ Gagal memuat dari cloud: ' + e.message);
-    showSync('Gagal sync cloud','err');
+    setHeroSync('err', 'Gagal sync — menggunakan data lokal');
+    setCloudBanner('err', '❌ Gagal memuat dari cloud: ' + e.message);
+    showSync('Gagal sync cloud', 'err');
   }
 }
 
@@ -463,18 +460,18 @@ async function refreshArsipCloud() {
 
 async function syncArsipToCloud(item) {
   if (!getGasUrl()) return;
-  showSync('Menyimpan ke cloud...','syncing');
+  showSync('Menyimpan ke cloud...', 'syncing');
   try {
     await gasCall('simpanArsip', {
       ...item,
-      uploadedFiles: (uploadFiles[item.id]||[]).map(f => ({name:f.name, size:f.size, status:f.status, url:f.url||null}))
+      uploadedFiles: (uploadFiles[item.id] || []).map(f => ({ name: f.name, size: f.size, status: f.status, url: f.url || null }))
     });
-    showSync('Tersimpan ke cloud','ok');
-  } catch { showSync('Gagal sync cloud','err'); }
+    showSync('Tersimpan ke cloud', 'ok');
+  } catch { showSync('Gagal sync cloud', 'err'); }
 }
 async function hapusArsipCloud(id, folderName) {
   if (!getGasUrl()) return;
-  try { await gasCall('hapusArsip', {id, folderName}); } catch {}
+  try { await gasCall('hapusArsip', { id, folderName }); } catch { }
 }
 
 // ════ NOMOR SURAT ═════════════════════════════════════════════
@@ -496,7 +493,7 @@ async function fetchNomorBA() {
     if (dot) dot.className = 'nomor-dot ok';
     if (inp && !inp.dataset.userEdited) {
       const tgl = document.getElementById('inp-tanggal')?.value;
-      const d   = tgl ? parseTanggal(tgl) : new Date();
+      const d = tgl ? parseTanggal(tgl) : new Date();
       inp.value = buildNomorBA(nomorBALast + 1, d);
       inp.placeholder = 'Nomor BA...';
     }
@@ -532,7 +529,7 @@ async function fetchNomor() {
 
 function updateNomorPreview() {
   const tgl = document.getElementById('inp-tanggal').value;
-  const d   = tgl ? parseTanggal(tgl) : new Date();
+  const d = tgl ? parseTanggal(tgl) : new Date();
 
   // Nomor Surat
   const inp = document.getElementById('inp-nomor-manual');
@@ -547,10 +544,10 @@ function updateNomorPreview() {
 function setTplMode(mode, btn) {
   tplMode = mode; settings.tplMode = mode;
   document.querySelectorAll('.tpl-mode-tab').forEach(b => b.classList.remove('active')); btn.classList.add('active');
-  document.querySelectorAll('.tpl-mode-panel').forEach(p => p.classList.remove('active')); document.getElementById('tpl-panel-'+mode).classList.add('active');
+  document.querySelectorAll('.tpl-mode-panel').forEach(p => p.classList.remove('active')); document.getElementById('tpl-panel-' + mode).classList.add('active');
 }
 function getTemplateUrl(key) {
-  return tplMode === 'auto' ? AUTO_PATHS[key] : (document.getElementById('url-'+key)||{value:''}).value.trim();
+  return tplMode === 'auto' ? AUTO_PATHS[key] : (document.getElementById('url-' + key) || { value: '' }).value.trim();
 }
 
 // ════ TEST URLS ═══════════════════════════════════════════════
@@ -560,41 +557,41 @@ async function testUrl(url) {
   return buf.byteLength;
 }
 async function testAutoUrl(key) {
-  const b = document.getElementById('st-auto-'+key);
+  const b = document.getElementById('st-auto-' + key);
   b.className = 'tpl-badge loading'; b.textContent = 'Mengecek...';
-  try { const s = await testUrl(AUTO_PATHS[key]); b.className = 'tpl-badge ok'; b.textContent = `✓ OK (${(s/1024).toFixed(1)}KB)`; }
+  try { const s = await testUrl(AUTO_PATHS[key]); b.className = 'tpl-badge ok'; b.textContent = `✓ OK (${(s / 1024).toFixed(1)}KB)`; }
   catch (e) { b.className = 'tpl-badge err'; b.textContent = '✗ ' + e.message; }
 }
 async function testSemuaAuto() {
-  await Promise.all(['und','abs','ris','ba'].map(k => testAutoUrl(k)));
+  await Promise.all(['und', 'abs', 'ris', 'ba'].map(k => testAutoUrl(k)));
 }
 async function testManualUrl(key) {
-  const b   = document.getElementById('badge-'+key);
-  const url = (document.getElementById('url-'+key)||{value:''}).value.trim();
-  if (!url) { showToast('Masukkan URL','error'); return; }
+  const b = document.getElementById('badge-' + key);
+  const url = (document.getElementById('url-' + key) || { value: '' }).value.trim();
+  if (!url) { showToast('Masukkan URL', 'error'); return; }
   b.className = 'tpl-badge loading'; b.textContent = 'Mengecek...';
-  try { const s = await testUrl(url); b.className = 'tpl-badge ok'; b.textContent = `✓ OK (${(s/1024).toFixed(1)}KB)`; showToast('✓ OK','success'); }
-  catch (e) { b.className = 'tpl-badge err'; b.textContent = '✗ ' + e.message; showToast('Gagal: ' + e.message,'error'); }
+  try { const s = await testUrl(url); b.className = 'tpl-badge ok'; b.textContent = `✓ OK (${(s / 1024).toFixed(1)}KB)`; showToast('✓ OK', 'success'); }
+  catch (e) { b.className = 'tpl-badge err'; b.textContent = '✗ ' + e.message; showToast('Gagal: ' + e.message, 'error'); }
 }
 async function testGasUrl() {
-  const url = (document.getElementById('set-gas-url')||{value:''}).value.trim();
-  if (!url) { showToast('Masukkan URL GAS','error'); return; }
+  const url = (document.getElementById('set-gas-url') || { value: '' }).value.trim();
+  if (!url) { showToast('Masukkan URL GAS', 'error'); return; }
   const st = document.getElementById('gas-status');
   st.textContent = '⏳ Menguji...'; st.style.color = '#8a6010';
   settings.gasUrl = url; localStorage.setItem('sirapat_settings', JSON.stringify(settings));
   try {
     const d = await gasCall('getLastNomor');
     st.textContent = `✅ Terhubung! Nomor terakhir: ${d.lastNomor}`; st.style.color = '#2e7d32';
-    showToast('GAS terhubung!','success'); fetchNomor();
-  } catch (e) { st.textContent = '❌ Gagal: ' + e.message; st.style.color = '#c62828'; showToast('GAS gagal: ' + e.message,'error'); }
+    showToast('GAS terhubung!', 'success'); fetchNomor();
+  } catch (e) { st.textContent = '❌ Gagal: ' + e.message; st.style.color = '#c62828'; showToast('GAS gagal: ' + e.message, 'error'); }
 }
 
 // ════ CEK STATUS CACHE TEMPLATE ═══════════════════════════════
 async function cekStatusCacheTemplate() {
   await initTplIDB();
-  const keys   = ['und', 'abs', 'ris'];
+  const keys = ['und', 'abs', 'ris'];
   const labels = { und: 'Undangan', abs: 'Absen', ris: 'Risalah' };
-  const hasil  = {};
+  const hasil = {};
   for (const key of keys) {
     const data = await tplCacheGet(key);
     hasil[key] = !!data;
@@ -639,8 +636,8 @@ function getCheckedYth() {
   });
   return result;
 }
-function togglePeserta(i)   { document.getElementById('pgen-'+i).classList.toggle('checked'); }
-function getCheckedPeserta(){ return pesertaList.filter((_, i) => document.getElementById('pgen-'+i)?.classList.contains('checked')); }
+function togglePeserta(i) { document.getElementById('pgen-' + i).classList.toggle('checked'); }
+function getCheckedPeserta() { return pesertaList.filter((_, i) => document.getElementById('pgen-' + i)?.classList.contains('checked')); }
 function pilihAgenda(el, text) {
   document.querySelectorAll('.agenda-chip').forEach(c => c.classList.remove('active')); el.classList.add('active');
   const ta = document.getElementById('inp-agenda');
@@ -648,11 +645,11 @@ function pilihAgenda(el, text) {
 }
 
 // ════ KALENDER ════════════════════════════════════════════════
-function initCalInline()   { calYearInline = today.getFullYear(); calMonthInline = today.getMonth(); }
+function initCalInline() { calYearInline = today.getFullYear(); calMonthInline = today.getMonth(); }
 function changeMonthInline(d) {
   calMonthInline += d;
-  if (calMonthInline < 0)  { calMonthInline = 11; calYearInline--; }
-  if (calMonthInline > 11) { calMonthInline = 0;  calYearInline++; }
+  if (calMonthInline < 0) { calMonthInline = 11; calYearInline--; }
+  if (calMonthInline > 11) { calMonthInline = 0; calYearInline++; }
   renderCalInline();
 }
 function renderCalInline() {
@@ -660,22 +657,22 @@ function renderCalInline() {
   document.getElementById('cal-title-inline').textContent = `${BULAN_ID[calMonthInline]} ${calYearInline}`;
 
   const rapatMap = {};
-  arsipList.forEach(r => { (rapatMap[r.tanggal] ??= []).push({jam:r.jam, tempat:r.tempat, agenda:r.agenda}); });
+  arsipList.forEach(r => { (rapatMap[r.tanggal] ??= []).push({ jam: r.jam, tempat: r.tempat, agenda: r.agenda }); });
 
-  const selTgl    = document.getElementById('inp-tanggal').value;
-  const selJam    = document.getElementById('inp-jam').value;
+  const selTgl = document.getElementById('inp-tanggal').value;
+  const selJam = document.getElementById('inp-jam').value;
   const selTempat = document.getElementById('inp-tempat').value.trim();
-  const firstDay  = new Date(calYearInline, calMonthInline, 1).getDay();
-  const days      = new Date(calYearInline, calMonthInline + 1, 0).getDate();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const firstDay = new Date(calYearInline, calMonthInline, 1).getDay();
+  const days = new Date(calYearInline, calMonthInline + 1, 0).getDate();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-  let html = HARI_ID.map((_, i) => `<div class="cal-day-name">${['Min','Sen','Sel','Rab','Kam','Jum','Sab'][i]}</div>`).join('');
+  let html = HARI_ID.map((_, i) => `<div class="cal-day-name">${['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'][i]}</div>`).join('');
   for (let i = 0; i < firstDay; i++) html += `<div class="cal-day other-month"></div>`;
 
   for (let d = 1; d <= days; d++) {
-    const ds     = `${calYearInline}-${String(calMonthInline+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const ds = `${calYearInline}-${String(calMonthInline + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     const events = rapatMap[ds] || [];
-    const hasEv  = events.length > 0;
+    const hasEv = events.length > 0;
     const isBooked = hasEv && ds === selTgl && events.some(e =>
       e.tempat === selTempat && Math.abs(getMenitDariJam(selJam) - getMenitDariJam(e.jam)) < 60
     );
@@ -684,7 +681,7 @@ function renderCalInline() {
     if (ds === todayStr) cls += ' today'; else if (ds === selTgl) cls += ' selected';
     cls += isBooked ? ' booked' : hasEv ? ' has-event' : '';
 
-    const tip = hasEv ? events.map(e => `${e.jam} – ${(e.agenda||'').substring(0,25)}`).join(' | ') : '';
+    const tip = hasEv ? events.map(e => `${e.jam} – ${(e.agenda || '').substring(0, 25)}`).join(' | ') : '';
 
     let badgeHtml = '';
     if (hasEv) {
@@ -694,7 +691,7 @@ function renderCalInline() {
       badgeHtml = `<div class="cal-badge ${isKonflik ? 'konflik' : ''}">${events.length} Rapat</div>`;
     }
 
-    html += `<div class="${cls}" ${tip ? `data-tip="${tip.replace(/"/g,'&quot;')}"` : ''} onclick="calClickInline('${ds}')">
+    html += `<div class="${cls}" ${tip ? `data-tip="${tip.replace(/"/g, '&quot;')}"` : ''} onclick="calClickInline('${ds}')">
       <span style="margin-bottom:2px">${d}</span>
       ${badgeHtml}
     </div>`;
@@ -722,7 +719,7 @@ function showModalMultiple(ds, events) {
       <div class="meeting-card">
         <div class="mc-header">
           <div class="mc-time">🕒 ${r.jam} WIB</div>
-          <div class="mc-participants">👥 ${(r.peserta||[]).length} Peserta</div>
+          <div class="mc-participants">👥 ${(r.peserta || []).length} Peserta</div>
         </div>
         <div class="mc-agenda">${r.agenda}</div>
         <div class="mc-location">📍 ${r.tempat}</div>
@@ -737,10 +734,10 @@ function showModalMultiple(ds, events) {
 }
 
 function checkBooking() {
-  const tgl    = document.getElementById('inp-tanggal').value;
-  const jam    = document.getElementById('inp-jam').value;
+  const tgl = document.getElementById('inp-tanggal').value;
+  const jam = document.getElementById('inp-jam').value;
   const tempat = document.getElementById('inp-tempat').value.trim();
-  const warn   = document.getElementById('booking-warn');
+  const warn = document.getElementById('booking-warn');
   const btnGen = document.getElementById('btn-gen');
 
   if (!jam || jam.length < 5) {
@@ -761,7 +758,7 @@ function checkBooking() {
     warn.style.display = 'block';
     warn.innerHTML =
       `⚠ <strong>Konflik jadwal!</strong> Jarak antar rapat minimal 1 Jam.<br>` +
-      `<span style="font-size:11px;opacity:.85">Sudah ada rapat pukul <strong>${konflik.jam} WIB</strong> (<em>${konflik.agenda.substring(0,60)}${konflik.agenda.length>60?'...':''}</em>)</span><br>` +
+      `<span style="font-size:11px;opacity:.85">Sudah ada rapat pukul <strong>${konflik.jam} WIB</strong> (<em>${konflik.agenda.substring(0, 60)}${konflik.agenda.length > 60 ? '...' : ''}</em>)</span><br>` +
       `<span style="font-size:11px;opacity:.7">Silakan ubah jam (berikan jeda minimal 1 jam) atau ganti ruangan.</span>`;
     if (btnGen) { btnGen.disabled = true; btnGen.style.opacity = '0.45'; btnGen.title = 'Ada konflik jadwal'; }
   } else {
@@ -821,10 +818,10 @@ async function preloadTemplates() {
         const buf = await r.arrayBuffer();
         await tplCacheSave(key, buf);
         cached++;
-      } catch {}
+      } catch { }
     }
     if (cached > 0) console.log(`[DocuMeet] ${cached} template ter-cache offline.`);
-  } catch {}
+  } catch { }
 }
 
 // ════ FETCH & INJECT — dengan fallback cache ══════════════════
@@ -863,17 +860,17 @@ async function fetchAndInject(url, data, cacheKey) {
 }
 
 // ════ GENERATE DOKUMEN ════════════════════════════════════════
-function setPS(id, state) { const el = document.getElementById(id); if (el) el.className = 'prog-step' + (state ? ' '+state : ''); }
+function setPS(id, state) { const el = document.getElementById(id); if (el) el.className = 'prog-step' + (state ? ' ' + state : ''); }
 
 async function generateDokumen() {
   if (!isAdmin()) { showToast('⛔ Hanya Admin yang bisa generate dokumen.', 'error'); return; }
   const tanggalVal = document.getElementById('inp-tanggal').value;
-  const jamVal     = document.getElementById('inp-jam').value;
-  const tempat     = document.getElementById('inp-tempat').value.trim();
-  const agenda     = document.getElementById('inp-agenda').value.trim();
+  const jamVal = document.getElementById('inp-jam').value;
+  const tempat = document.getElementById('inp-tempat').value.trim();
+  const agenda = document.getElementById('inp-agenda').value.trim();
 
-  if (!tanggalVal) { showToast('Pilih tanggal rapat!','error'); return; }
-  if (!agenda)     { showToast('Isi agenda rapat!','error'); return; }
+  if (!tanggalVal) { showToast('Pilih tanggal rapat!', 'error'); return; }
+  if (!agenda) { showToast('Isi agenda rapat!', 'error'); return; }
 
   const menitBaru = getMenitDariJam(jamVal);
   const konflik = arsipList.find(r => {
@@ -881,38 +878,38 @@ async function generateDokumen() {
     return Math.abs(menitBaru - getMenitDariJam(r.jam)) < 60;
   });
   if (konflik) {
-    showToast(`❌ Konflik jadwal! "${konflik.agenda.substring(0,45)}..." sudah terjadwal di waktu & tempat yang sama.`,'error');
+    showToast(`❌ Konflik jadwal! "${konflik.agenda.substring(0, 45)}..." sudah terjadwal di waktu & tempat yang sama.`, 'error');
     const w = document.getElementById('booking-warn');
-    if (w) { w.style.display = 'block'; w.scrollIntoView({behavior:'smooth', block:'center'}); }
+    if (w) { w.style.display = 'block'; w.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
     return;
   }
 
- const urlUnd = getTemplateUrl('und'), urlAbs = getTemplateUrl('abs'), urlRis = getTemplateUrl('ris'), urlBa = getTemplateUrl('ba');
-  if (!urlUnd||!urlAbs||!urlRis) { showToast('URL template belum lengkap!','error'); return; }
+  const urlUnd = getTemplateUrl('und'), urlAbs = getTemplateUrl('abs'), urlRis = getTemplateUrl('ris'), urlBa = getTemplateUrl('ba');
+  if (!urlUnd || !urlAbs || !urlRis) { showToast('URL template belum lengkap!', 'error'); return; }
   const pesertaHadir = getCheckedPeserta();
-  if (!pesertaHadir.length) { showToast('Pilih minimal 1 peserta!','error'); return; }
+  if (!pesertaHadir.length) { showToast('Pilih minimal 1 peserta!', 'error'); return; }
 
   document.getElementById('btn-awan').classList.remove('visible');
   lastGenId = lastGenBlobs = lastGenPrefix = null;
-  
-  const tgl     = parseTanggal(tanggalVal);
+
+  const tgl = parseTanggal(tanggalVal);
   const hariStr = HARI_ID[tgl.getDay()];
-  const tglStr  = tglFull(tgl);
-  const tglGen  = tglGeneret();
-  const jamFmt  = jamVal + ' WIB s/d Selesai';
+  const tglStr = tglFull(tgl);
+  const tglGen = tglGeneret();
+  const jamFmt = jamVal + ' WIB s/d Selesai';
 
   let nextNo = settings.nomorLast + 1;
   let nextNoBA = nomorBALast + 1;
   if (getGasUrl()) {
-    try { const dBA = await gasCall('getLastNomorBA'); nextNoBA = dBA.nextNomorBA; } catch {}
+    try { const dBA = await gasCall('getLastNomorBA'); nextNoBA = dBA.nextNomorBA; } catch { }
   }
   if (getGasUrl()) {
-    try { const d = await gasCall('getLastNomor'); nextNo = d.nextNomor; } catch {}
+    try { const d = await gasCall('getLastNomor'); nextNo = d.nextNomor; } catch { }
   }
 
   const inpManual = document.getElementById('inp-nomor-manual');
   const nomorManual = inpManual ? inpManual.value.trim() : '';
-  const inpBAManual  = document.getElementById('inp-nomor-ba-manual');
+  const inpBAManual = document.getElementById('inp-nomor-ba-manual');
   const nomorBAManual = inpBAManual ? inpBAManual.value.trim() : '';
   const data = {
     nomorSurat: nomorManual || buildNomor(nextNo, tgl), hari: hariStr, tanggal: tglStr,
@@ -923,42 +920,42 @@ async function generateDokumen() {
     jumlahPeserta: String(pesertaHadir.length), tgl_generet: tglGen,
     yth: getCheckedYth(),
     nomorBA: nomorBAManual || buildNomorBA(nextNoBA, tgl),
-  tglAngka:       String(tgl.getDate()),
-  tahunTerbilang: tahunTerbilang(tgl.getFullYear()),
+    tglAngka: String(tgl.getDate()),
+    tahunTerbilang: tahunTerbilang(tgl.getFullYear()),
     peserta: pesertaHadir.map((p, i) => ({
-      no: String(i+1),
+      no: String(i + 1),
       nama: p.nama,
       namaRingkas: p.nama.split(',')[0].trim()
         .split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '),
       jabatan: p.jabatan,
       ttd: '',
-      ttdNo: (i % 2 === 0) ? String(i+1) : '          ' + String(i+1),
+      ttdNo: (i % 2 === 0) ? String(i + 1) : '          ' + String(i + 1),
     }))
   };
 
   const btn = document.getElementById('btn-gen');
-  const sp  = document.getElementById('spinner');
-  const tx  = document.getElementById('btn-gen-text');
+  const sp = document.getElementById('spinner');
+  const tx = document.getElementById('btn-gen-text');
   btn.disabled = true; sp.style.display = 'block';
   document.getElementById('progress-bar').style.display = 'flex';
-  ['ps-fetch','ps-inject','ps-zip','ps-done'].forEach(id => setPS(id,''));
+  ['ps-fetch', 'ps-inject', 'ps-zip', 'ps-done'].forEach(id => setPS(id, ''));
 
   try {
-    setPS('ps-fetch','active'); tx.textContent = 'Mengambil template...';
+    setPS('ps-fetch', 'active'); tx.textContent = 'Mengambil template...';
     let blobs;
     try {
       blobs = await Promise.all([
         fetchAndInject(urlUnd, data, 'und'),
         fetchAndInject(urlAbs, data, 'abs'),
         fetchAndInject(urlRis, data, 'ris'),
-         fetchAndInject(urlBa,  data, 'ba')
+        fetchAndInject(urlBa, data, 'ba')
       ]);
     }
-    catch (e) { setPS('ps-fetch','err'); throw e; }
-    setPS('ps-fetch','done'); setPS('ps-inject','done');
+    catch (e) { setPS('ps-fetch', 'err'); throw e; }
+    setPS('ps-fetch', 'done'); setPS('ps-inject', 'done');
 
-    setPS('ps-zip','active'); tx.textContent = 'Mengunduh 4 dokumen...';
-    const prefix = `Rapat_${tanggalVal.replace(/-/g,'')}`;
+    setPS('ps-zip', 'active'); tx.textContent = 'Mengunduh 4 dokumen...';
+    const prefix = `Rapat_${tanggalVal.replace(/-/g, '')}`;
     dlBlob(blobs[0], `${prefix}_Undangan.docx`);
     await new Promise(r => setTimeout(r, 300));
     dlBlob(blobs[1], `${prefix}_AbsenHadir.docx`);
@@ -966,66 +963,68 @@ async function generateDokumen() {
     dlBlob(blobs[2], `${prefix}_Risalah.docx`);
     await new Promise(r => setTimeout(r, 300));
     dlBlob(blobs[3], `${prefix}_BeritaAcara.docx`);
-    setPS('ps-zip','done'); setPS('ps-done','done');
+    setPS('ps-zip', 'done'); setPS('ps-done', 'done');
 
     lastGenBlobs = blobs; lastGenPrefix = prefix;
 
     const arsipId = Date.now();
     const mkDraft = (blob, suffix) => ({
-      file:blob, name:`Draft_${prefix}_${suffix}`, size:blob.size, status:'pending',
-      url:null, type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      _blobUrl:null, _showPreview:false, _blob:blob, _isDraft:false
+      file: blob, name: `Draft_${prefix}_${suffix}`, size: blob.size, status: 'pending',
+      url: null, type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      _blobUrl: null, _showPreview: false, _blob: blob, _isDraft: false
     });
     uploadFiles[arsipId] = [
-      mkDraft(blobs[0],'Undangan.docx'),
-      mkDraft(blobs[1],'AbsenHadir.docx'),
-      mkDraft(blobs[2],'Risalah.docx'),
+      mkDraft(blobs[0], 'Undangan.docx'),
+      mkDraft(blobs[1], 'AbsenHadir.docx'),
+      mkDraft(blobs[2], 'Risalah.docx'),
       mkDraft(blobs[3], 'BeritaAcara.docx'),
     ];
 
     // newItem.uploadedFiles harus tetap [] — draft hanya di uploadFiles[arsipId] (memory)
-    const newItem = {id:arsipId, tanggal:tanggalVal, hari:hariStr, jam:jamVal, tempat, agenda,
-      nomorSurat: data.nomorSurat, tglGeneret:tglGen,
-      peserta: pesertaHadir.map(p => p.nama), uploadedFiles:[]};  // ← uploadedFiles SELALU []
+    const newItem = {
+      id: arsipId, tanggal: tanggalVal, hari: hariStr, jam: jamVal, tempat, agenda,
+      nomorSurat: data.nomorSurat, tglGeneret: tglGen,
+      peserta: pesertaHadir.map(p => p.nama), uploadedFiles: []
+    };  // ← uploadedFiles SELALU []
     arsipList.unshift(newItem); saveLocal();
 
     settings.nomorLast = nextNo;
     localStorage.setItem('sirapat_settings', JSON.stringify(settings));
 
     if (getGasUrl()) {
-    const folderNameForNomor = `${String(tgl.getDate()).padStart(2,'0')} ${BULAN_ID[tgl.getMonth()]} ${tgl.getFullYear()}`;
-gasCall('simpanNomor', {
-  nomorUrut:    nextNo,
-  nomorSurat:   data.nomorSurat,
-  tanggal:      tanggalVal,        // kirim format YYYY-MM-DD agar bisa di-parse Date()
-  agenda:       agenda,
-  tujuan:       '',
-  tglGeneret:   tglGen,
-  pesertaCount: pesertaHadir.length,
-  folderName:   folderNameForNomor  // untuk cari folder di Drive
-}).catch(() => {});
-// Simpan nomor BA ke sheet BA
-gasCall('simpanNomorBA', {
-  noUrut:  nextNoBA,
-  nomorBA: data.nomorBA,
-  tanggal: tanggalVal,
-  tentang: `BA RAPAT RUTIN - ${agenda.substring(0, 60)}`,
-  linkBA:  ''   // bisa diupdate nanti setelah file terupload
-}).catch(() => {});
+      const folderNameForNomor = `${String(tgl.getDate()).padStart(2, '0')} ${BULAN_ID[tgl.getMonth()]} ${tgl.getFullYear()}`;
+      gasCall('simpanNomor', {
+        nomorUrut: nextNo,
+        nomorSurat: data.nomorSurat,
+        tanggal: tanggalVal,        // kirim format YYYY-MM-DD agar bisa di-parse Date()
+        agenda: agenda,
+        tujuan: '',
+        tglGeneret: tglGen,
+        pesertaCount: pesertaHadir.length,
+        folderName: folderNameForNomor  // untuk cari folder di Drive
+      }).catch(() => { });
+      // Simpan nomor BA ke sheet BA
+      gasCall('simpanNomorBA', {
+        noUrut: nextNoBA,
+        nomorBA: data.nomorBA,
+        tanggal: tanggalVal,
+        tentang: `BA RAPAT RUTIN - ${agenda.substring(0, 60)}`,
+        linkBA: ''   // bisa diupdate nanti setelah file terupload
+      }).catch(() => { });
       // Update state lokal
-nomorBALast = nextNoBA;
-localStorage.setItem('sirapat_nomorBA', String(nomorBALast));
-      
+      nomorBALast = nextNoBA;
+      localStorage.setItem('sirapat_nomorBA', String(nomorBALast));
+
       syncArsipToCloud(newItem);
-      const folderName = `${String(tgl.getDate()).padStart(2,'0')} ${BULAN_ID[tgl.getMonth()]} ${tgl.getFullYear()}`;
+      const folderName = `${String(tgl.getDate()).padStart(2, '0')} ${BULAN_ID[tgl.getMonth()]} ${tgl.getFullYear()}`;
       setTimeout(() => uploadSemuaFile(arsipId, folderName), 500);
     }
 
     lastGenId = arsipId;
     document.getElementById('btn-awan').classList.add('visible');
     updateNomorPreview(); renderCalInline(); refreshStats();
-    showToast('✓ 4 dokumen berhasil diunduh (Undangan, Daftar hadir, Risalah, BA)!','success');
-  } catch (err) { console.error(err); showToast('❌ ' + err.message,'error'); }
+    showToast('✓ 4 dokumen berhasil diunduh (Undangan, Daftar hadir, Risalah, BA)!', 'success');
+  } catch (err) { console.error(err); showToast('❌ ' + err.message, 'error'); }
   finally { btn.disabled = false; sp.style.display = 'none'; tx.textContent = 'Generate 4 Dokumen'; }
 }
 
@@ -1049,7 +1048,7 @@ function simpanKeAwan() {
 
 // ════ ARSIP LIST ══════════════════════════════════════════════
 function renderArsip() {
-  const q   = (document.getElementById('search-inp')?.value || '').toLowerCase();
+  const q = (document.getElementById('search-inp')?.value || '').toLowerCase();
   const bln = document.getElementById('filter-bulan')?.value || '';
   const thn = document.getElementById('filter-tahun')?.value || '';
   const list = arsipList
@@ -1071,25 +1070,25 @@ function renderArsip() {
 
   const el = document.getElementById('arsip-list');
   if (!list.length) {
-    el.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3>Belum ada arsip</h3><p>${getGasUrl()?'Data cloud kosong.':'Arsip muncul setelah generate pertama.'}</p></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3>Belum ada arsip</h3><p>${getGasUrl() ? 'Data cloud kosong.' : 'Arsip muncul setelah generate pertama.'}</p></div>`;
     return;
   }
   el.innerHTML = list.map(r => {
-    const d          = parseTanggal(r.tanggal);
-    const files      = uploadFiles[r.id] || [];
-    const allFiles   = [...files, ...(r.uploadedFiles||[])];
-    const totalCloud = new Set(allFiles.filter(f => f?.status==='done').map(f => f.name)).size;
-    const hasDraft   = files.some(f => f._isDraft);
+    const d = parseTanggal(r.tanggal);
+    const files = uploadFiles[r.id] || [];
+    const allFiles = [...files, ...(r.uploadedFiles || [])];
+    const totalCloud = new Set(allFiles.filter(f => f?.status === 'done').map(f => f.name)).size;
+    const hasDraft = files.some(f => f._isDraft);
     return `<div class="arsip-item" id="arsip-item-${r.id}" onclick="showArsipDetail(${r.id})">
       <div class="arsip-date-box"><div class="day">${d.getDate()}</div><div class="month">${SH_ID[d.getMonth()]}</div></div>
       <div class="arsip-info">
-        <div class="arsip-title">${r.agenda.substring(0,60)}${r.agenda.length>60?'...':''}</div>
+        <div class="arsip-title">${r.agenda.substring(0, 60)}${r.agenda.length > 60 ? '...' : ''}</div>
         <div class="arsip-meta">
           <span>📅 ${r.hari}, ${d.getFullYear()}</span>
           <span>🕐 ${r.jam} WIB</span>
-          <span>👥 ${(r.peserta||[]).length}</span>
+          <span>👥 ${(r.peserta || []).length}</span>
           ${totalCloud ? `<span style="color:var(--blue)">☁ ${totalCloud}</span>` : ''}
-          ${hasDraft   ? `<span style="color:var(--gold)">📝 draft</span>` : ''}
+          ${hasDraft ? `<span style="color:var(--gold)">📝 draft</span>` : ''}
           ${r.nomorSurat ? `<span>${r.nomorSurat}</span>` : ''}
         </div>
       </div>
@@ -1109,7 +1108,7 @@ function hapusArsip(id) {
   arsipList = arsipList.filter(x => x.id !== id);
   saveLocal(); delete uploadFiles[id]; hapusArsipCloud(id, folderName);
   renderArsip(); renderCalInline(); refreshStats();
-  showToast('Arsip + folder Drive dihapus','info');
+  showToast('Arsip + folder Drive dihapus', 'info');
 }
 
 // ════ MODAL DETAIL ════════════════════════════════════════════
@@ -1117,7 +1116,7 @@ function printDetail() {
   if (!currentModalId) return;
   const r = arsipList.find(x => x.id === currentModalId); if (!r) return;
   const d = parseTanggal(r.tanggal);
-  const w = window.open('','_blank','width=800,height=600');
+  const w = window.open('', '_blank', 'width=800,height=600');
   w.document.write(`<html><head><title>Print Detail Rapat</title>
     <style>@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>
     </head><body><div style="font-family:Arial,sans-serif;max-width:800px;margin:0 auto">
@@ -1127,11 +1126,11 @@ function printDetail() {
       <tr><td style="padding:8px 0;font-weight:600;color:#5a3040">Tanggal</td><td>${r.hari}, ${tglFull(d)}</td></tr>
       <tr><td style="padding:8px 0;font-weight:600;color:#5a3040">Pukul</td><td>${r.jam} WIB</td></tr>
       <tr><td style="padding:8px 0;font-weight:600;color:#5a3040">Tempat</td><td>${r.tempat}</td></tr>
-      <tr><td style="padding:8px 0;font-weight:600;color:#5a3040">Nomor Surat</td><td>${r.nomorSurat||'-'}</td></tr>
-      <tr><td style="padding:8px 0;font-weight:600;color:#5a3040">Tgl Generate</td><td>${r.tglGeneret||'-'}</td></tr>
+      <tr><td style="padding:8px 0;font-weight:600;color:#5a3040">Nomor Surat</td><td>${r.nomorSurat || '-'}</td></tr>
+      <tr><td style="padding:8px 0;font-weight:600;color:#5a3040">Tgl Generate</td><td>${r.tglGeneret || '-'}</td></tr>
     </table>
-    <h3 style="margin-top:30px;color:#7a1020">Daftar Peserta (${(r.peserta||[]).length} Orang)</h3>
-    <ol style="padding-left:20px;font-size:14px;line-height:1.6">${(r.peserta||[]).map(n=>`<li>${n}</li>`).join('')}</ol>
+    <h3 style="margin-top:30px;color:#7a1020">Daftar Peserta (${(r.peserta || []).length} Orang)</h3>
+    <ol style="padding-left:20px;font-size:14px;line-height:1.6">${(r.peserta || []).map(n => `<li>${n}</li>`).join('')}</ol>
     </div></body></html>`);
   w.document.close(); w.focus();
   setTimeout(() => { w.print(); w.close(); }, 250);
@@ -1140,15 +1139,15 @@ function printDetail() {
 function shareFiles() {
   if (!currentModalId) return;
   const r = arsipList.find(x => x.id === currentModalId); if (!r) return;
-  const allDone = [...(uploadFiles[currentModalId]||[]), ...(r.uploadedFiles||[])]
+  const allDone = [...(uploadFiles[currentModalId] || []), ...(r.uploadedFiles || [])]
     .filter(f => f?.status === 'done' && f.url)
     .reduce((acc, f) => { if (!acc.find(x => x.name === f.name)) acc.push(f); return acc; }, []);
-  if (!allDone.length) { showToast('Belum ada dokumen tersimpan di Drive.','error'); return; }
+  if (!allDone.length) { showToast('Belum ada dokumen tersimpan di Drive.', 'error'); return; }
   const d = parseTanggal(r.tanggal);
   const text = `🗂 Dokumen Rapat: ${r.agenda}\n📅 ${r.hari}, ${tglFull(d)}\n\n` +
     allDone.map(f => `📄 ${f.name}\n${f.url}`).join('\n\n');
-  if (navigator.share) navigator.share({title:'Dokumen Rapat',text}).catch(()=>{});
-  else navigator.clipboard.writeText(text).then(() => showToast('✓ Link disalin ke clipboard!','success'))
+  if (navigator.share) navigator.share({ title: 'Dokumen Rapat', text }).catch(() => { });
+  else navigator.clipboard.writeText(text).then(() => showToast('✓ Link disalin ke clipboard!', 'success'))
     .catch(() => prompt('Salin teks berikut:', text));
 }
 
@@ -1156,10 +1155,10 @@ function showArsipDetail(id) {
   currentModalId = id;
   const r = arsipList.find(x => x.id === id); if (!r) return;
   const d = parseTanggal(r.tanggal);
-  const folderName = `${String(d.getDate()).padStart(2,'0')} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;
+  const folderName = `${String(d.getDate()).padStart(2, '0')} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;
   if (r.uploadedFiles?.length && !uploadFiles[id]?.length)
-    uploadFiles[id] = r.uploadedFiles.map(f => ({...f, file:null, type:f.type||'', _showPreview:false}));
-  const hasDriveFiles = [...(uploadFiles[id]||[]), ...(r.uploadedFiles||[])].some(f => f?.status==='done' && f.url);
+    uploadFiles[id] = r.uploadedFiles.map(f => ({ ...f, file: null, type: f.type || '', _showPreview: false }));
+  const hasDriveFiles = [...(uploadFiles[id] || []), ...(r.uploadedFiles || [])].some(f => f?.status === 'done' && f.url);
   const shareBtn = document.getElementById('modal-share-btn');
   if (shareBtn) shareBtn.style.display = hasDriveFiles ? '' : 'none';
   document.getElementById('modal-title').textContent = 'Detail Rapat';
@@ -1172,10 +1171,10 @@ function showArsipDetail(id) {
     <div class="detail-row"><div class="detail-label">Pukul</div><div class="detail-val">${r.jam} WIB</div></div>
     <div class="detail-row"><div class="detail-label">Tempat</div><div class="detail-val">${r.tempat}</div></div>
     <div class="detail-row"><div class="detail-label">Agenda</div><div class="detail-val">${r.agenda}</div></div>
-    <div class="detail-row"><div class="detail-label">Nomor Surat</div><div class="detail-val">${r.nomorSurat||'-'}</div></div>
-    <div class="detail-row"><div class="detail-label">Di-generate</div><div class="detail-val">${r.tglGeneret||'-'}</div></div>
-    <div class="detail-row" style="border-bottom:none"><div class="detail-label">Peserta (${(r.peserta||[]).length})</div>
-      <div class="detail-val">${(r.peserta||[]).map((n,i)=>`${i+1}. ${n}`).join('<br>')}</div>
+    <div class="detail-row"><div class="detail-label">Nomor Surat</div><div class="detail-val">${r.nomorSurat || '-'}</div></div>
+    <div class="detail-row"><div class="detail-label">Di-generate</div><div class="detail-val">${r.tglGeneret || '-'}</div></div>
+    <div class="detail-row" style="border-bottom:none"><div class="detail-label">Peserta (${(r.peserta || []).length})</div>
+      <div class="detail-val">${(r.peserta || []).map((n, i) => `${i + 1}. ${n}`).join('<br>')}</div>
     </div>
   </div>
   <div id="detail-edit-${r.id}" style="display:none">
@@ -1188,7 +1187,7 @@ function showArsipDetail(id) {
     <div class="field" style="margin-bottom:8px"><label>Agenda</label>
       <textarea id="edit-agenda-${r.id}" rows="3">${r.agenda}</textarea></div>
     <div class="field" style="margin-bottom:8px"><label>Nomor Surat</label>
-      <input type="text" id="edit-nomor-${r.id}" value="${r.nomorSurat||''}"></div>
+      <input type="text" id="edit-nomor-${r.id}" value="${r.nomorSurat || ''}"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
       <button class="btn-sm" onclick="toggleEditDetail(${r.id})">Batal</button>
       <button class="btn-primary" onclick="simpanEditDetail(${r.id})">💾 Simpan</button>
@@ -1199,7 +1198,7 @@ function showArsipDetail(id) {
       <div class="upload-section-title">☁ Upload Dokumen ke Drive <span class="folder-tag">📁 ${folderName}</span>
       <button class="btn-sm" style="margin-left:auto" onclick="scanArsipDrive(${id}, this)">🔄 Scan Drive</button>
 </div>
-      ${!getGasUrl()?'<div class="no-gas-warning">⚠ URL Apps Script belum diisi di Pengaturan.</div>':''}
+      ${!getGasUrl() ? '<div class="no-gas-warning">⚠ URL Apps Script belum diisi di Pengaturan.</div>' : ''}
       <div class="upload-slots" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
   ${SLOT_DEFS.map(s => `
     <div class="upload-zone" style="padding:1rem .75rem"
@@ -1228,7 +1227,7 @@ function showArsipDetail(id) {
 function toggleEditDetail(id) {
   const view = document.getElementById(`detail-view-${id}`);
   const edit = document.getElementById(`detail-edit-${id}`);
-  const btn  = document.getElementById('btn-edit-detail');
+  const btn = document.getElementById('btn-edit-detail');
   const isEditing = edit.style.display !== 'none';
   view.style.display = isEditing ? '' : 'none';
   edit.style.display = isEditing ? 'none' : '';
@@ -1238,20 +1237,20 @@ function toggleEditDetail(id) {
 function simpanEditDetail(id) {
   if (!isAdmin()) { showToast('⛔ Akses ditolak.', 'error'); return; }
   const r = arsipList.find(x => x.id === id); if (!r) return;
-  const tgl    = document.getElementById(`edit-tgl-${id}`).value;
-  const jam    = document.getElementById(`edit-jam-${id}`).value;
+  const tgl = document.getElementById(`edit-tgl-${id}`).value;
+  const jam = document.getElementById(`edit-jam-${id}`).value;
   const tempat = document.getElementById(`edit-tempat-${id}`).value.trim();
   const agenda = document.getElementById(`edit-agenda-${id}`).value.trim();
-  const nomor  = document.getElementById(`edit-nomor-${id}`).value.trim();
+  const nomor = document.getElementById(`edit-nomor-${id}`).value.trim();
 
   if (!tgl || !agenda) { showToast('Tanggal dan agenda wajib diisi', 'error'); return; }
 
   const d = parseTanggal(tgl);
-  r.tanggal    = tgl;
-  r.hari       = HARI_ID[d.getDay()];
-  r.jam        = jam;
-  r.tempat     = tempat;
-  r.agenda     = agenda;
+  r.tanggal = tgl;
+  r.hari = HARI_ID[d.getDay()];
+  r.jam = jam;
+  r.tempat = tempat;
+  r.agenda = agenda;
   r.nomorSurat = nomor;
 
   saveLocal();
@@ -1265,16 +1264,16 @@ function simpanEditDetail(id) {
 }
 
 function renderDraftSection(id) {
-  const drafts = (uploadFiles[id]||[]).filter(f => f._isDraft && f._blob);
+  const drafts = (uploadFiles[id] || []).filter(f => f._isDraft && f._blob);
   if (!drafts.length) return '';
   return `<div class="draft-section">
     <div class="draft-section-title">📝 Draft Dokumen Tergenerate</div>
     <div class="draft-files">${drafts.map(f =>
-      `<div class="draft-file-item">
+    `<div class="draft-file-item">
         <div class="draft-file-icon">📝</div>
         <div class="draft-file-name">${f.name}</div>
         <span style="font-size:10px;color:var(--text-muted)">${fmtSize(f.size)}</span>
-        <button class="draft-file-dl" onclick="downloadDraft(${id},${(uploadFiles[id]||[]).indexOf(f)})">⬇ Unduh</button>
+        <button class="draft-file-dl" onclick="downloadDraft(${id},${(uploadFiles[id] || []).indexOf(f)})">⬇ Unduh</button>
       </div>`).join('')}
     </div>
     <div style="font-size:10px;color:var(--text-muted);margin-top:6px">💡 File draft hanya tersedia selama sesi ini.</div>
@@ -1282,21 +1281,21 @@ function renderDraftSection(id) {
 }
 
 function downloadDraft(arsipId, fileIdx) {
-  const f = (uploadFiles[arsipId]||[])[fileIdx];
+  const f = (uploadFiles[arsipId] || [])[fileIdx];
   if (!f?._blob) return;
   dlBlob(f._blob, f.name);
 }
 
 function renderFileList(id) {
-  const files  = (uploadFiles[id]||[]).filter(f => !f._isDraft);
-  const el     = document.getElementById(`file-list-${id}`); if (!el) return;
-  const actEl  = document.getElementById(`upload-actions-${id}`);
+  const files = (uploadFiles[id] || []).filter(f => !f._isDraft);
+  const el = document.getElementById(`file-list-${id}`); if (!el) return;
+  const actEl = document.getElementById(`upload-actions-${id}`);
   if (actEl) actEl.style.display = files.length ? 'flex' : 'none';
   if (!files.length) { el.innerHTML = ''; return; }
 
   el.innerHTML = files.map(f => {
-    const realIdx = (uploadFiles[id]||[]).indexOf(f);
-    const isDone  = f.status === 'done' && f.url;
+    const realIdx = (uploadFiles[id] || []).indexOf(f);
+    const isDone = f.status === 'done' && f.url;
     const imgFile = isImage(f.name);
     const pdfFile = isPdf(f.name);
     let btns = '';
@@ -1306,8 +1305,8 @@ function renderFileList(id) {
     } else {
       btns += `<span class="file-status ${f.status}">${statusLbl(f.status)}</span>`;
     }
-    if ((imgFile && (f._blobUrl||isDone)) || (pdfFile && isDone)) {
-      btns += ` <button class="file-preview-btn${f._showPreview?' active':''}" onclick="togglePreview(${id},${realIdx})" title="${f._showPreview?'Tutup':'Lihat'} preview">👁</button>`;
+    if ((imgFile && (f._blobUrl || isDone)) || (pdfFile && isDone)) {
+      btns += ` <button class="file-preview-btn${f._showPreview ? ' active' : ''}" onclick="togglePreview(${id},${realIdx})" title="${f._showPreview ? 'Tutup' : 'Lihat'} preview">👁</button>`;
       btns += ` <button class="file-preview-btn" onclick="printSingleFile(${id},${realIdx})" title="Print">🖨️</button>`;
     }
     let preview = '';
@@ -1328,7 +1327,7 @@ function renderFileList(id) {
 <div class="file-size">${fmtSize(f.size)}</div>
 <div style="display:flex;align-items:center;gap:3px;flex-shrink:0;margin-left:auto">
           ${btns}
-          ${f.status!=='uploading' ? `<button onclick="hapusFile(${id},${realIdx})" title="Hapus" style="background:none;border:none;cursor:pointer;font-size:12px;padding:2px 5px;border-radius:3px;color:var(--text-muted)">✕</button>` : ''}
+          ${f.status !== 'uploading' ? `<button onclick="hapusFile(${id},${realIdx})" title="Hapus" style="background:none;border:none;cursor:pointer;font-size:12px;padding:2px 5px;border-radius:3px;color:var(--text-muted)">✕</button>` : ''}
         </div>
       </div>${preview}
     </div>`;
@@ -1342,7 +1341,7 @@ function togglePreview(arsipId, fileIdx) {
   renderFileList(arsipId);
 }
 function revokeBlobUrl(arsipId, fileIdx) {
-  const f = (uploadFiles[arsipId]||[])[fileIdx];
+  const f = (uploadFiles[arsipId] || [])[fileIdx];
   if (f?._blobUrl) URL.revokeObjectURL(f._blobUrl);
 }
 function closeModal(e) {
@@ -1363,9 +1362,9 @@ function addFiles(id, files) {
   uploadFiles[id] ??= [];
   files.forEach(f => {
     const maxMB = f.type.startsWith('image/') ? 20 : 10;
-    if (f.size > maxMB*1024*1024) { showToast(`${f.name} terlalu besar (maks ${maxMB}MB)`,'error'); return; }
+    if (f.size > maxMB * 1024 * 1024) { showToast(`${f.name} terlalu besar (maks ${maxMB}MB)`, 'error'); return; }
     const blobUrl = f.type.startsWith('image/') ? URL.createObjectURL(f) : null;
-    const entry = { file:f, name:f.name, size:f.size, status:'pending', url:null, type:f.type||'', _blobUrl:blobUrl, _showPreview:false };
+    const entry = { file: f, name: f.name, size: f.size, status: 'pending', url: null, type: f.type || '', _blobUrl: blobUrl, _showPreview: false };
     uploadFiles[id].push(entry);
     if (!navigator.onLine) {
       const r = arsipList.find(x => x.id === id);
@@ -1377,7 +1376,7 @@ function addFiles(id, files) {
   renderFileList(id);
 }
 function renameForSlot(file, slotKey, originalName) {
-  const SLOT_PREFIX = {undangan:'Undangan', ba:'BeritaAcara', absen:'AbsenHadir', risalah:'Risalah'};
+  const SLOT_PREFIX = { undangan: 'Undangan', ba: 'BeritaAcara', absen: 'AbsenHadir', risalah: 'Risalah' };
   const ext = (originalName.split('.').pop() || '').toLowerCase();
   return `${SLOT_PREFIX[slotKey]}.${ext}`;
 }
@@ -1385,7 +1384,7 @@ function renameForSlot(file, slotKey, originalName) {
 function addFileToSlot(id, file, slotKey) {
   uploadFiles[id] ??= [];
   const maxMB = file.type.startsWith('image/') ? 20 : 10;
-  if (file.size > maxMB*1024*1024) { showToast(`${file.name} terlalu besar (maks ${maxMB}MB)`,'error'); return; }
+  if (file.size > maxMB * 1024 * 1024) { showToast(`${file.name} terlalu besar (maks ${maxMB}MB)`, 'error'); return; }
   const renamedName = renameForSlot(file, slotKey, file.name);
   const blobUrl = file.type.startsWith('image/') ? URL.createObjectURL(file) : null;
 
@@ -1393,8 +1392,8 @@ function addFileToSlot(id, file, slotKey) {
   uploadFiles[id] = uploadFiles[id].filter(f => !(f._slot === slotKey && f.status !== 'done'));
 
   const entry = {
-    file, name: renamedName, size: file.size, status:'pending',
-    url:null, type:file.type||'', _blobUrl:blobUrl, _showPreview:false, _slot:slotKey
+    file, name: renamedName, size: file.size, status: 'pending',
+    url: null, type: file.type || '', _blobUrl: blobUrl, _showPreview: false, _slot: slotKey
   };
   uploadFiles[id].push(entry);
 
@@ -1429,16 +1428,16 @@ function hapusFile(id, i) {
   revokeBlobUrl(id, i); uploadFiles[id].splice(i, 1); renderFileList(id);
 
   if (adaDiDrive && getGasUrl()) {
-    gasCall('hapusFileDrive', { url: f.url }).catch(() => {});
+    gasCall('hapusFileDrive', { url: f.url }).catch(() => { });
   }
 
   const r = arsipList.find(x => x.id === id);
   if (r) {
-    r.uploadedFiles = uploadFiles[id].filter(f => f.status==='done').map(f => ({name:f.name, size:f.size, status:f.status, url:f.url||null}));
+    r.uploadedFiles = uploadFiles[id].filter(f => f.status === 'done').map(f => ({ name: f.name, size: f.size, status: f.status, url: f.url || null }));
     saveLocal();
-    if (getGasUrl()) gasCall('updateArsipFiles', {id, uploadedFiles:r.uploadedFiles}).catch(()=>{});
+    if (getGasUrl()) gasCall('updateArsipFiles', { id, uploadedFiles: r.uploadedFiles }).catch(() => { });
   }
-  renderArsip(); showToast('File dihapus','info');
+  renderArsip(); showToast('File dihapus', 'info');
 }
 
 async function uploadSemuaFile(id, folderName) {
@@ -1462,15 +1461,15 @@ async function uploadSemuaFile(id, folderName) {
     renderFileList(id);
     try {
       const res = await gasCall('uploadFile', {
-        fileName:   f.name,
+        fileName: f.name,
         fileBase64: await toBase64(f.file),
-        mimeType:   f.file.type || 'application/octet-stream',
+        mimeType: f.file.type || 'application/octet-stream',
         folderName
       });
       if (!res.success) throw new Error(res.error || 'Unknown');
-      allFiles[i].status   = 'done';
-      allFiles[i].url      = res.fileUrl;
-      allFiles[i].type     = allFiles[i].type || f.file?.type || '';
+      allFiles[i].status = 'done';
+      allFiles[i].url = res.fileUrl;
+      allFiles[i].type = allFiles[i].type || f.file?.type || '';
       allFiles[i]._isDraft = false;
       ok++;
     } catch { allFiles[i].status = 'err'; fail++; }
@@ -1486,14 +1485,14 @@ async function uploadSemuaFile(id, folderName) {
       .filter(f => f.status === 'done' && f.url)
       .map(f => ({ name: f.name, size: f.size, status: f.status, url: f.url }));
     saveLocal();
-    if (getGasUrl()) gasCall('updateArsipFiles', { id, uploadedFiles: r.uploadedFiles }).catch(() => {});
+    if (getGasUrl()) gasCall('updateArsipFiles', { id, uploadedFiles: r.uploadedFiles }).catch(() => { });
   }
 
   // Update link folder di sheet Surat Keluar setelah upload berhasil
   if (ok > 0 && r?.nomorSurat) {
     const nomorUrut = parseInt(r.nomorSurat);
     if (!isNaN(nomorUrut) && nomorUrut > 0) {
-      gasCall('updateLinkFolder', { nomorUrut, folderName }).catch(() => {});
+      gasCall('updateLinkFolder', { nomorUrut, folderName }).catch(() => { });
     }
   }
 
@@ -1511,11 +1510,11 @@ function shareSingleFile(url, name) {
 }
 
 function printSingleFile(arsipId, fileIdx) {
-  const f = (uploadFiles[arsipId]||[])[fileIdx]; if (!f) return;
+  const f = (uploadFiles[arsipId] || [])[fileIdx]; if (!f) return;
   if (isImage(f.name)) {
     const src = f._blobUrl || (f.url ? (extractDriveId(f.url) ? `https://drive.google.com/thumbnail?id=${extractDriveId(f.url)}&sz=w2000` : f.url) : '');
-    if (!src) { showToast('File belum siap di-print','error'); return; }
-    const w = window.open('','_blank');
+    if (!src) { showToast('File belum siap di-print', 'error'); return; }
+    const w = window.open('', '_blank');
     w.document.write(`<html><head><title>Print - ${f.name}</title>
       <style>@media print{@page{margin:0}body{margin:0;display:flex;justify-content:center;align-items:center;height:100vh}img{max-width:100%;max-height:100vh;object-fit:contain}}</style>
       </head><body onload="setTimeout(function(){window.print();window.close()},500)">
@@ -1525,7 +1524,7 @@ function printSingleFile(arsipId, fileIdx) {
   } else if (isPdf(f.name) && f.url) {
     window.open(f.url, '_blank');
   } else {
-    showToast('File belum siap di-print','error');
+    showToast('File belum siap di-print', 'error');
   }
 }
 
@@ -1537,7 +1536,7 @@ function renderPesertaManage() {
          ondragenter="pDragEnter(event,${i})" ondragleave="pDragLeave(event)"
          ondrop="pDrop(event,${i})" ondragend="pDragEnd(event)">
       <div class="drag-handle" title="Geser untuk ubah urutan">⠿</div>
-      <div class="peserta-num">${i+1}</div>
+      <div class="peserta-num">${i + 1}</div>
       <input type="text" value="${p.nama}" placeholder="Nama + gelar" id="pm-nama-${i}">
       <input type="text" value="${p.jabatan}" placeholder="Jabatan" id="pm-jab-${i}" style="max-width:260px">
       <button class="btn-icon" onclick="hapusPesertaRow(${i})">✕</button>
@@ -1548,50 +1547,50 @@ function renderPesertaManage() {
 let pDragIdx = null;
 function syncPesertaDOM() {
   pesertaList.forEach((_, i) => {
-    const n = document.getElementById('pm-nama-'+i), j = document.getElementById('pm-jab-'+i);
+    const n = document.getElementById('pm-nama-' + i), j = document.getElementById('pm-jab-' + i);
     if (n) pesertaList[i].nama = n.value;
     if (j) pesertaList[i].jabatan = j.value;
   });
 }
-function pDragStart(e, i) { syncPesertaDOM(); pDragIdx=i; e.dataTransfer.effectAllowed='move'; setTimeout(()=>e.target.classList.add('dragging'),0); }
-function pDragOver(e)     { e.preventDefault(); e.dataTransfer.dropEffect='move'; }
-function pDragEnter(e, i) { e.preventDefault(); if (i!==pDragIdx) e.currentTarget.classList.add('drop-target'); }
-function pDragLeave(e)    { e.currentTarget.classList.remove('drop-target'); }
+function pDragStart(e, i) { syncPesertaDOM(); pDragIdx = i; e.dataTransfer.effectAllowed = 'move'; setTimeout(() => e.target.classList.add('dragging'), 0); }
+function pDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function pDragEnter(e, i) { e.preventDefault(); if (i !== pDragIdx) e.currentTarget.classList.add('drop-target'); }
+function pDragLeave(e) { e.currentTarget.classList.remove('drop-target'); }
 function pDrop(e, i) {
   e.stopPropagation(); e.currentTarget.classList.remove('drop-target');
-  if (pDragIdx===null || pDragIdx===i) return;
+  if (pDragIdx === null || pDragIdx === i) return;
   pesertaList.splice(i, 0, pesertaList.splice(pDragIdx, 1)[0]);
   renderPesertaManage();
   localStorage.setItem('sirapat_peserta', JSON.stringify(pesertaList));
   renderPesertaGen();
-  if (getGasUrl()) gasCall('simpanPeserta', {peserta:pesertaList}).catch(()=>{});
+  if (getGasUrl()) gasCall('simpanPeserta', { peserta: pesertaList }).catch(() => { });
 }
 function pDragEnd(e) {
   e.target.classList.remove('dragging');
   document.querySelectorAll('.peserta-row').forEach(el => el.classList.remove('drop-target'));
   pDragIdx = null;
 }
-function tambahPeserta() { pesertaList.push({nama:'',jabatan:''}); renderPesertaManage(); }
+function tambahPeserta() { pesertaList.push({ nama: '', jabatan: '' }); renderPesertaManage(); }
 function hapusPesertaRow(i) {
   if (!confirm('Hapus peserta ini?')) return;
   pesertaList.splice(i, 1); renderPesertaManage();
-  showToast('Peserta dihapus','info');
+  showToast('Peserta dihapus', 'info');
 }
 function simpanPeserta() {
   if (!isAdmin()) { showToast('⛔ Akses ditolak.', 'error'); return; }
-  pesertaList = pesertaList.map((_,i) => ({
-    nama:    document.getElementById('pm-nama-'+i)?.value||'',
-    jabatan: document.getElementById('pm-jab-'+i)?.value||''
+  pesertaList = pesertaList.map((_, i) => ({
+    nama: document.getElementById('pm-nama-' + i)?.value || '',
+    jabatan: document.getElementById('pm-jab-' + i)?.value || ''
   })).filter(p => p.nama.trim());
   localStorage.setItem('sirapat_peserta', JSON.stringify(pesertaList));
-  renderPesertaGen(); showToast('Daftar peserta disimpan!','success');
-  if (getGasUrl()) gasCall('simpanPeserta', {peserta:pesertaList}).catch(()=>{});
+  renderPesertaGen(); showToast('Daftar peserta disimpan!', 'success');
+  if (getGasUrl()) gasCall('simpanPeserta', { peserta: pesertaList }).catch(() => { });
 }
 function resetPeserta() {
   if (!confirm('Reset ke default?')) return;
-  pesertaList = DEFAULT_PESERTA.map(p => ({...p}));
+  pesertaList = DEFAULT_PESERTA.map(p => ({ ...p }));
   localStorage.setItem('sirapat_peserta', JSON.stringify(pesertaList));
-  renderPesertaManage(); renderPesertaGen(); showToast('Direset ke default.','info');
+  renderPesertaManage(); renderPesertaGen(); showToast('Direset ke default.', 'info');
 }
 
 // ════ YTH LIST ════════════════════════════════════════════════
@@ -1600,7 +1599,7 @@ function renderYthManage() {
   if (!cont) return;
   cont.innerHTML = ythList.map((y, i) =>
     `<div class="peserta-row" style="gap:8px">
-      <div class="peserta-num">${i+1}</div>
+      <div class="peserta-num">${i + 1}</div>
       <input type="text" value="${y}" placeholder="Contoh: Seluruh Anggota" id="yth-item-${i}" style="flex:1;font-family:'Inter',sans-serif;font-size:12px;padding:6px 9px;border:1.5px solid #e8ddd5;border-radius:5px;background:#fdfaf7;outline:none">
       <button class="btn-icon" onclick="hapusYthRow(${i})">✕</button>
     </div>`
@@ -1614,13 +1613,13 @@ function hapusYthRow(i) {
 }
 function simpanYth() {
   if (!isAdmin()) { showToast('⛔ Akses ditolak.', 'error'); return; }
-  ythList = ythList.map((_,i) => document.getElementById('yth-item-'+i)?.value.trim() || '').filter(Boolean);
+  ythList = ythList.map((_, i) => document.getElementById('yth-item-' + i)?.value.trim() || '').filter(Boolean);
   localStorage.setItem('sirapat_yth', JSON.stringify(ythList));
-  showToast('Daftar Yth. disimpan!','success');
+  showToast('Daftar Yth. disimpan!', 'success');
   renderYthGen();
   if (getGasUrl()) gasCall('simpanYth', {
-  yth: ythList.map((y, i) => ({ no: String(i + 1), namaYth: y }))
-}).catch(() => {});
+    yth: ythList.map((y, i) => ({ no: String(i + 1), namaYth: y }))
+  }).catch(() => { });
 }
 function resetYth() {
   if (!confirm('Reset ke default?')) return;
@@ -1628,29 +1627,29 @@ function resetYth() {
   localStorage.setItem('sirapat_yth', JSON.stringify(ythList));
   renderYthManage();
   renderYthGen();
-  showToast('Direset ke default.','info');
+  showToast('Direset ke default.', 'info');
 }
 
 // ════ PENGATURAN ══════════════════════════════════════════════
 function loadPengaturan() {
-  ['instansi','kota','ketua','sekretaris'].forEach(k => { const el=document.getElementById('set-'+k); if(el) el.value=settings[k]||''; });
-  const fields = {nf:'set-nomor-fmt', nl:'set-nomor-last', gu:'set-gas-url', uu:'url-und', ua:'url-abs', ur:'url-ris'};
-  const vals   = {nf:settings.nomorFmt, nl:settings.nomorLast||0, gu:settings.gasUrl, uu:settings.urlUnd, ua:settings.urlAbs, ur:settings.urlRis};
-  Object.entries(fields).forEach(([k,id]) => { const el=document.getElementById(id); if(el) el.value=vals[k]||''; });
+  ['instansi', 'kota', 'ketua', 'sekretaris'].forEach(k => { const el = document.getElementById('set-' + k); if (el) el.value = settings[k] || ''; });
+  const fields = { nf: 'set-nomor-fmt', nl: 'set-nomor-last', gu: 'set-gas-url', uu: 'url-und', ua: 'url-abs', ur: 'url-ris' };
+  const vals = { nf: settings.nomorFmt, nl: settings.nomorLast || 0, gu: settings.gasUrl, uu: settings.urlUnd, ua: settings.urlAbs, ur: settings.urlRis };
+  Object.entries(fields).forEach(([k, id]) => { const el = document.getElementById(id); if (el) el.value = vals[k] || ''; });
   if (settings.tplMode === 'manual') document.querySelectorAll('.tpl-mode-tab')[1]?.click();
 }
 function simpanPengaturan() {
   if (!isAdmin()) { showToast('⛔ Akses ditolak.', 'error'); return; }
-  ['instansi','kota','ketua','sekretaris'].forEach(k => { const el=document.getElementById('set-'+k); if(el) settings[k]=el.value; });
-  const nf=document.getElementById('set-nomor-fmt');  if(nf) settings.nomorFmt=nf.value;
-  const nl=document.getElementById('set-nomor-last'); if(nl) settings.nomorLast=parseInt(nl.value)||0;
-  const gu=document.getElementById('set-gas-url');    if(gu) settings.gasUrl=gu.value.trim();
-  const uu=document.getElementById('url-und');        if(uu) settings.urlUnd=uu.value;
-  const ua=document.getElementById('url-abs');        if(ua) settings.urlAbs=ua.value;
-  const ur=document.getElementById('url-ris');        if(ur) settings.urlRis=ur.value;
+  ['instansi', 'kota', 'ketua', 'sekretaris'].forEach(k => { const el = document.getElementById('set-' + k); if (el) settings[k] = el.value; });
+  const nf = document.getElementById('set-nomor-fmt'); if (nf) settings.nomorFmt = nf.value;
+  const nl = document.getElementById('set-nomor-last'); if (nl) settings.nomorLast = parseInt(nl.value) || 0;
+  const gu = document.getElementById('set-gas-url'); if (gu) settings.gasUrl = gu.value.trim();
+  const uu = document.getElementById('url-und'); if (uu) settings.urlUnd = uu.value;
+  const ua = document.getElementById('url-abs'); if (ua) settings.urlAbs = ua.value;
+  const ur = document.getElementById('url-ris'); if (ur) settings.urlRis = ur.value;
   settings.tplMode = tplMode;
   localStorage.setItem('sirapat_settings', JSON.stringify(settings));
-  showToast('Pengaturan disimpan!','success'); fetchNomor();
+  showToast('Pengaturan disimpan!', 'success'); fetchNomor();
 }
 function toggleFaq(el) { el.classList.toggle('open'); el.nextElementSibling.classList.toggle('open'); }
 
@@ -1661,7 +1660,7 @@ function showPage(id, btn) {
   const targetPage = document.getElementById('page-' + id);
   if (targetPage) targetPage.classList.add('active');
   if (btn) btn.classList.add('active');
- if (id === 'peserta') { renderPesertaManage(); renderYthManage(); }
+  if (id === 'peserta') { renderPesertaManage(); renderYthManage(); }
   if (id === 'beranda') {
     renderCalInline();
     renderArsip();
@@ -1672,7 +1671,7 @@ function showPage(id, btn) {
   if (id === 'pengaturan') loadPengaturan();
 }
 let toastT;
-function showToast(msg, type='info') {
+function showToast(msg, type = 'info') {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = `toast ${type} show`;
   clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 4500);
@@ -1727,7 +1726,7 @@ function applyRoleUI() {
   const admin = isAdmin();
 
   // Nav: sembunyikan menu khusus admin
-  ['generate','peserta','pengaturan'].forEach(id => {
+  ['generate', 'peserta', 'pengaturan'].forEach(id => {
     document.querySelectorAll(`.nav-btn[onclick*="'${id}'"]`).forEach(el => {
       el.style.display = admin ? '' : 'none';
     });
@@ -1817,12 +1816,12 @@ async function loadYthFromCloud() {
 function renderUpNext() {
   const el = document.getElementById('upnext-list'); if (!el) return;
   const todayMs = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-  const nowMs   = new Date().getTime();
+  const nowMs = new Date().getTime();
 
   const upcoming = arsipList
     .filter(r => {
       const d = parseTanggal(r.tanggal);
-      if (r.jam) { const p = r.jam.split(':'); d.setHours(parseInt(p[0],10), parseInt(p[1],10), 0, 0); }
+      if (r.jam) { const p = r.jam.split(':'); d.setHours(parseInt(p[0], 10), parseInt(p[1], 10), 0, 0); }
       return d.getTime() >= nowMs;
     })
     .sort((a, b) => {
@@ -1845,14 +1844,14 @@ function renderUpNext() {
     const isFirst = i === 0;
     return `<div class="upnext-item${isFirst ? ' next' : ''}" onclick="showArsipDetail(${r.id})">
       <div class="upnext-datebox${isFirst ? '' : ' future'}">
-        <span class="ud">${String(d.getDate()).padStart(2,'0')}</span>
+        <span class="ud">${String(d.getDate()).padStart(2, '0')}</span>
         <span class="um">${SH_ID[d.getMonth()].toUpperCase()}</span>
       </div>
       <div class="upnext-info">
-        <div class="upnext-agenda">${r.agenda.substring(0,55)}${r.agenda.length>55?'...':''}</div>
+        <div class="upnext-agenda">${r.agenda.substring(0, 55)}${r.agenda.length > 55 ? '...' : ''}</div>
         <div class="upnext-meta">
           <span>🕒 ${r.jam} WIB</span>
-          <span>📍 ${(r.tempat||'').substring(0,28)}</span>
+          <span>📍 ${(r.tempat || '').substring(0, 28)}</span>
         </div>
       </div>
       <span class="upnext-badge ${isSoon ? 'soon' : 'far'}">${labelHari}</span>
@@ -1863,7 +1862,7 @@ function renderUpNext() {
 // ════ RISALAH TERAKHIR QUICK ACCESS ══════════════════════════
 function renderRisalahQuick() {
   const sub = document.getElementById('risalah-quick-sub');
-  const st  = document.getElementById('risalah-quick-status');
+  const st = document.getElementById('risalah-quick-status');
   if (!sub || !st) return;
   if (!arsipList.length) {
     sub.textContent = 'Belum ada arsip rapat';
@@ -1874,7 +1873,7 @@ function renderRisalahQuick() {
   const sudahLewat = arsipList
     .filter(r => {
       const d = parseTanggal(r.tanggal);
-      if (r.jam) { const p = r.jam.split(':'); d.setHours(parseInt(p[0],10), parseInt(p[1],10), 0, 0); }
+      if (r.jam) { const p = r.jam.split(':'); d.setHours(parseInt(p[0], 10), parseInt(p[1], 10), 0, 0); }
       return d.getTime() <= nowMs;
     })
     .sort((a, b) => {
@@ -1889,27 +1888,27 @@ function renderRisalahQuick() {
   }
 
   const latest = sudahLewat[0];
-  const d      = parseTanggal(latest.tanggal);
-  sub.textContent = `${(latest.agenda||'').substring(0,45)}${(latest.agenda||'').length>45?'...':''} — ${d.getDate()} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;
+  const d = parseTanggal(latest.tanggal);
+  sub.textContent = `${(latest.agenda || '').substring(0, 45)}${(latest.agenda || '').length > 45 ? '...' : ''} — ${d.getDate()} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;
 
-  const allFiles    = [...(uploadFiles[latest.id]||[]), ...(latest.uploadedFiles||[])];
+  const allFiles = [...(uploadFiles[latest.id] || []), ...(latest.uploadedFiles || [])];
   const risalahFile = allFiles.find(f => f?.name && /risalah/i.test(f.name) && f.status === 'done');
   if (risalahFile) {
     st.className = 'risalah-quick-status ok'; st.textContent = '☁ Drive';
   } else {
-    const hasDraft = (uploadFiles[latest.id]||[]).some(f => /risalah/i.test(f.name||''));
+    const hasDraft = (uploadFiles[latest.id] || []).some(f => /risalah/i.test(f.name || ''));
     st.className = 'risalah-quick-status ' + (hasDraft ? 'pending' : 'none');
     st.textContent = hasDraft ? '📝 Draft' : '—';
   }
 }
 
 function bukaRisalahTerakhir() {
-  if (!arsipList.length) { showToast('Belum ada arsip rapat.','error'); return; }
+  if (!arsipList.length) { showToast('Belum ada arsip rapat.', 'error'); return; }
   const nowMs = new Date().getTime();
   const sudahLewat = arsipList
     .filter(r => {
       const d = parseTanggal(r.tanggal);
-      if (r.jam) { const p = r.jam.split(':'); d.setHours(parseInt(p[0],10), parseInt(p[1],10), 0, 0); }
+      if (r.jam) { const p = r.jam.split(':'); d.setHours(parseInt(p[0], 10), parseInt(p[1], 10), 0, 0); }
       return d.getTime() <= nowMs;
     })
     .sort((a, b) => {
@@ -1917,30 +1916,30 @@ function bukaRisalahTerakhir() {
       const dB = parseTanggal(b.tanggal); if (b.jam) dB.setHours(...b.jam.split(':').map(Number));
       return dB.getTime() - dA.getTime();
     });
-  if (!sudahLewat.length) { showToast('Belum ada rapat yang sudah berlangsung.','error'); return; }
+  if (!sudahLewat.length) { showToast('Belum ada rapat yang sudah berlangsung.', 'error'); return; }
   showArsipDetail(sudahLewat[0].id);
 }
 
 // ════ HEALTH METER ════════════════════════════════════════════
 function renderHealthMeter() {
-  const rowsEl  = document.getElementById('health-rows');
+  const rowsEl = document.getElementById('health-rows');
   const scoreEl = document.getElementById('health-score');
-  const footEl  = document.getElementById('health-footer-text');
+  const footEl = document.getElementById('health-footer-text');
   if (!rowsEl) return;
 
-  const yr   = today.getFullYear();
+  const yr = today.getFullYear();
   const list = arsipList.filter(r => parseTanggal(r.tanggal).getFullYear() === yr);
   const total = list.length;
 
   if (!total) {
     rowsEl.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:6px 0">Belum ada arsip tahun ini.</div>';
     if (scoreEl) { scoreEl.textContent = '—'; scoreEl.className = 'health-score'; }
-    if (footEl)  footEl.textContent = 'Tidak ada data';
+    if (footEl) footEl.textContent = 'Tidak ada data';
     return;
   }
 
   const countDonePdf = (keyword) => list.filter(r => {
-    const allFiles = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
+    const allFiles = [...(uploadFiles[r.id] || []), ...(r.uploadedFiles || [])];
     return allFiles.some(f =>
       f?.name &&
       new RegExp(keyword, 'i').test(f.name) &&
@@ -1949,26 +1948,26 @@ function renderHealthMeter() {
     );
   }).length;
 
-  const undOk  = countDonePdf('undangan');
-  const absOk  = countDonePdf('absen');
-  const risOk  = countDonePdf('risalah');
+  const undOk = countDonePdf('undangan');
+  const absOk = countDonePdf('absen');
+  const risOk = countDonePdf('risalah');
   const baOk = countDonePdf('berita');
   const fotoOk = list.filter(r => {
-    const allFiles = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
+    const allFiles = [...(uploadFiles[r.id] || []), ...(r.uploadedFiles || [])];
     return allFiles.some(f => f?.name && isImage(f.name) && f.status === 'done');
   }).length;
 
-  const pct  = u => Math.round(u / total * 100);
+  const pct = u => Math.round(u / total * 100);
   const pUnd = pct(undOk), pAbs = pct(absOk), pRis = pct(risOk), pFoto = pct(fotoOk), pBa = pct(baOk);
-const overall = Math.round((pUnd + pAbs + pRis + pFoto + pBa) / 5);
-  const cls  = v => v >= 90 ? 'ok' : v >= 60 ? 'warn' : 'err';
+  const overall = Math.round((pUnd + pAbs + pRis + pFoto + pBa) / 5);
+  const cls = v => v >= 90 ? 'ok' : v >= 60 ? 'warn' : 'err';
 
   rowsEl.innerHTML = [
-    {icon:'📋', label:'Berita Acara (PDF)',   ok:baOk,   pct:pBa},
-    {icon:'📨', label:'Undangan (PDF)',      ok:undOk,  pct:pUnd},
-    {icon:'✅', label:'Daftar Hadir (PDF)',   ok:absOk,  pct:pAbs},
-    {icon:'📝', label:'Risalah (PDF)',        ok:risOk,  pct:pRis},
-    {icon:'📸', label:'Dokumentasi (Foto)',  ok:fotoOk, pct:pFoto},
+    { icon: '📋', label: 'Berita Acara (PDF)', ok: baOk, pct: pBa },
+    { icon: '📨', label: 'Undangan (PDF)', ok: undOk, pct: pUnd },
+    { icon: '✅', label: 'Daftar Hadir (PDF)', ok: absOk, pct: pAbs },
+    { icon: '📝', label: 'Risalah (PDF)', ok: risOk, pct: pRis },
+    { icon: '📸', label: 'Dokumentasi (Foto)', ok: fotoOk, pct: pFoto },
   ].map(row => `
     <div class="health-row">
       <div class="health-row-top">
@@ -1984,40 +1983,40 @@ const overall = Math.round((pUnd + pAbs + pRis + pFoto + pBa) / 5);
   }
 
   const belum = list.filter(r => {
-    const allFiles  = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
+    const allFiles = [...(uploadFiles[r.id] || []), ...(r.uploadedFiles || [])];
     const doneFiles = allFiles.filter(f => f?.status === 'done' && f?.name);
-    const hasUnd  = doneFiles.some(f => /undangan/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
-const hasAbs  = doneFiles.some(f => /absen/i.test(f.name)    && f.name.toLowerCase().endsWith('.pdf'));
-const hasRis  = doneFiles.some(f => /risalah/i.test(f.name)  && f.name.toLowerCase().endsWith('.pdf'));
-const hasBa   = doneFiles.some(f => /ba/i.test(f.name)       && f.name.toLowerCase().endsWith('.pdf'));
-const hasFoto = doneFiles.some(f => isImage(f.name));
-return !(hasUnd && hasAbs && hasRis && hasBa && hasFoto);
+    const hasUnd = doneFiles.some(f => /undangan/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
+    const hasAbs = doneFiles.some(f => /absen/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
+    const hasRis = doneFiles.some(f => /risalah/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
+    const hasBa = doneFiles.some(f => /ba/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
+    const hasFoto = doneFiles.some(f => isImage(f.name));
+    return !(hasUnd && hasAbs && hasRis && hasBa && hasFoto);
   }).length;
 
   if (footEl) footEl.textContent = belum > 0 ? `${belum} arsip belum lengkap dokumen Drive` : '✓ Semua arsip tahun ini lengkap';
 }
 
 function scrollToArsipBelum() {
-  const yr    = today.getFullYear();
+  const yr = today.getFullYear();
   const lbl = document.getElementById('health-year-lbl');
   if (lbl) lbl.textContent = yr;
   const belum = arsipList.find(r => {
     if (parseTanggal(r.tanggal).getFullYear() !== yr) return false;
-    const allFiles  = [...(uploadFiles[r.id]||[]), ...(r.uploadedFiles||[])];
+    const allFiles = [...(uploadFiles[r.id] || []), ...(r.uploadedFiles || [])];
     const doneFiles = allFiles.filter(f => f?.status === 'done' && f?.name);
-    const hasUnd  = doneFiles.some(f => /undangan/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
-const hasAbs  = doneFiles.some(f => /absen/i.test(f.name)    && f.name.toLowerCase().endsWith('.pdf'));
-const hasRis  = doneFiles.some(f => /risalah/i.test(f.name)  && f.name.toLowerCase().endsWith('.pdf'));
-const hasBa   = doneFiles.some(f => /ba/i.test(f.name)       && f.name.toLowerCase().endsWith('.pdf'));
-const hasFoto = doneFiles.some(f => isImage(f.name));
-return !(hasUnd && hasAbs && hasRis && hasBa && hasFoto);
+    const hasUnd = doneFiles.some(f => /undangan/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
+    const hasAbs = doneFiles.some(f => /absen/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
+    const hasRis = doneFiles.some(f => /risalah/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
+    const hasBa = doneFiles.some(f => /ba/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
+    const hasFoto = doneFiles.some(f => isImage(f.name));
+    return !(hasUnd && hasAbs && hasRis && hasBa && hasFoto);
   });
-  if (!belum) { showToast('Semua arsip tahun ini sudah lengkap!','success'); return; }
+  if (!belum) { showToast('Semua arsip tahun ini sudah lengkap!', 'success'); return; }
   const el = document.getElementById('arsip-item-' + belum.id);
   if (el) {
     el.classList.add('highlight');
-    el.scrollIntoView({behavior:'smooth',block:'center'});
-    setTimeout(()=>el.classList.remove('highlight'),2500);
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => el.classList.remove('highlight'), 2500);
   }
   showArsipDetail(belum.id);
 }
@@ -2050,7 +2049,7 @@ async function idbSave(arsipId, folderName, fileEntry) {
 async function idbGetAll() {
   if (!idb) return [];
   return new Promise((res, rej) => {
-    const tx  = idb.transaction('pending', 'readonly');
+    const tx = idb.transaction('pending', 'readonly');
     const req = tx.objectStore('pending').getAll();
     req.onsuccess = () => res(req.result);
     req.onerror = rej;
@@ -2068,7 +2067,7 @@ async function idbClear() {
 
 function getFolderName(r) {
   const d = parseTanggal(r.tanggal);
-  return `${String(d.getDate()).padStart(2,'0')} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;
+  return `${String(d.getDate()).padStart(2, '0')} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 async function updateOfflinePendingCount() {
@@ -2100,11 +2099,11 @@ window.addEventListener('online', async () => {
       if (r) {
         r.uploadedFiles = files.filter(f => f.status === 'done').map(f => ({ name: f.name, size: f.size, status: 'done', url: f.url }));
         saveLocal();
-        gasCall('updateArsipFiles', { id: item.arsipId, uploadedFiles: r.uploadedFiles }).catch(() => {});
+        gasCall('updateArsipFiles', { id: item.arsipId, uploadedFiles: r.uploadedFiles }).catch(() => { });
       }
       renderFileList(item.arsipId);
       ok++;
-    } catch {}
+    } catch { }
   }
   await idbClear();
   renderArsip();
@@ -2135,7 +2134,4 @@ initCalInline();
 renderCalInline();
 renderPesertaGen();
 refreshStats();
-if (settings.tplMode === 'manual') { tplMode='manual'; document.querySelectorAll('.tpl-mode-tab')[1]?.click(); }
-
-// ★ mulaiAutoSync dipanggil via DOMContentLoaded jika sudah login
-// Jika belum login (login-screen tampil), mulaiAutoSync dipanggil setelah loginAdmin() berhasil
+if (settings.tplMode === 'manual') { tplMode = 'manual'; document.querySelectorAll('.tpl-mode-tab')[1]?.click(); }
