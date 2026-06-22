@@ -1966,7 +1966,7 @@ function renderHealthMeter() {
   }).length;
 
   const undOk = countDonePdf('undangan');
-  const absOk = countDonePdf('absen');
+  const absOk = countDonePdf('hadir');
   const risOk = countDonePdf('risalah');
   const baOk = countDonePdf('berita');
   const fotoOk = list.filter(r => {
