@@ -1080,10 +1080,23 @@ function renderArsip() {
     const allFiles = [...files, ...(r.uploadedFiles || [])];
     const totalCloud = new Set(allFiles.filter(f => f?.status === 'done').map(f => f.name)).size;
     const hasDraft = files.some(f => f._isDraft);
+
+    // ── Cek kelengkapan 5 dokumen (sama persis dgn logika health meter) ──
+    const doneFiles = allFiles.filter(f => f?.status === 'done' && f?.name);
+    const hasUnd  = doneFiles.some(f => /undangan/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
+    const hasAbs  = doneFiles.some(f => /hadir/i.test(f.name)    && f.name.toLowerCase().endsWith('.pdf'));
+    const hasRis  = doneFiles.some(f => /risalah/i.test(f.name)  && f.name.toLowerCase().endsWith('.pdf'));
+    const hasBa   = doneFiles.some(f => /berita/i.test(f.name)   && f.name.toLowerCase().endsWith('.pdf'));
+    const hasFoto = doneFiles.some(f => isImage(f.name));
+    const isLengkap = hasUnd && hasAbs && hasRis && hasBa && hasFoto;
+
     return `<div class="arsip-item" id="arsip-item-${r.id}" onclick="showArsipDetail(${r.id})">
       <div class="arsip-date-box"><div class="day">${d.getDate()}</div><div class="month">${SH_ID[d.getMonth()]}</div></div>
       <div class="arsip-info">
-        <div class="arsip-title">${r.agenda.substring(0, 60)}${r.agenda.length > 60 ? '...' : ''}</div>
+        <div class="arsip-title">
+          ${r.agenda.substring(0, 60)}${r.agenda.length > 60 ? '...' : ''}
+          ${isLengkap ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;background:rgba(46,125,50,.12);color:#2e7d32;border:1px solid rgba(46,125,50,.25);border-radius:9px;padding:1px 7px;margin-left:6px;vertical-align:middle">✓ Lengkap</span>` : ''}
+        </div>
         <div class="arsip-meta">
           <span>📅 ${r.hari}, ${d.getFullYear()}</span>
           <span>🕐 ${r.jam} WIB</span>
