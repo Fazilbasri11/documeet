@@ -245,12 +245,14 @@ function sanitasiField(val, type) {
 
   return s;
 }
+
 function sanitasiArsip(list) {
   return list.map(r => ({
     ...r,
     tanggal: sanitasiField(r.tanggal, 'tanggal'),
     jam: sanitasiField(r.jam, 'jam'),
     tglGeneret: sanitasiField(r.tglGeneret, 'tglGeneret'),
+    isManual: r.isManual === true,
   }));
 }
 
