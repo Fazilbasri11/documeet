@@ -1055,20 +1055,27 @@ function renderArsip() {
   const bln = document.getElementById('filter-bulan')?.value || '';
   const thn = document.getElementById('filter-tahun')?.value || '';
   const tahunAktif = String(today.getFullYear());
-  const adaFilter = q || bln || (thn && thn !== tahunAktif);
+
+  const adaFilter = q || bln || thn;
+
   const list = arsipList
     .filter(r => {
-      if (r.isManual && !adaFilter) return false;
       const d = parseTanggal(r.tanggal);
-      const filterTahun = thn || tahunAktif;
-      if (thn !== '' && String(d.getFullYear()) !== thn) return false;
-      else if (thn === '' && !q && !bln && String(d.getFullYear()) !== tahunAktif) return false;
+      const thnData = String(d.getFullYear());
+
+      if (r.isManual && !adaFilter) return false;
+
+      if (thn) {
+        if (thnData !== thn) return false;
+      } else if (!adaFilter) {
+        if (thnData !== tahunAktif) return false;
+      }
+
       if (bln && BULAN_ID[d.getMonth()] !== bln) return false;
       if (q && !JSON.stringify(r).toLowerCase().includes(q)) return false;
       return true;
     })
     .sort((a, b) => {
-      // Urutkan berdasarkan tanggal+jam rapat (terbaru di atas)
       const dA = parseTanggal(a.tanggal);
       if (a.jam) dA.setHours(...a.jam.split(':').map(Number));
       const dB = parseTanggal(b.tanggal);
@@ -1088,7 +1095,6 @@ function renderArsip() {
     const totalCloud = new Set(allFiles.filter(f => f?.status === 'done').map(f => f.name)).size;
     const hasDraft = files.some(f => f._isDraft);
 
-    // ── Cek kelengkapan 5 dokumen (sama persis dgn logika health meter) ──
     const doneFiles = allFiles.filter(f => f?.status === 'done' && f?.name);
     const hasUnd  = doneFiles.some(f => /undangan/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
     const hasAbs  = doneFiles.some(f => /hadir/i.test(f.name)    && f.name.toLowerCase().endsWith('.pdf'));
