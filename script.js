@@ -308,7 +308,7 @@ function refreshStats() {
   const total = arsipList.length;
   const tiArsip = arsipList.filter(r => parseTanggal(r.tanggal).getFullYear() === yr && !r.isManual);
   const ti = tiArsip.length;
-  const avg = total ? Math.round(arsipList.filter(r => !r.isManual).reduce((a, r) => a + (r.peserta || []).length, 0) / total) : 0;
+  const avg = tiArsip.length ? Math.round(tiArsip.reduce((a, r) => a + (r.peserta || []).length, 0) / tiArsip.length) : 0;
 
   const ht = document.getElementById('hs-total'); if (ht) animCount(ht, total);
   const hy = document.getElementById('hs-tahun'); if (hy) animCount(hy, ti);
