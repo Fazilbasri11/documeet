@@ -1,4 +1,4 @@
-const CACHE_NAME = 'documeet-v4';
+const CACHE_NAME = 'documeet-v5';
 const urlsToCache = [
   './',
   './index.html',
