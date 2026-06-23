@@ -1670,6 +1670,10 @@ async function simpanArsipManual() {
   const tgl = document.getElementById('manual-tgl')?.value;
   if (!tgl) { showToast('Tanggal wajib diisi', 'error'); return; }
 
+  const btn = document.querySelector('[onclick="simpanArsipManual()"]');
+  const btnTeks = btn?.textContent;
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Menyimpan...'; }
+
   const nomorSurat = document.getElementById('manual-nomor')?.value.trim() || '';
   const d = parseTanggal(tgl);
   const arsipId = Date.now();
@@ -1691,53 +1695,53 @@ async function simpanArsipManual() {
 
   arsipList.unshift(newItem);
   saveLocal();
-
-  // Upload file jika ada
-  const fileInput = document.getElementById('manual-file-input');
-  const file = fileInput?.files[0];
   uploadFiles[arsipId] = [];
 
-  if (file) {
+  const fileInput = document.getElementById('manual-file-input');
+  const file = fileInput?.files[0];
+
+  if (file && getGasUrl()) {
+    if (btn) btn.textContent = '☁ Mengupload file...';
     const entry = {
       file, name: file.name, size: file.size,
-      status: 'pending', url: null, type: file.type || '',
+      status: 'uploading', url: null, type: file.type || '',
       _blobUrl: isImage(file.name) ? URL.createObjectURL(file) : null,
       _showPreview: false
     };
     uploadFiles[arsipId].push(entry);
-
-    if (getGasUrl()) {
-      entry.status = 'uploading';
-      try {
-        const res = await gasCall('uploadFile', {
-          fileName: file.name,
-          fileBase64: await toBase64(file),
-          mimeType: file.type || 'application/octet-stream',
-          folderName
-        });
-        if (!res.success) throw new Error(res.error);
-        entry.status = 'done';
-        entry.url = res.fileUrl;
-        newItem.uploadedFiles = [{ name: entry.name, size: entry.size, status: 'done', url: entry.url }];
-      } catch (e) {
-        entry.status = 'err';
-        showToast('⚠ Gagal upload file: ' + e.message, 'error');
-      }
+    try {
+      const res = await gasCall('uploadFile', {
+        fileName: file.name,
+        fileBase64: await toBase64(file),
+        mimeType: file.type || 'application/octet-stream',
+        folderName
+      });
+      if (!res.success) throw new Error(res.error);
+      entry.status = 'done';
+      entry.url = res.fileUrl;
+      newItem.uploadedFiles = [{ name: entry.name, size: entry.size, status: 'done', url: entry.url }];
+      saveLocal();
+    } catch (e) {
+      entry.status = 'err';
+      showToast('⚠ Gagal upload file: ' + e.message, 'error');
     }
-    saveLocal();
   }
 
-  if (getGasUrl()) {
-    syncArsipToCloud(newItem);
-  }
+  if (btn) btn.textContent = '☁ Sinkron ke cloud...';
+  if (getGasUrl()) syncArsipToCloud(newItem);
 
   // Reset form
   document.getElementById('manual-tgl').value = '';
   document.getElementById('manual-nomor').value = '';
   if (fileInput) fileInput.value = '';
-  document.getElementById('manual-dropzone').querySelector('.manual-file-info').textContent = 'Klik atau drop 1 file di sini';
+  const dz = document.getElementById('manual-dropzone');
+  if (dz) {
+    dz.querySelector('.manual-file-info').textContent = 'Klik atau drop 1 file di sini';
+    dz.style.borderColor = '#d0c0c5';
+  }
   document.getElementById('manual-file-name').textContent = '';
 
+  if (btn) { btn.disabled = false; btn.textContent = btnTeks; }
   refreshStats();
   renderCalInline();
   showToast('✓ Arsip manual tersimpan', 'success');
