@@ -304,9 +304,9 @@ function animCount(el, target) {
 function refreshStats() {
   const yr = today.getFullYear();
   const total = arsipList.length;
-  const tiArsip = arsipList.filter(r => parseTanggal(r.tanggal).getFullYear() === yr);
+  const tiArsip = arsipList.filter(r => parseTanggal(r.tanggal).getFullYear() === yr && !r.isManual);
   const ti = tiArsip.length;
-  const avg = total ? Math.round(arsipList.reduce((a, r) => a + (r.peserta || []).length, 0) / total) : 0;
+  const avg = total ? Math.round(arsipList.filter(r => !r.isManual).reduce((a, r) => a + (r.peserta || []).length, 0) / total) : 0;
 
   const ht = document.getElementById('hs-total'); if (ht) animCount(ht, total);
   const hy = document.getElementById('hs-tahun'); if (hy) animCount(hy, ti);
@@ -1052,8 +1052,10 @@ function renderArsip() {
   const q = (document.getElementById('search-inp')?.value || '').toLowerCase();
   const bln = document.getElementById('filter-bulan')?.value || '';
   const thn = document.getElementById('filter-tahun')?.value || '';
+  const adaFilter = q || bln || thn;
   const list = arsipList
     .filter(r => {
+      if (r.isManual && !adaFilter) return false;
       const d = parseTanggal(r.tanggal);
       if (bln && BULAN_ID[d.getMonth()] !== bln) return false;
       if (thn && String(d.getFullYear()) !== thn) return false;
@@ -1660,6 +1662,102 @@ function resetYth() {
   showToast('Direset ke default.', 'info');
 }
 
+// ════ ARSIP MANUAL ════════════════════════════════════════════
+async function simpanArsipManual() {
+  if (!isAdmin()) { showToast('⛔ Hanya Admin yang bisa menambah arsip manual.', 'error'); return; }
+  const tgl = document.getElementById('manual-tgl')?.value;
+  if (!tgl) { showToast('Tanggal wajib diisi', 'error'); return; }
+
+  const nomorSurat = document.getElementById('manual-nomor')?.value.trim() || '';
+  const d = parseTanggal(tgl);
+  const arsipId = Date.now();
+  const folderName = getFolderName({ tanggal: tgl });
+
+  const newItem = {
+    id: arsipId,
+    tanggal: tgl,
+    hari: HARI_ID[d.getDay()],
+    jam: '10:00',
+    tempat: settings.instansi || 'KIP Kabupaten Pidie Jaya',
+    agenda: 'Rapat Pleno Rutin',
+    nomorSurat,
+    tglGeneret: tglGeneret(),
+    peserta: pesertaList.map(p => p.nama),
+    uploadedFiles: [],
+    isManual: true
+  };
+
+  arsipList.unshift(newItem);
+  saveLocal();
+
+  // Upload file jika ada
+  const fileInput = document.getElementById('manual-file-input');
+  const file = fileInput?.files[0];
+  uploadFiles[arsipId] = [];
+
+  if (file) {
+    const entry = {
+      file, name: file.name, size: file.size,
+      status: 'pending', url: null, type: file.type || '',
+      _blobUrl: isImage(file.name) ? URL.createObjectURL(file) : null,
+      _showPreview: false
+    };
+    uploadFiles[arsipId].push(entry);
+
+    if (getGasUrl()) {
+      entry.status = 'uploading';
+      try {
+        const res = await gasCall('uploadFile', {
+          fileName: file.name,
+          fileBase64: await toBase64(file),
+          mimeType: file.type || 'application/octet-stream',
+          folderName
+        });
+        if (!res.success) throw new Error(res.error);
+        entry.status = 'done';
+        entry.url = res.fileUrl;
+        newItem.uploadedFiles = [{ name: entry.name, size: entry.size, status: 'done', url: entry.url }];
+      } catch (e) {
+        entry.status = 'err';
+        showToast('⚠ Gagal upload file: ' + e.message, 'error');
+      }
+    }
+    saveLocal();
+  }
+
+  if (getGasUrl()) {
+    syncArsipToCloud(newItem);
+  }
+
+  // Reset form
+  document.getElementById('manual-tgl').value = '';
+  document.getElementById('manual-nomor').value = '';
+  if (fileInput) fileInput.value = '';
+  document.getElementById('manual-dropzone').querySelector('.manual-file-info').textContent = 'Klik atau drop 1 file di sini';
+  document.getElementById('manual-file-name').textContent = '';
+
+  refreshStats();
+  renderCalInline();
+  showToast('✓ Arsip manual tersimpan', 'success');
+}
+
+function handleManualFileInput(ev) {
+  const file = ev.target.files[0]; if (!file) return;
+  document.getElementById('manual-dropzone').querySelector('.manual-file-info').textContent = '✓ File dipilih';
+  document.getElementById('manual-file-name').textContent = `📄 ${file.name} (${fmtSize(file.size)})`;
+}
+
+function handleManualDrop(ev) {
+  ev.preventDefault();
+  const dz = document.getElementById('manual-dropzone');
+  dz.style.borderColor = '#d0c0c5';
+  const file = ev.dataTransfer.files[0]; if (!file) return;
+  const dt = new DataTransfer(); dt.items.add(file);
+  document.getElementById('manual-file-input').files = dt.files;
+  dz.querySelector('.manual-file-info').textContent = '✓ File dipilih';
+  document.getElementById('manual-file-name').textContent = `📄 ${file.name} (${fmtSize(file.size)})`;
+}
+
 // ════ PENGATURAN ══════════════════════════════════════════════
 function loadPengaturan() {
   ['instansi', 'kota', 'ketua', 'sekretaris'].forEach(k => { const el = document.getElementById('set-' + k); if (el) el.value = settings[k] || ''; });
@@ -1849,6 +1947,7 @@ function renderUpNext() {
   const nowMs = new Date().getTime();
 
   const upcoming = arsipList
+    .filter(r => !r.isManual)
     .filter(r => {
       const d = parseTanggal(r.tanggal);
       if (r.jam) { const p = r.jam.split(':'); d.setHours(parseInt(p[0], 10), parseInt(p[1], 10), 0, 0); }
@@ -1958,7 +2057,7 @@ function renderHealthMeter() {
   if (!rowsEl) return;
 
   const yr = today.getFullYear();
-  const list = arsipList.filter(r => parseTanggal(r.tanggal).getFullYear() === yr);
+  const list = arsipList.filter(r => parseTanggal(r.tanggal).getFullYear() === yr && !r.isManual);
   const total = list.length;
 
   if (!total) {
