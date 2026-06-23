@@ -1061,7 +1061,8 @@ function renderArsip() {
       if (r.isManual && !adaFilter) return false;
       const d = parseTanggal(r.tanggal);
       const filterTahun = thn || tahunAktif;
-      if (String(d.getFullYear()) !== filterTahun) return false;
+      if (thn !== '' && String(d.getFullYear()) !== thn) return false;
+      else if (thn === '' && !q && !bln && String(d.getFullYear()) !== tahunAktif) return false;
       if (bln && BULAN_ID[d.getMonth()] !== bln) return false;
       if (q && !JSON.stringify(r).toLowerCase().includes(q)) return false;
       return true;
