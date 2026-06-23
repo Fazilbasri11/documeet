@@ -1054,13 +1054,15 @@ function renderArsip() {
   const q = (document.getElementById('search-inp')?.value || '').toLowerCase();
   const bln = document.getElementById('filter-bulan')?.value || '';
   const thn = document.getElementById('filter-tahun')?.value || '';
-  const adaFilter = q || bln || thn;
+  const tahunAktif = String(today.getFullYear());
+  const adaFilter = q || bln || (thn && thn !== tahunAktif);
   const list = arsipList
     .filter(r => {
       if (r.isManual && !adaFilter) return false;
       const d = parseTanggal(r.tanggal);
+      const filterTahun = thn || tahunAktif;
+      if (String(d.getFullYear()) !== filterTahun) return false;
       if (bln && BULAN_ID[d.getMonth()] !== bln) return false;
-      if (thn && String(d.getFullYear()) !== thn) return false;
       if (q && !JSON.stringify(r).toLowerCase().includes(q)) return false;
       return true;
     })
