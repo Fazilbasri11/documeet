@@ -1,5 +1,4 @@
 <html lang="id">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -4467,6 +4466,44 @@
           </div>
           <div style="display:flex;justify-content:flex-end">
             <button class="btn-primary" onclick="simpanPengaturan()">💾 Simpan Pengaturan</button>
+          </div>
+
+          <div class="setting-group" style="margin-top:2rem">
+            <h3>📥 Input Arsip Manual</h3>
+            <div style="background:rgba(201,147,42,.05);border:1.5px solid rgba(201,147,42,.18);border-radius:11px;padding:1.1rem 1.25rem">
+              <p style="font-size:11px;color:var(--text-muted);margin-bottom:1rem;line-height:1.6">
+                Untuk memasukkan data rapat <strong>tahun lalu</strong> yang belum tercatat. Arsip ini tidak dihitung di statistik tahun berjalan, health meter, atau bar chart. Hanya muncul di daftar arsip saat ada pencarian/filter aktif.
+              </p>
+              <div class="form-row-2" style="margin-bottom:.9rem">
+                <div class="field">
+                  <label>Tanggal Rapat <span style="color:#e53935">*</span></label>
+                  <input type="date" id="manual-tgl">
+                </div>
+                <div class="field">
+                  <label>Nomor Surat <span style="color:var(--text-muted);font-weight:400">(opsional)</span></label>
+                  <input type="text" id="manual-nomor" placeholder="Contoh: 01/PK.01-Und/...">
+                </div>
+              </div>
+              <div class="field" style="margin-bottom:.9rem">
+                <label>Upload Dokumen <span style="color:var(--text-muted);font-weight:400">(opsional, 1 file)</span></label>
+                <div id="manual-dropzone"
+                     style="border:2px dashed #d0c0c5;border-radius:9px;padding:1.25rem;text-align:center;cursor:pointer;background:#fdfaf7;transition:all .2s"
+                     ondragover="event.preventDefault();this.style.borderColor='var(--maroon)'"
+                     ondragleave="this.style.borderColor='#d0c0c5'"
+                     ondrop="handleManualDrop(event)"
+                     onclick="document.getElementById('manual-file-input').click()">
+                  <div style="font-size:1.5rem;margin-bottom:4px">📄</div>
+                  <div style="font-size:11px;color:var(--text-muted)" class="manual-file-info">Klik atau drop 1 file di sini</div>
+                  <input type="file" id="manual-file-input" style="display:none"
+                         accept=".pdf,.docx,.doc,.jpg,.jpeg,.png"
+                         onchange="handleManualFileInput(event)">
+                </div>
+                <div id="manual-file-name" style="font-size:11px;color:var(--maroon);font-weight:600;margin-top:5px"></div>
+              </div>
+              <div style="display:flex;justify-content:flex-end">
+                <button class="btn-primary" onclick="simpanArsipManual()">💾 Simpan Arsip Manual</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
