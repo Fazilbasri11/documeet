@@ -286,8 +286,13 @@ async function scanArsipDrive(id, btnEl) {
     ];
 
     renderFileList(id);
-    renderArsip();
-    refreshStats();
+    
+    // ★ Tunda render berat ke next tick agar UI tidak freeze
+    setTimeout(() => {
+      renderArsip();
+      refreshStats();
+    }, 0);
+
     if (btnEl) showToast(`✓ Scan selesai — ${res.uploadedFiles.length} file ditemukan`, 'success');
   } catch (e) {
     console.warn('scanArsipDrive gagal:', e);
@@ -1249,7 +1254,7 @@ function showArsipDetail(id) {
     </div>`;
   renderFileList(id);
   document.getElementById('modal-overlay').classList.add('open');
-  scanArsipDrive(id);
+  setTimeout(() => scanArsipDrive(id), 800);
 }
 
 function toggleEditDetail(id) {
