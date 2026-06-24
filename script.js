@@ -265,42 +265,84 @@ async function kirimFilesKeDatin(arsipId) {
   const r = arsipList.find(x => x.id === arsipId);
   if (!r) return;
 
-  // Cek minimal ada 1 PDF tersimpan
   const allFiles = [...(uploadFiles[arsipId] || []), ...(r.uploadedFiles || [])];
   const adaPdf = allFiles.some(f => f?.status === 'done' && isPdf(f.name));
-  if (!adaPdf) {
-    showToast('⚠ Belum ada PDF tersimpan di Drive KUL.', 'error');
-    return;
-  }
+  if (!adaPdf) { showToast('⚠ Belum ada PDF tersimpan di Drive KUL.', 'error'); return; }
 
-  const folderNameKUL  = getFolderName(r);             // "20 Agustus 2025"
-  const folderNameDATIN = buildFolderNameDATIN(r.tanggal); // "UM_2025_Lap.RapatRutinAgustus20"
+  const folderNameKUL   = getFolderName(r);
+  const folderNameDATIN = buildFolderNameDATIN(r.tanggal);
 
   const btn = document.getElementById(`btn-datin-${arsipId}`);
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Mengirim...'; }
-  showToast('Mengirim file ke Drive DATIN...', 'info');
+  const setBtn = (txt) => { if (btn) btn.textContent = txt; };
+  if (btn) btn.disabled = true;
 
   try {
-    const res = await gasCall('kirimKeDatin', { folderNameKUL, folderNameDATIN });
-    if (!res.success) throw new Error(res.error);
+    // ── 1. Ambil semua PDF dari Drive KUL via GAS ──────────
+    setBtn('⏳ Mengambil PDF...');
+    showToast('Mengambil PDF dari Drive...', 'info');
+    const resPdf = await gasCall('ambilPdfDariFolder', { folderName: folderNameKUL });
+    if (!resPdf.success) throw new Error(resPdf.error);
+    if (!resPdf.pdfs?.length) throw new Error('Tidak ada PDF di folder ini.');
 
-    // Simpan link folder DATIN ke arsip lokal
-    r.datingFolderUrl  = res.folderUrl;
-    r.datinFolderName  = res.folderName;
+    // ── 2. Merge semua PDF di browser pakai pdf-lib ────────
+    setBtn(`⏳ Menggabungkan ${resPdf.pdfs.length} PDF...`);
+    showToast(`Menggabungkan ${resPdf.pdfs.length} file PDF...`, 'info');
+
+    const { PDFDocument } = PDFLib;
+    const mergedPdf = await PDFDocument.create();
+
+    for (const pdfData of resPdf.pdfs) {
+      const binaryStr = atob(pdfData.base64);
+      const bytes = new Uint8Array(binaryStr.length);
+      for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+      try {
+        const srcDoc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+        const pages  = await mergedPdf.copyPages(srcDoc, srcDoc.getPageIndices());
+        pages.forEach(p => mergedPdf.addPage(p));
+      } catch (e) {
+        console.warn('Skip PDF gagal dimuat:', pdfData.nama, e.message);
+      }
+    }
+
+    const mergedBytes  = await mergedPdf.save();
+    const mergedBase64 = btoa(String.fromCharCode(...new Uint8Array(mergedBytes)));
+
+    // ── 3. Upload PDF gabungan ke folder DATIN ─────────────
+    setBtn('⏳ Mengupload PDF gabungan...');
+    showToast('Mengupload PDF gabungan ke DATIN...', 'info');
+    const d        = parseTanggal(r.tanggal);
+    const tglStr   = `${String(d.getDate()).padStart(2,'0')}${BULAN_ID[d.getMonth()]}${d.getFullYear()}`;
+    const namaFile = `DokumenRapat_${tglStr}.pdf`;
+
+    const resUpload = await gasCall('uploadFileToDatin', {
+      fileName: namaFile, fileBase64: mergedBase64,
+      mimeType: 'application/pdf', folderNameDATIN
+    });
+    if (!resUpload.success) throw new Error(resUpload.error);
+
+    // ── 4. Copy foto ke DATIN ──────────────────────────────
+    setBtn('⏳ Mengirim foto...');
+    const resFoto = await gasCall('kirimFotoKeDatin', { folderNameKUL, folderNameDATIN });
+
+    // Simpan link folder DATIN
+    r.datingFolderUrl = resUpload.folderUrl;
+    r.datinFolderName = folderNameDATIN;
     saveLocal();
     syncArsipToCloud(r);
 
-    showToast(`✓ ${res.disalin} file dikirim ke DATIN!`, 'success');
+    const totalFoto = resFoto?.disalin || 0;
+    showToast(`✓ ${resPdf.pdfs.length} PDF digabung + ${totalFoto} foto dikirim ke DATIN!`, 'success');
+
     if (btn) {
       btn.disabled = false;
       btn.textContent = '✓ Terkirim';
       btn.style.background = 'linear-gradient(135deg,#2e7d32,#388e3c)';
-      btn.onclick = () => window.open(res.folderUrl, '_blank');
+      btn.onclick = () => window.open(resUpload.folderUrl, '_blank');
     }
 
-    // Refresh modal supaya link DATIN muncul
     closeModal();
     setTimeout(() => showArsipDetail(arsipId), 200);
+
   } catch (e) {
     showToast('❌ Gagal kirim DATIN: ' + e.message, 'error');
     if (btn) { btn.disabled = false; btn.textContent = '📤 Kirim ke DATIN'; }
