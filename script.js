@@ -1381,7 +1381,16 @@ function renderFileList(id) {
 
 
 function togglePreview(arsipId, fileIdx) {
-  const files = uploadFiles[arsipId]; if (!files?.[fileIdx]) return;
+  const files = uploadFiles[arsipId]; 
+  if (!files?.[fileIdx]) return;
+  const f = files[fileIdx];
+  
+  // mobile + PDF: buka langsung, jangan render iframe
+  if (window.innerWidth <= 768 && isPdf(f.name) && f.status === 'done' && f.url) {
+    window.open(f.url, '_blank');
+    return;
+  }
+  
   files[fileIdx]._showPreview = !files[fileIdx]._showPreview;
   renderFileList(arsipId);
 }
