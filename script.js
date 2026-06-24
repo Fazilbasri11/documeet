@@ -304,8 +304,15 @@ async function kirimFilesKeDatin(arsipId) {
       }
     }
 
-    const mergedBytes  = await mergedPdf.save();
-    const mergedBase64 = btoa(String.fromCharCode(...new Uint8Array(mergedBytes)));
+    const mergedBytes = await mergedPdf.save();
+    // Konversi chunk per chunk — hindari stack overflow pada file besar
+    let mergedBase64 = '';
+    const CHUNK = 8192;
+    const arr = new Uint8Array(mergedBytes);
+    for (let i = 0; i < arr.length; i += CHUNK) {
+      mergedBase64 += String.fromCharCode(...arr.subarray(i, i + CHUNK));
+    }
+    mergedBase64 = btoa(mergedBase64);
 
     // ── 3. Upload PDF gabungan ke folder DATIN ─────────────
     setBtn('⏳ Mengupload PDF gabungan...');
