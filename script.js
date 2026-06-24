@@ -246,6 +246,66 @@ function sanitasiField(val, type) {
   return s;
 }
 
+
+//penamaan folder untuk drive datin
+function buildFolderNameDATIN(tanggal) {
+  const d = parseTanggal(tanggal);
+  const tahun  = d.getFullYear();
+  const bulan  = BULAN_ID[d.getMonth()];   // "Agustus"
+  const tgl    = d.getDate();               // 20
+  return `UM_${tahun}_Lap.RapatRutin${bulan}${tgl}`;
+}
+
+//trigger untuk kirim ke drive datin
+async function kirimFilesKeDatin(arsipId) {
+  if (!isAdmin()) { showToast('⛔ Hanya Admin.', 'error'); return; }
+  if (!getGasUrl()) { showToast('GAS URL belum diisi.', 'error'); return; }
+
+  const r = arsipList.find(x => x.id === arsipId);
+  if (!r) return;
+
+  // Cek minimal ada 1 PDF tersimpan
+  const allFiles = [...(uploadFiles[arsipId] || []), ...(r.uploadedFiles || [])];
+  const adaPdf = allFiles.some(f => f?.status === 'done' && isPdf(f.name));
+  if (!adaPdf) {
+    showToast('⚠ Belum ada PDF tersimpan di Drive KUL.', 'error');
+    return;
+  }
+
+  const folderNameKUL  = getFolderName(r);             // "20 Agustus 2025"
+  const folderNameDATIN = buildFolderNameDATIN(r.tanggal); // "UM_2025_Lap.RapatRutinAgustus20"
+
+  const btn = document.getElementById(`btn-datin-${arsipId}`);
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Mengirim...'; }
+  showToast('Mengirim file ke Drive DATIN...', 'info');
+
+  try {
+    const res = await gasCall('kirimKeDatin', { folderNameKUL, folderNameDATIN });
+    if (!res.success) throw new Error(res.error);
+
+    // Simpan link folder DATIN ke arsip lokal
+    r.datingFolderUrl  = res.folderUrl;
+    r.datinFolderName  = res.folderName;
+    saveLocal();
+    syncArsipToCloud(r);
+
+    showToast(`✓ ${res.disalin} file dikirim ke DATIN!`, 'success');
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = '✓ Terkirim';
+      btn.style.background = 'linear-gradient(135deg,#2e7d32,#388e3c)';
+      btn.onclick = () => window.open(res.folderUrl, '_blank');
+    }
+
+    // Refresh modal supaya link DATIN muncul
+    closeModal();
+    setTimeout(() => showArsipDetail(arsipId), 200);
+  } catch (e) {
+    showToast('❌ Gagal kirim DATIN: ' + e.message, 'error');
+    if (btn) { btn.disabled = false; btn.textContent = '📤 Kirim ke DATIN'; }
+  }
+}
+
 function sanitasiArsip(list) {
   return list.map(r => ({
     ...r,
@@ -1230,6 +1290,11 @@ function showArsipDetail(id) {
     <div class="upload-section">
       <div class="upload-section-title">☁ Upload Dokumen ke Drive <span class="folder-tag">📁 ${folderName}</span>
       <button class="btn-sm" style="margin-left:auto" onclick="scanArsipDrive(${id}, this)">🔄 Scan Drive</button>
+      <button class="btn-sm" id="btn-datin-${id}"
+        style="margin-left:6px;background:linear-gradient(135deg,#1565c0,#1976d2);color:white;border-color:transparent"
+        onclick="${r.datinFolderUrl ? `window.open('${r.datinFolderUrl}','_blank')` : `kirimFilesKeDatin(${id})`}">
+        ${r.datinFolderUrl ? '✓ Lihat DATIN ↗' : '📤 Kirim ke DATIN'}
+      </button>
 </div>
       ${!getGasUrl() ? '<div class="no-gas-warning">⚠ URL Apps Script belum diisi di Pengaturan.</div>' : ''}
       <div class="upload-slots" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
