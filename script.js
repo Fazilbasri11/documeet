@@ -1058,10 +1058,10 @@ function simpanKeAwan() {
 function renderArsip() {
   const q = (document.getElementById('search-inp')?.value || '').toLowerCase();
   const bln = document.getElementById('filter-bulan')?.value || '';
-  const thn = document.getElementById('filter-tahun')?.value ?? '2026';
-  const semuaTahun = thn === '';           // user sengaja pilih "Semua Tahun"
-  const adaFilter = q || bln || thn || semuaTahun;
+  const thn = document.getElementById('filter-tahun')?.value || '';
   const tahunAktif = String(today.getFullYear());
+  const semuaTahun = thn === 'ALL';
+  const adaFilter = q || bln || semuaTahun || (thn && thn !== 'ALL');
   const list = arsipList
     .filter(r => {
       const d = parseTanggal(r.tanggal);
@@ -1070,11 +1070,11 @@ function renderArsip() {
       if (r.isManual && !adaFilter) return false;
 
       if (semuaTahun) {
-      // tidak ada filter tahun — semua lolos
+        // lolos semua tahun
       } else if (thn) {
-      if (thnData !== thn) return false;     // user pilih tahun spesifik
+        if (thnData !== thn) return false;
       } else {
-      if (thnData !== tahunAktif) return false; // default: tahun ini
+        if (thnData !== tahunAktif) return false;
       }
 
       if (bln && BULAN_ID[d.getMonth()] !== bln) return false;
@@ -1349,21 +1349,18 @@ function renderFileList(id) {
         const src = f._blobUrl || (isDone ? (extractDriveId(f.url) ? `https://drive.google.com/thumbnail?id=${extractDriveId(f.url)}&sz=w800` : f.url) : '');
         if (src) preview = `<div class="file-preview-area"><img src="${src}" alt="${f.name}" style="max-width:100%;max-height:360px;border-radius:8px;object-fit:contain;display:block;margin:0 auto" onerror="this.style.display='none'"></div>`;
       } else if (pdfFile && isDone) {
-  const driveId = extractDriveId(f.url);
-  const isMobile = window.innerWidth <= 768;
-  if (isMobile) {
-    // mobile: iframe PDF terlalu berat, arahkan ke tab baru
-    preview = `<div class="file-preview-area" style="text-align:center;padding:1rem">
-      <div style="font-size:2rem;margin-bottom:8px">📕</div>
-      <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">Preview PDF tidak tersedia di mobile.<br>Buka di tab baru untuk melihat.</div>
-      <a href="${f.url}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--maroon);color:white;padding:8px 16px;border-radius:7px;font-size:12px;font-weight:600;text-decoration:none">
-        📄 Buka PDF ↗
-      </a>
-    </div>`;
-  }else {
-    const src = driveId ? `https://drive.google.com/file/d/${driveId}/preview` : f.url;
-    preview = `<div class="file-preview-area"><iframe src="${src}" style="width:100%;height:440px;border:none;border-radius:8px" allowfullscreen loading="lazy"></iframe></div>`;
-  }
+        const driveId = extractDriveId(f.url);
+        if (window.innerWidth <= 768) {
+          preview = '<div class="file-preview-area" style="text-align:center;padding:1rem">'
+            + '<div style="font-size:2rem;margin-bottom:8px">📕</div>'
+            + '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">Preview PDF tidak tersedia di mobile.<br>Buka di tab baru untuk melihat.</div>'
+            + '<a href="' + f.url + '" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--maroon);color:white;padding:8px 16px;border-radius:7px;font-size:12px;font-weight:600;text-decoration:none">'
+            + '📄 Buka PDF ↗</a></div>';
+        } else {
+          const src = driveId ? 'https://drive.google.com/file/d/' + driveId + '/preview' : f.url;
+          preview = '<div class="file-preview-area"><iframe src="' + src + '" style="width:100%;height:440px;border:none;border-radius:8px" allowfullscreen loading="lazy"></iframe></div>';
+        }
+      }
     }
     return `<div class="uploaded-file-item" id="fitem-${id}-${realIdx}" style="flex-direction:column;align-items:stretch">
       <div style="display:flex;align-items:center;gap:9px">
