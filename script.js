@@ -270,7 +270,7 @@ async function kirimFilesKeDatin(arsipId) {
   if (!adaPdf) { showToast('⚠ Belum ada PDF tersimpan di Drive KUL.', 'error'); return; }
 
   const folderNameKUL   = getFolderName(r);
-  const folderNameDATIN = buildFolderNameDATIN(r.tanggal);
+  const folderNameDATIN = buildFolderNameDATIN(r.tanggal); // ini jadi nama FILE juga
 
   const btn = document.getElementById(`btn-datin-${arsipId}`);
   const setBtn = (txt) => { if (btn) btn.textContent = txt; };
@@ -278,18 +278,19 @@ async function kirimFilesKeDatin(arsipId) {
 
   try {
     // ── 1. Ambil semua PDF dari Drive KUL via GAS ──────────
-    setBtn('⏳ Mengambil PDF...');
-    showToast('Mengambil PDF dari Drive...', 'info');
-    const resPdf = await gasCall('ambilPdfDariFolder', { folderName: folderNameKUL });
+    setBtn('⏳ Mengambil file...');
+    showToast('Mengambil file dari Drive...', 'info');
+    const resPdf = await gasCall('ambilPdfDanFotoDariFolder', { folderName: folderNameKUL });
     if (!resPdf.success) throw new Error(resPdf.error);
-    if (!resPdf.pdfs?.length) throw new Error('Tidak ada PDF di folder ini.');
-
-    // ── 2. Merge semua PDF di browser pakai pdf-lib ────────
-    setBtn(`⏳ Menggabungkan ${resPdf.pdfs.length} PDF...`);
-    showToast(`Menggabungkan ${resPdf.pdfs.length} file PDF...`, 'info');
+    if (!resPdf.pdfs?.length && !resPdf.fotos?.length)
+      throw new Error('Tidak ada PDF atau foto di folder ini.');
 
     const { PDFDocument } = PDFLib;
     const mergedPdf = await PDFDocument.create();
+
+    // ── 2. Merge semua PDF dulu ────────────────────────────
+    setBtn(`⏳ Menggabungkan ${resPdf.pdfs.length} PDF...`);
+    showToast(`Menggabungkan ${resPdf.pdfs.length} PDF...`, 'info');
 
     for (const pdfData of resPdf.pdfs) {
       const binaryStr = atob(pdfData.base64);
@@ -298,14 +299,50 @@ async function kirimFilesKeDatin(arsipId) {
       try {
         const srcDoc = await PDFDocument.load(bytes, { ignoreEncryption: true });
         const pages  = await mergedPdf.copyPages(srcDoc, srcDoc.getPageIndices());
-        pages.forEach(p => mergedPdf.addPage(p));
+        pages.forEach(pg => mergedPdf.addPage(pg));
       } catch (e) {
         console.warn('Skip PDF gagal dimuat:', pdfData.nama, e.message);
       }
     }
 
+    // ── 3. Konversi foto → PDF page lalu tambahkan ─────────
+    if (resPdf.fotos?.length) {
+      setBtn(`⏳ Konversi ${resPdf.fotos.length} foto → PDF...`);
+      showToast(`Konversi ${resPdf.fotos.length} foto ke PDF...`, 'info');
+
+      for (const fotoData of resPdf.fotos) {
+        try {
+          const binaryStr = atob(fotoData.base64);
+          const bytes = new Uint8Array(binaryStr.length);
+          for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+
+          // Embed gambar — detect JPEG atau PNG
+          const isJpeg = fotoData.mime === 'image/jpeg' || fotoData.mime === 'image/jpg'
+                         || fotoData.nama.toLowerCase().match(/\.jpe?g$/);
+          let img;
+          if (isJpeg) {
+            img = await mergedPdf.embedJpg(bytes);
+          } else {
+            img = await mergedPdf.embedPng(bytes);
+          }
+
+          // Buat page seukuran gambar (maks A4 landscape/portrait)
+          const A4_W = 595, A4_H = 842;
+          const ratio = Math.min(A4_W / img.width, A4_H / img.height, 1);
+          const w = img.width  * ratio;
+          const h = img.height * ratio;
+
+          const page = mergedPdf.addPage([w, h]);
+          page.drawImage(img, { x: 0, y: 0, width: w, height: h });
+        } catch (e) {
+          console.warn('Skip foto gagal dikonversi:', fotoData.nama, e.message);
+        }
+      }
+    }
+
+    // ── 4. Save & konversi ke base64 (chunk agar tidak stack overflow) ──
+    setBtn('⏳ Menyimpan PDF gabungan...');
     const mergedBytes = await mergedPdf.save();
-    // Konversi chunk per chunk — hindari stack overflow pada file besar
     let mergedBase64 = '';
     const CHUNK = 8192;
     const arr = new Uint8Array(mergedBytes);
@@ -314,37 +351,36 @@ async function kirimFilesKeDatin(arsipId) {
     }
     mergedBase64 = btoa(mergedBase64);
 
-    // ── 3. Upload PDF gabungan ke folder DATIN ─────────────
-    setBtn('⏳ Mengupload PDF gabungan...');
+    // ── 5. Upload 1 PDF gabungan langsung ke root DATIN ────
+    setBtn('⏳ Mengupload ke DATIN...');
     showToast('Mengupload PDF gabungan ke DATIN...', 'info');
-    const d        = parseTanggal(r.tanggal);
-    const tglStr   = `${String(d.getDate()).padStart(2,'0')}${BULAN_ID[d.getMonth()]}${d.getFullYear()}`;
-    const namaFile = `DokumenRapat_${tglStr}.pdf`;
+    const namaFile = `${folderNameDATIN}.pdf`; // nama folder jadi nama file
 
     const resUpload = await gasCall('uploadFileToDatin', {
-      fileName: namaFile, fileBase64: mergedBase64,
-      mimeType: 'application/pdf', folderNameDATIN
+      fileName:     namaFile,
+      fileBase64:   mergedBase64,
+      mimeType:     'application/pdf'
+      // tidak ada folderNameDATIN → langsung ke root
     });
     if (!resUpload.success) throw new Error(resUpload.error);
 
-    // ── 4. Copy foto ke DATIN ──────────────────────────────
-    setBtn('⏳ Mengirim foto...');
-    const resFoto = await gasCall('kirimFotoKeDatin', { folderNameKUL, folderNameDATIN });
-
-    // Simpan link folder DATIN
-    r.datingFolderUrl = resUpload.folderUrl;
+    // Simpan link ke arsip lokal
+    r.datingFolderUrl = resUpload.fileUrl;  // link file langsung, bukan folder
     r.datinFolderName = folderNameDATIN;
     saveLocal();
     syncArsipToCloud(r);
 
-    const totalFoto = resFoto?.disalin || 0;
-    showToast(`✓ ${resPdf.pdfs.length} PDF digabung + ${totalFoto} foto dikirim ke DATIN!`, 'success');
+    const totalFoto = resPdf.fotos?.length || 0;
+    showToast(
+      `✓ ${resPdf.pdfs.length} PDF + ${totalFoto} foto digabung → 1 file ke DATIN!`,
+      'success'
+    );
 
     if (btn) {
       btn.disabled = false;
       btn.textContent = '✓ Terkirim';
       btn.style.background = 'linear-gradient(135deg,#2e7d32,#388e3c)';
-      btn.onclick = () => window.open(resUpload.folderUrl, '_blank');
+      btn.onclick = () => window.open(resUpload.fileUrl, '_blank');
     }
 
     closeModal();
