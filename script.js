@@ -251,10 +251,10 @@ function sanitasiField(val, type) {
 //penamaan folder untuk drive datin
 function buildFolderNameDATIN(tanggal) {
   const d = parseTanggal(tanggal);
-  const tahun  = d.getFullYear();
-  const bulan  = BULAN_ID[d.getMonth()];   // "Agustus"
-  const tgl    = d.getDate();               // 20
-  return `UM_${tahun}_Lap.RapatRutin${bulan}${tgl}`;
+  const tahun = d.getFullYear();
+  const bulan = BULAN_ID[d.getMonth()];  // "Juni"
+  const tgl   = d.getDate();             // 8
+  return `UM_${tahun}_Lap.RapatRutin-${tgl}${bulan}`;
 }
 
 //trigger untuk kirim ke drive datin
