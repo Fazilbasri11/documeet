@@ -2,7 +2,8 @@ const CACHE_NAME = 'documeet-v5';
 const urlsToCache = [
   './',
   './index.html',
-  './script.js'
+  './script.js',
+  './libs/pdf-lib.min.js'
 ];
 
 // Install Service Worker & simpan cache
