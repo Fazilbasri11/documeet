@@ -578,7 +578,7 @@ async function loadArsipFromCloud() {
     const data = await gasCall('getArsip');
     const cloudArsip = sanitasiArsip(data.arsip || []);
     const cloudIds = new Set(cloudArsip.map(r => String(r.id)));
-    const localOnly = arsipList.filter(r => !cloudIds.has(String(r.id)));
+    const localOnly = arsipList.filter(r => !cloudIds.has(String(r.id)) && !r._synced);
     arsipList = [...cloudArsip, ...localOnly];
     arsipList.sort((a, b) => String(b.id).localeCompare(String(a.id)));
     saveLocal();
@@ -620,6 +620,8 @@ async function syncArsipToCloud(item) {
       ...item,
       uploadedFiles: (uploadFiles[item.id] || []).map(f => ({ name: f.name, size: f.size, status: f.status, url: f.url || null }))
     });
+    item._synced = true;
+    saveLocal();
     showSync('Tersimpan ke cloud', 'ok');
   } catch { showSync('Gagal sync cloud', 'err'); }
 }
@@ -1138,7 +1140,8 @@ async function generateDokumen() {
     const newItem = {
       id: arsipId, tanggal: tanggalVal, hari: hariStr, jam: jamVal, tempat, agenda,
       nomorSurat: data.nomorSurat, tglGeneret: tglGen,
-      peserta: pesertaHadir.map(p => p.nama), uploadedFiles: []
+      peserta: pesertaHadir.map(p => p.nama), uploadedFiles: [],
+      _synced: false
     };  // ← uploadedFiles SELALU []
     arsipList.unshift(newItem); saveLocal();
 
@@ -1873,7 +1876,8 @@ async function simpanArsipManual() {
     tglGeneret: tglGeneret(),
     peserta: pesertaList.map(p => p.nama),
     uploadedFiles: [],
-    isManual: true
+    isManual: true,
+    _synced: false
   };
 
   arsipList.unshift(newItem);
