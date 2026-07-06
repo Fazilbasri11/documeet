@@ -12,7 +12,7 @@ const DEFAULT_PESERTA = [
   { nama: 'MAIMUN MAHMILUL, S.IP.', jabatan: 'Kasubbag Parmas dan SDM' },
   { nama: 'ISNAINI, SE.', jabatan: 'Analis Pengelola Keuangan APBN Ahli Muda' },
   { nama: 'NURHAYATI, A.Md.', jabatan: 'Bendahara Pengeluaran' },
-  { nama: 'FAZIL BASRI, S.Kom.', jabatan: 'Notulen' },
+  { nama: 'FAZIL BASRI, S.Kom.', jabatan: 'Notulensi' },
 ];
 
 
