@@ -1067,7 +1067,12 @@ async function generateDokumen() {
   const nomorManual = inpManual ? inpManual.value.trim() : '';
   const inpBAManual = document.getElementById('inp-nomor-ba-manual');
   const nomorBAManual = inpBAManual ? inpBAManual.value.trim() : '';
-  const data = {
+  const notulensiRaw = pesertaHadir.length ? pesertaHadir[pesertaHadir.length - 1].nama : '';
+  const notulensiNama = notulensiRaw.split(',')[0].trim()
+  .split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+
+const data = {
+    notulensi: notulensiNama,
     nomorSurat: nomorManual || buildNomor(nextNo, tgl), hari: hariStr, tanggal: tglStr,
     tanggalHari: `${hariStr}, ${tglStr}`, jam: jamFmt, jamPolos: jamVal, tempat, agenda,
     ketua: settings.ketua, sekretaris: settings.sekretaris, kota: settings.kota,
