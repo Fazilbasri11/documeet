@@ -2313,9 +2313,9 @@ function renderHealthMeter() {
     const allFiles = [...(uploadFiles[r.id] || []), ...(r.uploadedFiles || [])];
     const doneFiles = allFiles.filter(f => f?.status === 'done' && f?.name);
     const hasUnd = doneFiles.some(f => /undangan/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
-    const hasAbs = doneFiles.some(f => /absen/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
+    const hasAbs = doneFiles.some(f => /hadir/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
     const hasRis = doneFiles.some(f => /risalah/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
-    const hasBa = doneFiles.some(f => /ba/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
+    const hasBa = doneFiles.some(f => /berita/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
     const hasFoto = doneFiles.some(f => isImage(f.name));
     return !(hasUnd && hasAbs && hasRis && hasBa && hasFoto);
   }).length;
@@ -2332,9 +2332,9 @@ function scrollToArsipBelum() {
     const allFiles = [...(uploadFiles[r.id] || []), ...(r.uploadedFiles || [])];
     const doneFiles = allFiles.filter(f => f?.status === 'done' && f?.name);
     const hasUnd = doneFiles.some(f => /undangan/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
-    const hasAbs = doneFiles.some(f => /absen/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
+    const hasAbs = doneFiles.some(f => /hadir/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
     const hasRis = doneFiles.some(f => /risalah/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
-    const hasBa = doneFiles.some(f => /ba/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
+    const hasBa = doneFiles.some(f => /berita/i.test(f.name) && f.name.toLowerCase().endsWith('.pdf'));
     const hasFoto = doneFiles.some(f => isImage(f.name));
     return !(hasUnd && hasAbs && hasRis && hasBa && hasFoto);
   });
