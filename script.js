@@ -745,8 +745,8 @@ async function testGasUrl() {
 // ════ CEK STATUS CACHE TEMPLATE ═══════════════════════════════
 async function cekStatusCacheTemplate() {
   await initTplIDB();
-  const keys = ['und', 'abs', 'ris'];
-  const labels = { und: 'Undangan', abs: 'Absen', ris: 'Risalah' };
+  const keys = ['und', 'abs', 'ris', 'ba'];
+  const labels = { und: 'Undangan', abs: 'Absen', ris: 'Risalah', ba: 'Berita Acara' };
   const hasil = {};
   for (const key of keys) {
     const data = await tplCacheGet(key);
@@ -963,7 +963,7 @@ async function preloadTemplates() {
   if (!navigator.onLine) return;
   try {
     const keys = ['und', 'abs', 'ris', 'ba'];
-    const urls = { und: getTemplateUrl('und'), abs: getTemplateUrl('abs'), ris: getTemplateUrl('ris') };
+    const urls = { und: getTemplateUrl('und'), abs: getTemplateUrl('abs'), ris: getTemplateUrl('ris'), ba: getTemplateUrl('ba') };
     let cached = 0;
     for (const key of keys) {
       const url = urls[key];
