@@ -2320,7 +2320,7 @@ function renderHealthMeter() {
     return !(hasUnd && hasAbs && hasRis && hasBa && hasFoto);
   }).length;
 
-  if (footEl) footEl.textContent = belum > 0 ? `${belum} arsip belum lengkap dokumen Drive` : '✓ Semua arsip tahun ini lengkap';
+  if (footEl) footEl.textContent = belum > 0 ? `${belum} Rapat belum lengkap arsip` : '✓ Semua arsip tahun ini lengkap';
 }
 
 function scrollToArsipBelum() {
